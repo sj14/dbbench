@@ -29,7 +29,6 @@ func New(host string, port int, user, password string) *Postgres {
 // Benchmarks returns the individual benchmark functions for the postgres db.
 func (p *Postgres) Benchmarks() []func(int) string {
 	return []func(int) string{p.inserts, p.updates, p.selects, p.deletes}
-
 }
 
 // Setup initializes the database for the benchmark.
@@ -41,7 +40,7 @@ func (p *Postgres) Setup() {
 		log.Fatalf("failed to cfreate table: %v\n", err)
 	}
 	if _, err := p.db.Exec("TRUNCATE dbbench.accounts;"); err != nil {
-		log.Fatalln(err)
+		log.Fatalf("failed to truncate table: %v\n", err)
 	}
 }
 

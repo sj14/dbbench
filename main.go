@@ -4,17 +4,17 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/sj14/dbbench/cockroach"
-	"github.com/sj14/dbbench/postgres"
 )
 
 // Bencher is the interface a benchmark has to impelement
 type Bencher interface {
 	Setup()
 	Cleanup()
-	Benchmarks() []func(int) string
+	Benchmarks() []func(wg *sync.WaitGroup, from int, to int) (name string)
 }
 
 func main() {
@@ -26,26 +26,71 @@ func main() {
 	password := flag.String("password", "root", "password to connect with the server")
 	flag.Parse()
 
-	var bencher Bencher
-	switch *dbType {
-	case "postgres", "pg":
-		bencher = postgres.New(*host, *port, *user, *password)
-	case "cockroach", "cr":
-		bencher = cockroach.New(*host, *port, *user, *password)
-	default:
-		log.Fatalln("missing type parameter")
-	}
+	bencher := getImpl(*dbType, *host, *port, *user, *password)
 
-	benchmark(bencher, *iterations)
+	bencher.Setup()
+	defer bencher.Cleanup()
+
+	// benchmark(bencher, *iterations)
+
+	// wg := sync.WaitGroup{}
+
+	// max := 100
+	// for i := 0; i < max; i++ {
+	// 	newB := getImpl(*dbType, *host, *port, *user, *password)
+	// 	wg.Add(1)
+	// 	from := (*iterations / max) * i
+	// 	to := (*iterations / max) * (i + 1)
+	// 	fmt.Printf("from %v to %v\n", from, to)
+	// 	go benchmark(&wg, newB, from, to)
+	// }
+	// wg.Wait()
+
+	benchmark2(bencher, *iterations)
 }
 
-func benchmark(impl Bencher, iterations int) {
-	defer impl.Cleanup()
-	impl.Setup()
+func getImpl(dbType string, host string, port int, user, password string) Bencher {
+	switch dbType {
+	// case "postgres", "pg":
+	// return postgres.New(host, port, user, password)
+	case "cockroach", "cr":
+		return cockroach.New(host, port, user, password)
+	}
+
+	log.Fatalln("missing or unknown type parameter")
+	return nil
+}
+
+// func benchmark(wg *sync.WaitGroup, impl Bencher, from, to int) {
+// 	for _, b := range impl.Benchmarks() {
+// 		start := time.Now()
+// 		name := b(from, to)
+// 		fmt.Printf("%v took %v\n", name, time.Now().Sub(start))
+// 	}
+// 	wg.Done()
+// }
+
+func benchmark2(impl Bencher, iterations int) {
+	wg := &sync.WaitGroup{}
+
+	// newB := getImpl(*dbType, *host, *port, *user, *password)
+	// wg.Add(1)
+	// fmt.Printf("from %v to %v\n", from, to)
+	// go benchmark(&wg, newB, from, to)
 
 	for _, b := range impl.Benchmarks() {
+		max := 100
 		start := time.Now()
-		name := b(iterations)
-		fmt.Printf("%v took %v\n", name, time.Now().Sub(start))
+		wg.Add(max)
+		for i := 0; i < max; i++ {
+			from := (iterations / max) * i
+			to := (iterations / max) * (i + 1)
+
+			go func() {
+				_ = b(wg, from, to)
+			}()
+		}
+		wg.Wait()
+		fmt.Printf("took %v\n", time.Now().Sub(start))
 	}
 }
