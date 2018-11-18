@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/sj14/dbbench/cockroach"
+	"github.com/sj14/dbbench/mysql"
 	"github.com/sj14/dbbench/postgres"
 )
 
@@ -20,7 +21,7 @@ type Bencher interface {
 
 func main() {
 	iterations := flag.Int("i", 1000, "how many iterations should be run")
-	db := flag.String("db", "", "database/driver to use (postgres|cockroach)")
+	db := flag.String("db", "", "database/driver to use (mysql|postgres|cockroach)")
 	goroutines := flag.Int("threads", 10, "how many green threads (goroutines) to use")
 	host := flag.String("host", "localhsot", "address of the server")
 	port := flag.Int("port", 0, "port of the server")
@@ -38,6 +39,8 @@ func main() {
 
 func getImpl(dbType string, host string, port int, user, password string) Bencher {
 	switch dbType {
+	case "mysql", "mariadb":
+		return mysql.New(host, port, user, password)
 	case "postgres", "pg":
 		return postgres.New(host, port, user, password)
 	case "cockroach", "cr":

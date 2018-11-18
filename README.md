@@ -1,3 +1,11 @@
+# mariadb
+
+``` bash
+docker run --name some-mariadb -p 3306:3306 -d -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=dbbench mariadb 
+
+go run main.go -db mariadb -i 5000 -host localhost -port 3306 -user root -password root
+``` 
+
 # postgres
 
 ``` bash
