@@ -20,10 +20,10 @@ type Bencher interface {
 func main() {
 	iterations := flag.Int("i", 1000, "how many iterations should be run")
 	dbType := flag.String("type", "", "database/driver type to use (postgres|cockroach)")
-	host := flag.String("host", "", "")
-	port := flag.Int("port", 0, "")
-	user := flag.String("user", "", "")
-	password := flag.String("password", "", "")
+	host := flag.String("host", "localhsot", "address of the server")
+	port := flag.Int("port", 0, "port of the server")
+	user := flag.String("user", "root", "user name to connect with the server")
+	password := flag.String("password", "root", "password to connect with the server")
 	flag.Parse()
 
 	var bencher Bencher
