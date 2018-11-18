@@ -10,28 +10,22 @@ import (
 
 // Cockroach implements the bencher implementation.
 type Cockroach struct {
-	// db []*sql.DB
 	db *sql.DB
-	// inChan chan int
 }
 
 // New returns a new cockroach bencher.
 func New(host string, port int, user, password string) *Cockroach {
 	dataSourceName := fmt.Sprintf("host=%v port=%v user='%v' password='%v' sslmode=disable", host, port, user, password)
 
-	c := &Cockroach{}
-
-	// for i := 1; i < 5; i++ {
 	db, err := sql.Open("postgres", dataSourceName)
 	if err != nil {
 		log.Fatalf("failed to open connection: %v\n", err)
 	}
+	if err := db.Ping(); err != nil {
+		log.Fatalf("failed to ping db: %v", err)
+	}
 
-	// c.db = append(c.db, db)
-	// }
-
-	c.db = db
-	return c
+	return &Cockroach{db: db}
 }
 
 // Benchmarks returns the individual benchmark functions for the cockroach db.
@@ -60,7 +54,9 @@ func (p *Cockroach) Cleanup() {
 	if _, err := p.db.Exec("DROP DATABASE dbbench"); err != nil {
 		log.Printf("failed to drop database: %v\n", err)
 	}
-	p.db.Close()
+	if err := p.db.Close(); err != nil {
+		log.Printf("failed to close connection: %v", err)
+	}
 }
 
 func (p *Cockroach) inserts(from, to int) string {

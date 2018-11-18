@@ -19,7 +19,10 @@ func New(host string, port int, user, password string) *Postgres {
 
 	db, err := sql.Open("postgres", dataSourceName)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalf("failed to open connection: %v\n", err)
+	}
+	if err := db.Ping(); err != nil {
+		log.Fatalf("failed to ping db: %v", err)
 	}
 
 	p := &Postgres{db: db}
@@ -52,7 +55,9 @@ func (p *Postgres) Cleanup() {
 	if _, err := p.db.Exec("DROP SCHEMA dbbench"); err != nil {
 		log.Printf("failed drop schema: %v\n", err)
 	}
-	p.db.Close()
+	if err := p.db.Close(); err != nil {
+		log.Printf("failed to close connection: %v", err)
+	}
 }
 
 func (p *Postgres) inserts(from, to int) string {
