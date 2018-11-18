@@ -20,14 +20,18 @@ type Bencher interface {
 func main() {
 	iterations := flag.Int("i", 1000, "how many iterations should be run")
 	dbType := flag.String("type", "", "database/driver type to use (postgres|cockroach)")
+	host := flag.String("host", "", "")
+	port := flag.Int("port", 0, "")
+	user := flag.String("user", "", "")
+	password := flag.String("password", "", "")
 	flag.Parse()
 
 	var bencher Bencher
 	switch *dbType {
 	case "postgres", "pg":
-		bencher = postgres.New()
+		bencher = postgres.New(*host, *port, *user, *password)
 	case "cockroach", "cr":
-		bencher = cockroach.New()
+		bencher = cockroach.New(*host, *port, *user, *password)
 	default:
 		log.Fatalln("missing type parameter")
 	}
@@ -36,6 +40,7 @@ func main() {
 }
 
 func benchmark(impl Bencher, iterations int) {
+	defer impl.Cleanup()
 	impl.Setup()
 
 	for _, b := range impl.Benchmarks() {
@@ -43,6 +48,4 @@ func benchmark(impl Bencher, iterations int) {
 		name := b(iterations)
 		fmt.Printf("%v took %v\n", name, time.Now().Sub(start))
 	}
-
-	impl.Cleanup()
 }

@@ -2,6 +2,7 @@ package cockroach
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 
 	_ "github.com/lib/pq" // pq is the postgres/cockroach db driver
@@ -13,8 +14,10 @@ type Cockroach struct {
 }
 
 // New returns a new cockroach bencher.
-func New() *Cockroach {
-	db, err := sql.Open("postgres", "host=127.0.0.1 port=26257 user=root password='' sslmode=disable")
+func New(host string, port int, user, password string) *Cockroach {
+	dataSourceName := fmt.Sprintf("host=%v port=%v user='%v' password='%v' sslmode=disable", host, port, user, password)
+
+	db, err := sql.Open("postgres", dataSourceName)
 	if err != nil {
 		log.Fatalf("failed to open connection: %v\n", err)
 	}
@@ -45,10 +48,10 @@ func (p *Cockroach) Setup() {
 // Cleanup removes all remaining benchmarking data.
 func (p *Cockroach) Cleanup() {
 	if _, err := p.db.Exec("DROP TABLE dbbench.accounts"); err != nil {
-		log.Fatalf("failed to drop table: %v\n", err)
+		log.Printf("failed to drop table: %v\n", err)
 	}
 	if _, err := p.db.Exec("DROP DATABASE dbbench"); err != nil {
-		log.Fatalf("failed to drop database: %v\n", err)
+		log.Printf("failed to drop database: %v\n", err)
 	}
 	p.db.Close()
 }
