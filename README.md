@@ -1,3 +1,11 @@
+# mysql
+
+``` bash
+docker run --name some-mysql -p 3306:3306 -d -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=dbbench mysql
+
+go run main.go -db mysql -i 5000 -host localhost -port 3306 -user root -password root
+``` 
+
 # mariadb
 
 ``` bash
