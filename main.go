@@ -7,6 +7,9 @@ import (
 	"sync"
 	"time"
 
+	_ "github.com/go-sql-driver/mysql" // mysql db driver
+	_ "github.com/lib/pq"              // pq is the postgres/cockroach db driver
+	"github.com/sj14/dbbench/cassandra"
 	"github.com/sj14/dbbench/cockroach"
 	"github.com/sj14/dbbench/mysql"
 	"github.com/sj14/dbbench/postgres"
@@ -20,6 +23,7 @@ type Bencher interface {
 }
 
 func main() {
+	// TODO: add database name flag (especially for mysql)
 	iterations := flag.Int("i", 1000, "how many iterations should be run")
 	db := flag.String("db", "", "database/driver to use (mysql|postgres|cockroach)")
 	goroutines := flag.Int("threads", 10, "how many green threads (goroutines) to use")
@@ -45,6 +49,8 @@ func getImpl(dbType string, host string, port int, user, password string) Benche
 		return postgres.New(host, port, user, password)
 	case "cockroach", "cr":
 		return cockroach.New(host, port, user, password)
+	case "cassandra":
+		return cassandra.New(host, port, user, password)
 	}
 
 	log.Fatalln("missing or unknown type parameter")

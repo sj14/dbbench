@@ -22,3 +22,10 @@ docker run -d -p 26257:26257 -p 8080:8080 cockroachdb/cockroach:latest start --i
 go run main.go -type cr -i 100 -host localhost -port 26257 -user root
 ```
 
+# cassandra
+
+``` bash
+docker run --name some-cassandra -p 9042:9042 -d cassandra:latest
+
+go run main.go -db cassandra -i 5000 -host localhost -port 9042
+```

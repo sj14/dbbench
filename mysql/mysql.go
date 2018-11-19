@@ -4,8 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-
-	_ "github.com/go-sql-driver/mysql" // mysql db driver
 )
 
 // Mysql implements the bencher implementation.
@@ -16,7 +14,7 @@ type Mysql struct {
 // New returns a new mysql bencher.
 func New(host string, port int, user, password string) *Mysql {
 	// username:password@protocol(address)/dbname?param=value
-	dataSourceName := fmt.Sprintf("%v:%v@tcp(%v:%v)/dbbench", user, password, host, port)
+	dataSourceName := fmt.Sprintf("%v:%v@tcp(%v:%v)/dbbench?charset=utf8", user, password, host, port)
 
 	db, err := sql.Open("mysql", dataSourceName)
 	if err != nil {
@@ -26,6 +24,7 @@ func New(host string, port int, user, password string) *Mysql {
 		log.Fatalf("failed to ping db: %v", err)
 	}
 
+	// db.SetMaxOpenConns() // TODO: as flag?
 	p := &Mysql{db: db}
 	return p
 }
@@ -53,9 +52,9 @@ func (m *Mysql) Cleanup() {
 	if _, err := m.db.Exec("DROP TABLE dbbench.accounts"); err != nil {
 		log.Printf("failed to drop table: %v\n", err)
 	}
-	if _, err := m.db.Exec("DROP SCHEMA dbbench"); err != nil {
-		log.Printf("failed drop schema: %v\n", err)
-	}
+	// if _, err := m.db.Exec("DROP SCHEMA dbbench"); err != nil {
+	// 	log.Printf("failed drop schema: %v\n", err)
+	// }
 	if err := m.db.Close(); err != nil {
 		log.Printf("failed to close connection: %v", err)
 	}

@@ -4,8 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-
-	_ "github.com/lib/pq" // pq is the postgres/cockroach db driver
 )
 
 // Cockroach implements the bencher implementation.
