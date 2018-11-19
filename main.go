@@ -49,7 +49,7 @@ func getImpl(dbType string, host string, port int, user, password string) Benche
 		return postgres.New(host, port, user, password)
 	case "cockroach", "cr":
 		return cockroach.New(host, port, user, password)
-	case "cassandra":
+	case "cassandra", "scylla":
 		return cassandra.New(host, port, user, password)
 	}
 

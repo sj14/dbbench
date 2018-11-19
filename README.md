@@ -29,3 +29,11 @@ docker run --name some-cassandra -p 9042:9042 -d cassandra:latest
 
 go run main.go -db cassandra -i 5000 -host localhost -port 9042
 ```
+
+# scylladb
+
+``` bash
+docker run --name some-scylla -p 9042:9042 -d scylladb/scylla
+
+go run main.go -db scylla -i 5000 -host localhost -port 9042
+``` 
