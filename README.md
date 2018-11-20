@@ -1,3 +1,9 @@
+# sqlite
+
+``` bash
+go run main.go -db sqlite -iter 10000
+``` 
+
 # mysql
 
 ``` bash
