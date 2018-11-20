@@ -12,18 +12,28 @@ type Cassandra struct {
 	session *gocql.Session
 }
 
-// New returns a new cassandra bencher.
+// NewCassandra returns a new cassandra bencher.
 func NewCassandra(host string, port int, user, password string) *Cassandra {
 	dataSourceName := fmt.Sprintf("%v:%v", host, port) // TODO: check how to do with port, user and password
 
 	cluster := gocql.NewCluster(dataSourceName)
 	cluster.Keyspace = ""
 	cluster.Consistency = gocql.Quorum
+	// TOOD: as flags
+	// Any         Consistency = 0x00
+	// One         Consistency = 0x01
+	// Two         Consistency = 0x02
+	// Three       Consistency = 0x03
+	// Quorum      Consistency = 0x04
+	// All         Consistency = 0x05
+	// LocalQuorum Consistency = 0x06
+	// EachQuorum  Consistency = 0x07
+	// LocalOne    Consistency = 0x0A
+
 	session, err := cluster.CreateSession()
 	if err != nil {
 		log.Fatalf("failed to create session: %v\n", err)
 	}
-	// defer session.Close()
 
 	return &Cassandra{session: session}
 }
@@ -34,14 +44,12 @@ func (p *Cassandra) Benchmarks() []func(int, int) string {
 }
 
 // Setup initializes the database for the benchmark.
-func (p *Cassandra) Setup() {
-	// if err := p.session.Query("CREATE DATABASE IF NOT EXISTS dbbench").Exec(); err != nil {
-	// 	log.Fatalf("failed to create database: %v\n", err)
-	// }
+func (p *Cassandra) Setup(...string) {
+	// TODO: flags for class and replication factor
 	if err := p.session.Query("CREATE KEYSPACE IF NOT EXISTS dbbench WITH replication = { 'class':'SimpleStrategy', 'replication_factor' : 1 }").Exec(); err != nil {
 		log.Fatalf("failed to create keyspace: %v\n", err)
 	}
-	// TODO: other tests use decemal for balance, cassandra or gocql doesn't to a automatic casting from int to decimal
+	// TODO: other tests use decimal for balance, cassandra or gocql doesn't do an automatic casting from int to decimal
 	if err := p.session.Query("CREATE TABLE IF NOT EXISTS dbbench.accounts (id INT PRIMARY KEY, balance INT);").Exec(); err != nil {
 		log.Fatalf("failed to create table: %v\n", err)
 	}

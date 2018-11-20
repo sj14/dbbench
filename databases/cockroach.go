@@ -12,7 +12,7 @@ type Cockroach struct {
 }
 
 // New returns a new cockroach bencher.
-func NewCockroach(host string, port int, user, password string) *Cockroach {
+func NewCockroach(host string, port int, user, password string, maxOpenConns int) *Cockroach {
 	dataSourceName := fmt.Sprintf("host=%v port=%v user='%v' password='%v' sslmode=disable", host, port, user, password)
 
 	db, err := sql.Open("postgres", dataSourceName)
@@ -23,6 +23,7 @@ func NewCockroach(host string, port int, user, password string) *Cockroach {
 		log.Fatalf("failed to ping db: %v", err)
 	}
 
+	db.SetMaxOpenConns(maxOpenConns)
 	return &Cockroach{db: db}
 }
 
@@ -32,7 +33,7 @@ func (p *Cockroach) Benchmarks() []func(int, int) string {
 }
 
 // Setup initializes the database for the benchmark.
-func (p *Cockroach) Setup() {
+func (p *Cockroach) Setup(...string) {
 	if _, err := p.db.Exec("CREATE DATABASE IF NOT EXISTS dbbench"); err != nil {
 		log.Fatalf("failed to create database: %v\n", err)
 	}

@@ -14,23 +14,29 @@ import (
 
 // Bencher is the interface a benchmark has to impelement
 type Bencher interface {
-	Setup()
+	Setup(...string)
 	Cleanup()
 	Benchmarks() []func(from int, to int) (name string)
 }
 
 func main() {
 	// TODO: add database name flag (especially for mysql)
-	iterations := flag.Int("i", 1000, "how many iterations should be run")
+	// global flags
 	db := flag.String("db", "", "database/driver to use (mysql|postgres|cockroach)")
-	goroutines := flag.Int("threads", 10, "how many green threads (goroutines) to use")
-	host := flag.String("host", "localhsot", "address of the server")
+	host := flag.String("host", "localhost", "address of the server")
 	port := flag.Int("port", 0, "port of the server")
 	user := flag.String("user", "root", "user name to connect with the server")
-	password := flag.String("password", "root", "password to connect with the server")
+	pass := flag.String("pass", "root", "password to connect with the server")
+	iterations := flag.Int("iter", 1000, "how many iterations should be run")
+	goroutines := flag.Int("threads", 25, "max. number of green threads (goroutines)")
+	maxOpenConns := flag.Int("conns", 0, "max. number of open connections")
+
+	// subcommands and local flags
+	// cassandra := flag.NewFlagSet("cassandra", flag.ExitOnError)
+
 	flag.Parse()
 
-	bencher := getImpl(*db, *host, *port, *user, *password)
+	bencher := getImpl(*db, *host, *port, *user, *pass, *maxOpenConns)
 
 	bencher.Setup()
 	defer bencher.Cleanup()
@@ -38,15 +44,18 @@ func main() {
 	benchmark(bencher, *iterations, *goroutines)
 }
 
-func getImpl(dbType string, host string, port int, user, password string) Bencher {
+func getImpl(dbType string, host string, port int, user, password string, maxOpenConns int) Bencher {
 	switch dbType {
 	case "mysql", "mariadb":
-		return databases.NewMySQL(host, port, user, password)
+		return databases.NewMySQL(host, port, user, password, maxOpenConns)
 	case "postgres", "pg":
-		return databases.NewPostgres(host, port, user, password)
+		return databases.NewPostgres(host, port, user, password, maxOpenConns)
 	case "cockroach", "cr":
-		return databases.NewCockroach(host, port, user, password)
+		return databases.NewCockroach(host, port, user, password, maxOpenConns)
 	case "cassandra", "scylla":
+		if maxOpenConns != 0 {
+			log.Fatalln("can't use flag 'conns' for cassandra or scylla")
+		}
 		return databases.NewCassandra(host, port, user, password)
 	}
 

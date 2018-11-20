@@ -11,8 +11,8 @@ type Mysql struct {
 	db *sql.DB
 }
 
-// New returns a new mysql bencher.
-func NewMySQL(host string, port int, user, password string) *Mysql {
+// New NewMySQL a new mysql bencher.
+func NewMySQL(host string, port int, user, password string, maxOpenConns int) *Mysql {
 	// username:password@protocol(address)/dbname?param=value
 	dataSourceName := fmt.Sprintf("%v:%v@tcp(%v:%v)/dbbench?charset=utf8", user, password, host, port)
 
@@ -24,7 +24,7 @@ func NewMySQL(host string, port int, user, password string) *Mysql {
 		log.Fatalf("failed to ping db: %v", err)
 	}
 
-	// db.SetMaxOpenConns() // TODO: as flag?
+	db.SetMaxOpenConns(maxOpenConns)
 	p := &Mysql{db: db}
 	return p
 }
@@ -35,7 +35,7 @@ func (m *Mysql) Benchmarks() []func(int, int) string {
 }
 
 // Setup initializes the database for the benchmark.
-func (m *Mysql) Setup() {
+func (m *Mysql) Setup(...string) {
 	if _, err := m.db.Exec("CREATE DATABASE IF NOT EXISTS dbbench"); err != nil {
 		log.Fatalf("failed to create database: %v\n", err)
 	}

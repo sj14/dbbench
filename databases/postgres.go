@@ -12,7 +12,7 @@ type Postgres struct {
 }
 
 // New returns a new postgres bencher.
-func NewPostgres(host string, port int, user, password string) *Postgres {
+func NewPostgres(host string, port int, user, password string, maxOpenConns int) *Postgres {
 	dataSourceName := fmt.Sprintf("host=%v port=%v user='%v' password='%v' sslmode=disable", host, port, user, password)
 
 	db, err := sql.Open("postgres", dataSourceName)
@@ -22,6 +22,8 @@ func NewPostgres(host string, port int, user, password string) *Postgres {
 	if err := db.Ping(); err != nil {
 		log.Fatalf("failed to ping db: %v", err)
 	}
+
+	db.SetMaxOpenConns(maxOpenConns)
 
 	p := &Postgres{db: db}
 	return p
@@ -33,7 +35,7 @@ func (p *Postgres) Benchmarks() []func(int, int) string {
 }
 
 // Setup initializes the database for the benchmark.
-func (p *Postgres) Setup() {
+func (p *Postgres) Setup(...string) {
 	if _, err := p.db.Exec("CREATE SCHEMA IF NOT EXISTS dbbench"); err != nil {
 		log.Fatalf("failed to create schema: %v\n", err)
 	}
