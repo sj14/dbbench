@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	_ "github.com/go-sql-driver/mysql" // mysql db driver
-	_ "github.com/lib/pq"              // pq is the postgres/cockroach db driver
+	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/sj14/dbbench/databases"
 )
