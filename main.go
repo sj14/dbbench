@@ -24,13 +24,13 @@ type Bencher interface {
 func main() {
 	// TODO: add database name flag (especially for mysql)
 	// global flags
-	db := flag.String("db", "", "database/driver to use (mysql|postgres|cockroach)")
+	db := flag.String("db", "", "database to use (sqlite|mariadb|mysql|postgres|cockroach|cassandra|scylla)")
 	host := flag.String("host", "localhost", "address of the server")
 	port := flag.Int("port", 0, "port of the server")
 	user := flag.String("user", "root", "user name to connect with the server")
 	pass := flag.String("pass", "root", "password to connect with the server")
 	iterations := flag.Int("iter", 1000, "how many iterations should be run")
-	goroutines := flag.Int("threads", 25, "max. number of green threads (goroutines)")
+	goroutines := flag.Int("threads", 25, "max. number of green threads")
 	maxOpenConns := flag.Int("conns", 0, "max. number of open connections")
 	clean := flag.Bool("clean", false, "only cleanup previous benchmark data, e.g. due to a crash (no benchmark will run)")
 	// subcommands and local flags
