@@ -9,10 +9,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql" // mysql db driver
 	_ "github.com/lib/pq"              // pq is the postgres/cockroach db driver
-	"github.com/sj14/dbbench/cassandra"
-	"github.com/sj14/dbbench/cockroach"
-	"github.com/sj14/dbbench/mysql"
-	"github.com/sj14/dbbench/postgres"
+	"github.com/sj14/dbbench/databases"
 )
 
 // Bencher is the interface a benchmark has to impelement
@@ -44,13 +41,13 @@ func main() {
 func getImpl(dbType string, host string, port int, user, password string) Bencher {
 	switch dbType {
 	case "mysql", "mariadb":
-		return mysql.New(host, port, user, password)
+		return databases.NewMySQL(host, port, user, password)
 	case "postgres", "pg":
-		return postgres.New(host, port, user, password)
+		return databases.NewPostgres(host, port, user, password)
 	case "cockroach", "cr":
-		return cockroach.New(host, port, user, password)
+		return databases.NewCockroach(host, port, user, password)
 	case "cassandra", "scylla":
-		return cassandra.New(host, port, user, password)
+		return databases.NewCassandra(host, port, user, password)
 	}
 
 	log.Fatalln("missing or unknown type parameter")

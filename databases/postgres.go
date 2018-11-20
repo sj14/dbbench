@@ -1,4 +1,4 @@
-package cockroach
+package databases
 
 import (
 	"database/sql"
@@ -6,13 +6,13 @@ import (
 	"log"
 )
 
-// Cockroach implements the bencher implementation.
-type Cockroach struct {
+// Postgres implements the bencher implementation.
+type Postgres struct {
 	db *sql.DB
 }
 
-// New returns a new cockroach bencher.
-func New(host string, port int, user, password string) *Cockroach {
+// New returns a new postgres bencher.
+func NewPostgres(host string, port int, user, password string) *Postgres {
 	dataSourceName := fmt.Sprintf("host=%v port=%v user='%v' password='%v' sslmode=disable", host, port, user, password)
 
 	db, err := sql.Open("postgres", dataSourceName)
@@ -23,21 +23,22 @@ func New(host string, port int, user, password string) *Cockroach {
 		log.Fatalf("failed to ping db: %v", err)
 	}
 
-	return &Cockroach{db: db}
+	p := &Postgres{db: db}
+	return p
 }
 
-// Benchmarks returns the individual benchmark functions for the cockroach db.
-func (p *Cockroach) Benchmarks() []func(int, int) string {
+// Benchmarks returns the individual benchmark functions for the postgres db.
+func (p *Postgres) Benchmarks() []func(int, int) string {
 	return []func(int, int) string{p.inserts, p.updates, p.selects, p.deletes}
 }
 
 // Setup initializes the database for the benchmark.
-func (p *Cockroach) Setup() {
-	if _, err := p.db.Exec("CREATE DATABASE IF NOT EXISTS dbbench"); err != nil {
-		log.Fatalf("failed to create database: %v\n", err)
+func (p *Postgres) Setup() {
+	if _, err := p.db.Exec("CREATE SCHEMA IF NOT EXISTS dbbench"); err != nil {
+		log.Fatalf("failed to create schema: %v\n", err)
 	}
 	if _, err := p.db.Exec("CREATE TABLE IF NOT EXISTS dbbench.accounts (id INT PRIMARY KEY, balance DECIMAL);"); err != nil {
-		log.Fatalf("failed to create table: %v\n", err)
+		log.Fatalf("failed to cfreate table: %v\n", err)
 	}
 	if _, err := p.db.Exec("TRUNCATE dbbench.accounts;"); err != nil {
 		log.Fatalf("failed to truncate table: %v\n", err)
@@ -45,19 +46,19 @@ func (p *Cockroach) Setup() {
 }
 
 // Cleanup removes all remaining benchmarking data.
-func (p *Cockroach) Cleanup() {
+func (p *Postgres) Cleanup() {
 	if _, err := p.db.Exec("DROP TABLE dbbench.accounts"); err != nil {
 		log.Printf("failed to drop table: %v\n", err)
 	}
-	if _, err := p.db.Exec("DROP DATABASE dbbench"); err != nil {
-		log.Printf("failed to drop database: %v\n", err)
+	if _, err := p.db.Exec("DROP SCHEMA dbbench"); err != nil {
+		log.Printf("failed drop schema: %v\n", err)
 	}
 	if err := p.db.Close(); err != nil {
 		log.Printf("failed to close connection: %v", err)
 	}
 }
 
-func (p *Cockroach) inserts(from, to int) string {
+func (p *Postgres) inserts(from, to int) string {
 	const q = "INSERT INTO dbbench.accounts VALUES($1, $2);"
 	for i := from; i < to; i++ {
 		if _, err := p.db.Exec(q, i, i); err != nil {
@@ -67,7 +68,7 @@ func (p *Cockroach) inserts(from, to int) string {
 	return "inserts"
 }
 
-func (p *Cockroach) selects(from, to int) string {
+func (p *Postgres) selects(from, to int) string {
 	const q = "SELECT * FROM dbbench.accounts WHERE id = $1;"
 	for i := from; i < to; i++ {
 		if _, err := p.db.Exec(q, i); err != nil {
@@ -77,7 +78,7 @@ func (p *Cockroach) selects(from, to int) string {
 	return "selects"
 }
 
-func (p *Cockroach) updates(from, to int) string {
+func (p *Postgres) updates(from, to int) string {
 	const q = "UPDATE dbbench.accounts SET balance = $1 WHERE id = $2;"
 	for i := from; i < to; i++ {
 		if _, err := p.db.Exec(q, i, i); err != nil {
@@ -87,7 +88,7 @@ func (p *Cockroach) updates(from, to int) string {
 	return "updates"
 }
 
-func (p *Cockroach) deletes(from, to int) string {
+func (p *Postgres) deletes(from, to int) string {
 	const q = "DELETE FROM dbbench.accounts WHERE id = $1"
 	for i := from; i < to; i++ {
 		if _, err := p.db.Exec(q, i); err != nil {

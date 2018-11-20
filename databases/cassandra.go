@@ -1,4 +1,4 @@
-package cassandra
+package databases
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ type Cassandra struct {
 }
 
 // New returns a new cassandra bencher.
-func New(host string, port int, user, password string) *Cassandra {
+func NewCassandra(host string, port int, user, password string) *Cassandra {
 	dataSourceName := fmt.Sprintf("%v:%v", host, port) // TODO: check how to do with port, user and password
 
 	cluster := gocql.NewCluster(dataSourceName)

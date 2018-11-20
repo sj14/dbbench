@@ -1,4 +1,4 @@
-package mysql
+package databases
 
 import (
 	"database/sql"
@@ -12,7 +12,7 @@ type Mysql struct {
 }
 
 // New returns a new mysql bencher.
-func New(host string, port int, user, password string) *Mysql {
+func NewMySQL(host string, port int, user, password string) *Mysql {
 	// username:password@protocol(address)/dbname?param=value
 	dataSourceName := fmt.Sprintf("%v:%v@tcp(%v:%v)/dbbench?charset=utf8", user, password, host, port)
 
