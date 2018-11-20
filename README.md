@@ -1,53 +1,68 @@
-# sqlite
+# Sample Usage
+
+Here are some examples how to run different databases with docker and the equivalent call of dbbench for testing/developing.
+
+## SQLite
 
 ``` bash
-go run main.go -db sqlite -iter 10000
+go run main.go -db sqlite
 ``` 
 
-# mysql
+## MySQL
 
 ``` bash
 docker run --name some-mysql -p 3306:3306 -d -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=dbbench mysql
 
-go run main.go -db mysql -iter 5000 -port 3306 -user root -password root
+go run main.go -db mysql -port 3306 -user root -password root
 ``` 
 
-# mariadb
+## MariaDB
 
 ``` bash
 docker run --name some-mariadb -p 3306:3306 -d -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=dbbench mariadb 
 
-go run main.go -db mariadb -iter 5000 -port 3306 -user root -password root
+go run main.go -db mariadb -port 3306 -user root -password root
 ``` 
 
-# postgres
+## PostgreSQL
 
 ``` bash
 docker run -d -p 5432:5432 postgres
 
-go run main.go -type pg -iter 1000 -port 36357 -user postgres -password example
+go run main.go -type postgres -port 5432 -user postgres -password example
 ``` 
 
-# cockroach
+## CockroachDB
 
 ``` bash
-docker run -d -p 26257:26257 -p 8080:8080 cockroachdb/cockroach:latest start --iternsecure
+# port 8080 is the webinterface (optional)
+docker run --name some-cockroach -d -p 26257:26257 -p 8080:8080 cockroachdb/cockroach:latest start --iternsecure
 
-go run main.go -type cr -iter 100 -port 26257 -user root
+go run main.go -type cockroach -port 26257 -user root
 ```
 
-# cassandra
+## Cassandra
 
 ``` bash
 docker run --name some-cassandra -p 9042:9042 -d cassandra:latest
 
-go run main.go -db cassandra -iter 5000 -port 9042
+go run main.go -db cassandra -port 9042
 ```
 
-# scylladb
+## ScyllaDB
 
 ``` bash
 docker run --name some-scylla -p 9042:9042 -d scylladb/scylla
 
-go run main.go -db scylla -iter 5000 -port 9042
+go run main.go -db scylla -port 9042
 ``` 
+
+# Troubleshooting
+
+I get the following error:
+
+```
+failed to insert: UNIQUE constraint failed: accounts.id
+exit status 1
+``` 
+The previous data wasn't removed (e.g. because the benchmark was canceled). Try to run the same command again, but with the `-clean` flag attached, which will remove the old data. Then run the original command again.
