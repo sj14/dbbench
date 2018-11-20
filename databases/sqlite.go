@@ -12,13 +12,8 @@ type SQLite struct {
 }
 
 // NewSQLite a new mysql bencher.
-func NewSQLite(host string, port int, user, password string, maxOpenConns int) *SQLite {
-	// dataSourceName := fmt.Sprintf("%v:%v@tcp(%v:%v)/dbbench?charset=utf8", user, password, host, port)
-
-	if err := os.Remove("./dbbench.sqlite"); err != nil {
-		log.Printf("not able to delete old database file: %v\n", err)
-	}
-
+func NewSQLite() *SQLite {
+	// TODO: filename as flag
 	db, err := sql.Open("sqlite3", "./dbbench.sqlite?cache=shared")
 	if err != nil {
 		log.Fatalf("failed to open connection: %v\n", err)
@@ -36,15 +31,9 @@ func (m *SQLite) Benchmarks() []func(int, int) string {
 
 // Setup initializes the database for the benchmark.
 func (m *SQLite) Setup(...string) {
-	// if _, err := m.db.Exec("CREATE DATABASE IF NOT EXISTS dbbench"); err != nil {
-	// 	log.Fatalf("failed to create database: %v\n", err)
-	// }
 	if _, err := m.db.Exec("CREATE TABLE IF NOT EXISTS accounts (id INT PRIMARY KEY, balance DECIMAL);"); err != nil {
 		log.Fatalf("failed to create table: %v\n", err)
 	}
-	// if _, err := m.db.Exec("TRUNCATE accounts;"); err != nil {
-	// 	log.Fatalf("failed to truncate table: %v\n", err)
-	// }
 }
 
 // Cleanup removes all remaining benchmarking data.
@@ -52,11 +41,11 @@ func (m *SQLite) Cleanup() {
 	if _, err := m.db.Exec("DROP TABLE accounts"); err != nil {
 		log.Printf("failed to drop table: %v\n", err)
 	}
-	// if _, err := m.db.Exec("DROP SCHEMA dbbench"); err != nil {
-	// 	log.Printf("failed drop schema: %v\n", err)
-	// }
 	if err := m.db.Close(); err != nil {
 		log.Printf("failed to close connection: %v", err)
+	}
+	if err := os.Remove("./dbbench.sqlite"); err != nil {
+		log.Printf("not able to delete old database file: %v\n", err)
 	}
 }
 
