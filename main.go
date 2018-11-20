@@ -9,6 +9,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql" // mysql db driver
 	_ "github.com/lib/pq"              // pq is the postgres/cockroach db driver
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/sj14/dbbench/databases"
 )
 
@@ -30,7 +31,6 @@ func main() {
 	iterations := flag.Int("iter", 1000, "how many iterations should be run")
 	goroutines := flag.Int("threads", 25, "max. number of green threads (goroutines)")
 	maxOpenConns := flag.Int("conns", 0, "max. number of open connections")
-
 	// subcommands and local flags
 	// cassandra := flag.NewFlagSet("cassandra", flag.ExitOnError)
 
@@ -46,6 +46,11 @@ func main() {
 
 func getImpl(dbType string, host string, port int, user, password string, maxOpenConns int) Bencher {
 	switch dbType {
+	case "sqlite":
+		if maxOpenConns != 0 {
+			log.Fatalln("can't use flag 'conns' for SQLite")
+		}
+		return databases.NewSQLite(host, port, user, password, maxOpenConns)
 	case "mysql", "mariadb":
 		return databases.NewMySQL(host, port, user, password, maxOpenConns)
 	case "postgres", "pg":
@@ -54,7 +59,7 @@ func getImpl(dbType string, host string, port int, user, password string, maxOpe
 		return databases.NewCockroach(host, port, user, password, maxOpenConns)
 	case "cassandra", "scylla":
 		if maxOpenConns != 0 {
-			log.Fatalln("can't use flag 'conns' for cassandra or scylla")
+			log.Fatalln("can't use flag 'conns' for Cassandra or ScyllaDB")
 		}
 		return databases.NewCassandra(host, port, user, password)
 	}
