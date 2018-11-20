@@ -33,6 +33,8 @@ func main() {
 	goroutines := flag.Int("threads", 25, "max. number of green threads")
 	maxOpenConns := flag.Int("conns", 0, "max. number of open connections")
 	clean := flag.Bool("clean", false, "only cleanup previous benchmark data, e.g. due to a crash (no benchmark will run)")
+	// test := flag.String("test", "all", "only run the specified test") // TODO
+
 	// subcommands and local flags
 	// cassandra := flag.NewFlagSet("cassandra", flag.ExitOnError)
 	flag.Parse()
@@ -40,7 +42,7 @@ func main() {
 	bencher := getImpl(*db, *host, *port, *user, *pass, *maxOpenConns)
 
 	if *clean {
-		// Clean flag. Try to clean data and exit.
+		// Clean flag. Try to clean old data and exit.
 		bencher.Cleanup()
 		os.Exit(0)
 	}
@@ -60,9 +62,9 @@ func getImpl(dbType string, host string, port int, user, password string, maxOpe
 		return databases.NewSQLite()
 	case "mysql", "mariadb":
 		return databases.NewMySQL(host, port, user, password, maxOpenConns)
-	case "postgres", "pg":
+	case "postgres":
 		return databases.NewPostgres(host, port, user, password, maxOpenConns)
-	case "cockroach", "cr":
+	case "cockroach":
 		return databases.NewCockroach(host, port, user, password, maxOpenConns)
 	case "cassandra", "scylla":
 		if maxOpenConns != 0 {
@@ -87,6 +89,8 @@ func benchmark(impl Bencher, iterations, goroutines int) {
 			to := (iterations / goroutines) * (i + 1)
 
 			go func() {
+				// TODO: we get the name _after_ the test was run,
+				// the "-test" flag won't work with this.
 				name = b(from, to)
 				wg.Done()
 			}()
