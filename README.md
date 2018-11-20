@@ -1,6 +1,30 @@
 # Sample Usage
 
-Here are some examples how to run different databases with docker and the equivalent call of dbbench for testing/developing.
+## Flags
+
+``` bash
+  -clean
+        only cleanup previous benchmark data, e.g. due to a crash (no benchmark will run)
+  -conns int
+        max. number of open connections
+  -db string
+        database to use (sqlite|mariadb|mysql|postgres|cockroach|cassandra|scylla)
+  -host string
+        address of the server (default "localhost")
+  -iter int
+        how many iterations should be run (default 1000)
+  -pass string
+        password to connect with the server (default "root")
+  -port int
+        port of the server
+  -threads int
+        max. number of green threads (default 25)
+  -user string
+        user name to connect with the server (default "root")
+``` 
+
+
+Below are some examples how to run different databases with docker and the equivalent call of dbbench for testing/developing.
 
 ## SQLite
 
