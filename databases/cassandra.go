@@ -3,6 +3,7 @@ package databases
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/gocql/gocql"
 )
@@ -18,6 +19,7 @@ func NewCassandra(host string, port int, user, password string) *Cassandra {
 
 	cluster := gocql.NewCluster(dataSourceName)
 	cluster.Keyspace = ""
+	cluster.Timeout = 5 * time.Minute
 	cluster.Consistency = gocql.Quorum
 	// TOOD: as flags
 	// Any         Consistency = 0x00
@@ -29,7 +31,6 @@ func NewCassandra(host string, port int, user, password string) *Cassandra {
 	// LocalQuorum Consistency = 0x06
 	// EachQuorum  Consistency = 0x07
 	// LocalOne    Consistency = 0x0A
-
 	session, err := cluster.CreateSession()
 	if err != nil {
 		log.Fatalf("failed to create session: %v\n", err)
