@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
 	"sync"
 	"time"
 
@@ -31,12 +32,18 @@ func main() {
 	iterations := flag.Int("iter", 1000, "how many iterations should be run")
 	goroutines := flag.Int("threads", 25, "max. number of green threads (goroutines)")
 	maxOpenConns := flag.Int("conns", 0, "max. number of open connections")
+	clean := flag.Bool("clean", false, "only cleanup previous benchmark data, e.g. due to a crash (no benchmark will run)")
 	// subcommands and local flags
 	// cassandra := flag.NewFlagSet("cassandra", flag.ExitOnError)
-
 	flag.Parse()
 
 	bencher := getImpl(*db, *host, *port, *user, *pass, *maxOpenConns)
+
+	if *clean {
+		// Clean flag. Try to clean data and exit.
+		bencher.Cleanup()
+		os.Exit(0)
+	}
 
 	bencher.Setup()
 	defer bencher.Cleanup()
@@ -50,7 +57,7 @@ func getImpl(dbType string, host string, port int, user, password string, maxOpe
 		if maxOpenConns != 0 {
 			log.Fatalln("can't use flag 'conns' for SQLite")
 		}
-		return databases.NewSQLite(host, port, user, password, maxOpenConns)
+		return databases.NewSQLite()
 	case "mysql", "mariadb":
 		return databases.NewMySQL(host, port, user, password, maxOpenConns)
 	case "postgres", "pg":
