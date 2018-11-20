@@ -40,7 +40,7 @@ func (p *Postgres) Setup(...string) {
 		log.Fatalf("failed to create schema: %v\n", err)
 	}
 	if _, err := p.db.Exec("CREATE TABLE IF NOT EXISTS dbbench.accounts (id INT PRIMARY KEY, balance DECIMAL);"); err != nil {
-		log.Fatalf("failed to cfreate table: %v\n", err)
+		log.Fatalf("failed to create table: %v\n", err)
 	}
 	if _, err := p.db.Exec("TRUNCATE dbbench.accounts;"); err != nil {
 		log.Fatalf("failed to truncate table: %v\n", err)

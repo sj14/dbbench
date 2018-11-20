@@ -40,7 +40,7 @@ func (m *Mysql) Setup(...string) {
 		log.Fatalf("failed to create database: %v\n", err)
 	}
 	if _, err := m.db.Exec("CREATE TABLE IF NOT EXISTS dbbench.accounts (id INT PRIMARY KEY, balance DECIMAL);"); err != nil {
-		log.Fatalf("failed to cfreate table: %v\n", err)
+		log.Fatalf("failed to create table: %v\n", err)
 	}
 	if _, err := m.db.Exec("TRUNCATE dbbench.accounts;"); err != nil {
 		log.Fatalf("failed to truncate table: %v\n", err)
