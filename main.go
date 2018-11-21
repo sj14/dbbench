@@ -18,7 +18,7 @@ import (
 type Bencher interface {
 	Setup(...string)
 	Cleanup()
-	Benchmarks() []func(from int, to int) (name string)
+	Benchmarks() []databases.Benchmark
 }
 
 func main() {
@@ -33,7 +33,7 @@ func main() {
 	goroutines := flag.Int("threads", 25, "max. number of green threads")
 	maxOpenConns := flag.Int("conns", 0, "max. number of open connections")
 	clean := flag.Bool("clean", false, "only cleanup previous benchmark data, e.g. due to a crash (no benchmark will run)")
-	// test := flag.String("test", "all", "only run the specified test") // TODO
+	// runBench := flag.String("run", "all", "only run the specified benchmark") // TODO
 
 	// subcommands and local flags
 	// cassandra := flag.NewFlagSet("cassandra", flag.ExitOnError)
@@ -77,10 +77,10 @@ func getImpl(dbType string, host string, port int, user, password string, maxOpe
 	return nil
 }
 
-func benchmark(impl Bencher, iterations, goroutines int) {
+func benchmark(bencher Bencher, iterations, goroutines int) {
 	wg := &sync.WaitGroup{}
 
-	for _, b := range impl.Benchmarks() {
+	for _, b := range bencher.Benchmarks() {
 		wg.Add(goroutines)
 		var name string
 		start := time.Now()
@@ -89,9 +89,8 @@ func benchmark(impl Bencher, iterations, goroutines int) {
 			to := (iterations / goroutines) * (i + 1)
 
 			go func() {
-				// TODO: we get the name _after_ the test was run,
-				// the "-test" flag won't work with this.
-				name = b(from, to)
+				name = b.Name
+				b.Func(from, to)
 				wg.Done()
 			}()
 		}

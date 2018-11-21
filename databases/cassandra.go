@@ -40,72 +40,73 @@ func NewCassandra(host string, port int, user, password string) *Cassandra {
 }
 
 // Benchmarks returns the individual benchmark functions for the cassandra db.
-func (p *Cassandra) Benchmarks() []func(int, int) string {
-	return []func(int, int) string{p.inserts, p.updates, p.selects, p.deletes}
+func (c *Cassandra) Benchmarks() []Benchmark {
+	return []Benchmark{
+		{"inserts", c.inserts},
+		{"updates", c.updates},
+		{"selects", c.selects},
+		{"deletes", c.deletes},
+	}
 }
 
 // Setup initializes the database for the benchmark.
-func (p *Cassandra) Setup(...string) {
+func (c *Cassandra) Setup(...string) {
 	// TODO: flags for class and replication factor
-	if err := p.session.Query("CREATE KEYSPACE IF NOT EXISTS dbbench WITH replication = { 'class':'SimpleStrategy', 'replication_factor' : 1 }").Exec(); err != nil {
+	if err := c.session.Query("CREATE KEYSPACE IF NOT EXISTS dbbench WITH replication = { 'class':'SimpleStrategy', 'replication_factor' : 1 }").Exec(); err != nil {
 		log.Fatalf("failed to create keyspace: %v\n", err)
 	}
 	// TODO: other tests use decimal for balance, cassandra or gocql doesn't do an automatic casting from int to decimal
-	if err := p.session.Query("CREATE TABLE IF NOT EXISTS dbbench.accounts (id INT PRIMARY KEY, balance INT);").Exec(); err != nil {
+	if err := c.session.Query("CREATE TABLE IF NOT EXISTS dbbench.accounts (id INT PRIMARY KEY, balance INT);").Exec(); err != nil {
 		log.Fatalf("failed to create table: %v\n", err)
 	}
-	if err := p.session.Query("TRUNCATE dbbench.accounts;").Exec(); err != nil {
+	if err := c.session.Query("TRUNCATE dbbench.accounts;").Exec(); err != nil {
 		log.Fatalf("failed to truncate table: %v\n", err)
 	}
 }
 
 // Cleanup removes all remaining benchmarking data.
-func (p *Cassandra) Cleanup() {
-	if err := p.session.Query("DROP TABLE dbbench.accounts").Exec(); err != nil {
+func (c *Cassandra) Cleanup() {
+	if err := c.session.Query("DROP TABLE dbbench.accounts").Exec(); err != nil {
 		log.Printf("failed to drop table: %v\n", err)
 	}
-	if err := p.session.Query("DROP KEYSPACE dbbench").Exec(); err != nil {
+	if err := c.session.Query("DROP KEYSPACE dbbench").Exec(); err != nil {
 		log.Printf("failed to drop database: %v\n", err)
 	}
-	p.session.Close()
+	c.session.Close()
 }
 
-func (p *Cassandra) inserts(from, to int) string {
+func (c *Cassandra) inserts(from, to int) {
 	const q = "INSERT INTO dbbench.accounts (id, balance) VALUES(?, ?);"
 	for i := from; i < to; i++ {
-		if err := p.session.Query(q, i, i).Exec(); err != nil {
+		if err := c.session.Query(q, i, i).Exec(); err != nil {
 			log.Fatalf("failed to insert: %v\n", err)
 		}
 	}
-	return "inserts"
 }
 
-func (p *Cassandra) selects(from, to int) string {
+func (c *Cassandra) selects(from, to int) {
 	const q = "SELECT * FROM dbbench.accounts WHERE id = ?;"
 	for i := from; i < to; i++ {
-		if err := p.session.Query(q, i).Exec(); err != nil {
+		if err := c.session.Query(q, i).Exec(); err != nil {
 			log.Fatalf("failed to select: %v\n", err)
 		}
 	}
-	return "selects"
 }
 
-func (p *Cassandra) updates(from, to int) string {
+func (c *Cassandra) updates(from, to int) {
 	const q = "UPDATE dbbench.accounts SET balance = ? WHERE id = ?;"
 	for i := from; i < to; i++ {
-		if err := p.session.Query(q, i, i).Exec(); err != nil {
+		if err := c.session.Query(q, i, i).Exec(); err != nil {
 			log.Fatalf("failed to update: %v\n", err)
 		}
 	}
-	return "updates"
 }
 
-func (p *Cassandra) deletes(from, to int) string {
+func (c *Cassandra) deletes(from, to int) {
 	const q = "DELETE FROM dbbench.accounts WHERE id = ?"
 	for i := from; i < to; i++ {
-		if err := p.session.Query(q, i).Exec(); err != nil {
+		if err := c.session.Query(q, i).Exec(); err != nil {
 			log.Fatalf("failed to delete: %v\n", err)
 		}
 	}
-	return "deletes"
 }

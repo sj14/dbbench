@@ -25,8 +25,13 @@ func NewSQLite() *SQLite {
 }
 
 // Benchmarks returns the individual benchmark functions for the mysql db.
-func (m *SQLite) Benchmarks() []func(int, int) string {
-	return []func(int, int) string{m.inserts, m.updates, m.selects, m.deletes}
+func (m *SQLite) Benchmarks() []Benchmark {
+	return []Benchmark{
+		{"inserts", m.inserts},
+		{"updates", m.updates},
+		{"selects", m.selects},
+		{"deletes", m.deletes},
+	}
 }
 
 // Setup initializes the database for the benchmark.
@@ -49,42 +54,38 @@ func (m *SQLite) Cleanup() {
 	}
 }
 
-func (m *SQLite) inserts(from, to int) string {
+func (m *SQLite) inserts(from, to int) {
 	const q = "INSERT INTO accounts VALUES(?, ?);"
 	for i := from; i < to; i++ {
 		if _, err := m.db.Exec(q, i, i); err != nil {
 			log.Fatalf("failed to insert: %v\n", err)
 		}
 	}
-	return "inserts"
 }
 
-func (m *SQLite) selects(from, to int) string {
+func (m *SQLite) selects(from, to int) {
 	const q = "SELECT * FROM accounts WHERE id = ?;"
 	for i := from; i < to; i++ {
 		if _, err := m.db.Exec(q, i); err != nil {
 			log.Fatalf("failed to select: %v\n", err)
 		}
 	}
-	return "selects"
 }
 
-func (m *SQLite) updates(from, to int) string {
+func (m *SQLite) updates(from, to int) {
 	const q = "UPDATE accounts SET balance = ? WHERE id = ?;"
 	for i := from; i < to; i++ {
 		if _, err := m.db.Exec(q, i, i); err != nil {
 			log.Fatalf("failed to update: %v\n", err)
 		}
 	}
-	return "updates"
 }
 
-func (m *SQLite) deletes(from, to int) string {
+func (m *SQLite) deletes(from, to int) {
 	const q = "DELETE FROM accounts WHERE id = ?"
 	for i := from; i < to; i++ {
 		if _, err := m.db.Exec(q, i); err != nil {
 			log.Fatalf("failed to delete: %v\n", err)
 		}
 	}
-	return "deletes"
 }
