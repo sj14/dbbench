@@ -32,8 +32,10 @@ func main() {
 	iterations := flag.Int("iter", 1000, "how many iterations should be run")
 	goroutines := flag.Int("threads", 25, "max. number of green threads")
 	maxOpenConns := flag.Int("conns", 0, "max. number of open connections")
-	clean := flag.Bool("clean", false, "only cleanup previous benchmark data, e.g. due to a crash (no benchmark will run)")
-	// runBench := flag.String("run", "all", "only run the specified benchmark") // TODO
+	clean := flag.Bool("clean", false, "only cleanup previous benchmark data, e.g. due to a crash")
+	// version := flag.Bool("version", false, "print version information") // TODO
+	runBench := flag.String("run", "all", "only run the specified benchmark") // TODO
+	// TODO noclean flag
 
 	// subcommands and local flags
 	// cassandra := flag.NewFlagSet("cassandra", flag.ExitOnError)
@@ -50,7 +52,7 @@ func main() {
 	bencher.Setup()
 	defer bencher.Cleanup()
 
-	benchmark(bencher, *iterations, *goroutines)
+	benchmark(bencher, *runBench, *iterations, *goroutines)
 }
 
 func getImpl(dbType string, host string, port int, user, password string, maxOpenConns int) Bencher {
@@ -77,7 +79,7 @@ func getImpl(dbType string, host string, port int, user, password string, maxOpe
 	return nil
 }
 
-func benchmark(bencher Bencher, iterations, goroutines int) {
+func benchmark(bencher Bencher, runBench string, iterations, goroutines int) {
 	wg := &sync.WaitGroup{}
 
 	for _, b := range bencher.Benchmarks() {
@@ -89,9 +91,15 @@ func benchmark(bencher Bencher, iterations, goroutines int) {
 			to := (iterations / goroutines) * (i + 1)
 
 			go func() {
+				defer wg.Done()
 				name = b.Name
+
+				if runBench != "all" && b.Name != runBench {
+					// only run the selected benchmark
+					name += "(skipped)"
+					return
+				}
 				b.Func(from, to)
-				wg.Done()
 			}()
 		}
 		wg.Wait()
