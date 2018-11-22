@@ -4,7 +4,7 @@
 
 ``` bash
   -clean
-        only cleanup previous benchmark data, e.g. due to a crash (no benchmark will run)
+        only cleanup previous benchmark data, e.g. due to a crash
   -conns int
         max. number of open connections
   -db string
@@ -13,10 +13,14 @@
         address of the server (default "localhost")
   -iter int
         how many iterations should be run (default 1000)
+  -noclean
+        dont cleanup benchmark data
   -pass string
         password to connect with the server (default "root")
   -port int
         port of the server
+  -run string
+        only run the specified benchmarks, e.g. "inserts deletes" (default "all")
   -threads int
         max. number of green threads (default 25)
   -user string

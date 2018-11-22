@@ -34,9 +34,9 @@ func main() {
 	goroutines := flag.Int("threads", 25, "max. number of green threads")
 	maxOpenConns := flag.Int("conns", 0, "max. number of open connections")
 	clean := flag.Bool("clean", false, "only cleanup previous benchmark data, e.g. due to a crash")
-	noclean := flag.Bool("noclean", false, "don't cleanup benchmark data")
+	noclean := flag.Bool("noclean", false, "dont cleanup benchmark data")
 	// version := flag.Bool("version", false, "print version information") // TODO
-	runBench := flag.String("run", "all", "only run the specified benchmark") // TODO
+	runBench := flag.String("run", "all", "only run the specified benchmarks, e.g. \"inserts deletes\"") // TODO
 
 	// subcommands and local flags
 	// cassandra := flag.NewFlagSet("cassandra", flag.ExitOnError)
