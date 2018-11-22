@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -14,7 +15,7 @@ import (
 	"github.com/sj14/dbbench/databases"
 )
 
-// Bencher is the interface a benchmark has to impelement
+// Bencher is the interface a benchmark has to impelement.
 type Bencher interface {
 	Setup(...string)
 	Cleanup()
@@ -33,9 +34,9 @@ func main() {
 	goroutines := flag.Int("threads", 25, "max. number of green threads")
 	maxOpenConns := flag.Int("conns", 0, "max. number of open connections")
 	clean := flag.Bool("clean", false, "only cleanup previous benchmark data, e.g. due to a crash")
+	noclean := flag.Bool("noclean", false, "don't cleanup benchmark data")
 	// version := flag.Bool("version", false, "print version information") // TODO
 	runBench := flag.String("run", "all", "only run the specified benchmark") // TODO
-	// TODO noclean flag
 
 	// subcommands and local flags
 	// cassandra := flag.NewFlagSet("cassandra", flag.ExitOnError)
@@ -43,16 +44,29 @@ func main() {
 
 	bencher := getImpl(*db, *host, *port, *user, *pass, *maxOpenConns)
 
+	// try to clean old data and exit when clean flag is set
 	if *clean {
-		// Clean flag. Try to clean old data and exit.
 		bencher.Cleanup()
 		os.Exit(0)
 	}
 
+	// setup database
 	bencher.Setup()
-	defer bencher.Cleanup()
 
-	benchmark(bencher, *runBench, *iterations, *goroutines)
+	// only cleanup benchmark data when noclean flag is not set
+	if !*noclean {
+		defer bencher.Cleanup()
+	}
+
+	start := time.Now()
+
+	// split benchmark names when "-run 'bench0 bench1 ...'" flag was used
+	toRun := strings.Split(*runBench, " ")
+
+	for _, r := range toRun {
+		benchmark(bencher, r, *iterations, *goroutines)
+	}
+	fmt.Printf("total: %v\n", time.Since(start))
 }
 
 func getImpl(dbType string, host string, port int, user, password string, maxOpenConns int) Bencher {
@@ -81,10 +95,15 @@ func getImpl(dbType string, host string, port int, user, password string, maxOpe
 
 func benchmark(bencher Bencher, runBench string, iterations, goroutines int) {
 	wg := &sync.WaitGroup{}
+	// w := tabwriter.NewWriter(os.Stdout, 0, 4, 4, '\t', tabwriter.AlignRight)
 
 	for _, b := range bencher.Benchmarks() {
+		// check if we want to run this particular benchmark
+		if runBench != "all" && b.Name != runBench {
+			continue
+		}
+
 		wg.Add(goroutines)
-		var name string
 		start := time.Now()
 		for i := 0; i < goroutines; i++ {
 			from := (iterations / goroutines) * i
@@ -92,17 +111,13 @@ func benchmark(bencher Bencher, runBench string, iterations, goroutines int) {
 
 			go func() {
 				defer wg.Done()
-				name = b.Name
-
-				if runBench != "all" && b.Name != runBench {
-					// only run the selected benchmark
-					name += "(skipped)"
-					return
-				}
 				b.Func(from, to)
 			}()
 		}
 		wg.Wait()
-		fmt.Printf("%v took %v\n", name, time.Now().Sub(start))
+		elapsed := time.Since(start)
+		fmt.Printf("%v\t%v\t%v\tns/op\n", b.Name, elapsed, elapsed.Nanoseconds()/int64(iterations))
+		// fmt.Fprintf(w, "%v\t%v\t%v\tns/op\n", name, elapsed, elapsed.Nanoseconds()/int64(iterations))
 	}
+	// w.Flush()
 }
