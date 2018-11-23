@@ -75,38 +75,30 @@ func (c *Cassandra) Cleanup() {
 	c.session.Close()
 }
 
-func (c *Cassandra) inserts(from, to int) {
+func (c *Cassandra) inserts(i int) {
 	const q = "INSERT INTO dbbench.accounts (id, balance) VALUES(?, ?);"
-	for i := from; i < to; i++ {
-		if err := c.session.Query(q, i, i).Exec(); err != nil {
-			log.Fatalf("failed to insert: %v\n", err)
-		}
+	if err := c.session.Query(q, i, i).Exec(); err != nil {
+		log.Fatalf("failed to insert: %v\n", err)
 	}
 }
 
-func (c *Cassandra) selects(from, to int) {
+func (c *Cassandra) selects(i int) {
 	const q = "SELECT * FROM dbbench.accounts WHERE id = ?;"
-	for i := from; i < to; i++ {
-		if err := c.session.Query(q, i).Exec(); err != nil {
-			log.Fatalf("failed to select: %v\n", err)
-		}
+	if err := c.session.Query(q, i).Exec(); err != nil {
+		log.Fatalf("failed to select: %v\n", err)
 	}
 }
 
-func (c *Cassandra) updates(from, to int) {
+func (c *Cassandra) updates(i int) {
 	const q = "UPDATE dbbench.accounts SET balance = ? WHERE id = ?;"
-	for i := from; i < to; i++ {
-		if err := c.session.Query(q, i, i).Exec(); err != nil {
-			log.Fatalf("failed to update: %v\n", err)
-		}
+	if err := c.session.Query(q, i, i).Exec(); err != nil {
+		log.Fatalf("failed to update: %v\n", err)
 	}
 }
 
-func (c *Cassandra) deletes(from, to int) {
+func (c *Cassandra) deletes(i int) {
 	const q = "DELETE FROM dbbench.accounts WHERE id = ?"
-	for i := from; i < to; i++ {
-		if err := c.session.Query(q, i).Exec(); err != nil {
-			log.Fatalf("failed to delete: %v\n", err)
-		}
+	if err := c.session.Query(q, i).Exec(); err != nil {
+		log.Fatalf("failed to delete: %v\n", err)
 	}
 }

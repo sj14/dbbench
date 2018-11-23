@@ -65,38 +65,30 @@ func (m *Mysql) Cleanup() {
 	}
 }
 
-func (m *Mysql) inserts(from, to int) {
+func (m *Mysql) inserts(i int) {
 	const q = "INSERT INTO dbbench.accounts VALUES(?, ?);"
-	for i := from; i < to; i++ {
-		if _, err := m.db.Exec(q, i, i); err != nil {
-			log.Fatalf("failed to insert: %v\n", err)
-		}
+	if _, err := m.db.Exec(q, i, i); err != nil {
+		log.Fatalf("failed to insert: %v\n", err)
 	}
 }
 
-func (m *Mysql) selects(from, to int) {
+func (m *Mysql) selects(i int) {
 	const q = "SELECT * FROM dbbench.accounts WHERE id = ?;"
-	for i := from; i < to; i++ {
-		if _, err := m.db.Exec(q, i); err != nil {
-			log.Fatalf("failed to select: %v\n", err)
-		}
+	if _, err := m.db.Exec(q, i); err != nil {
+		log.Fatalf("failed to select: %v\n", err)
 	}
 }
 
-func (m *Mysql) updates(from, to int) {
+func (m *Mysql) updates(i int) {
 	const q = "UPDATE dbbench.accounts SET balance = ? WHERE id = ?;"
-	for i := from; i < to; i++ {
-		if _, err := m.db.Exec(q, i, i); err != nil {
-			log.Fatalf("failed to update: %v\n", err)
-		}
+	if _, err := m.db.Exec(q, i, i); err != nil {
+		log.Fatalf("failed to update: %v\n", err)
 	}
 }
 
-func (m *Mysql) deletes(from, to int) {
+func (m *Mysql) deletes(i int) {
 	const q = "DELETE FROM dbbench.accounts WHERE id = ?"
-	for i := from; i < to; i++ {
-		if _, err := m.db.Exec(q, i); err != nil {
-			log.Fatalf("failed to delete: %v\n", err)
-		}
+	if _, err := m.db.Exec(q, i); err != nil {
+		log.Fatalf("failed to delete: %v\n", err)
 	}
 }

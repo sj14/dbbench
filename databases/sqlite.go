@@ -54,70 +54,26 @@ func (m *SQLite) Cleanup() {
 	}
 }
 
-func (m *SQLite) inserts(from, to int) {
+func (m *SQLite) inserts(i int) {
 	const q = "INSERT INTO accounts VALUES(?, ?);"
-	for i := from; i < to; i++ {
-		result, err := m.db.Exec(q, i, i)
-		if err != nil {
-			log.Fatalf("failed to insert: %v\n", err)
-		}
-		rows, err := result.RowsAffected()
-		if err != nil {
-			log.Fatalf("no to get insert rows: %v\n", err)
-		}
-		if rows == 0 {
-			log.Fatalf("no rows inserted\n")
-		}
-	}
+	result, err := m.db.Exec(q, i, i)
+	mustExec(result, err, "insert")
 }
 
-func (m *SQLite) selects(from, to int) {
+func (m *SQLite) selects(i int) {
 	const q = "SELECT * FROM accounts WHERE id = ?;"
-	for i := from; i < to; i++ {
-		result, err := m.db.Exec(q, i)
-		if err != nil {
-			log.Fatalf("failed to select: %v\n", err)
-		}
-		rows, err := result.RowsAffected()
-		if err != nil {
-			log.Fatalf("no to get select rows: %v\n", err)
-		}
-		if rows == 0 {
-			log.Fatalf("no rows selected\n")
-		}
-	}
+	result, err := m.db.Exec(q, i)
+	mustExec(result, err, "select")
 }
 
-func (m *SQLite) updates(from, to int) {
+func (m *SQLite) updates(i int) {
 	const q = "UPDATE accounts SET balance = ? WHERE id = ?;"
-	for i := from; i < to; i++ {
-		result, err := m.db.Exec(q, i, i)
-		if err != nil {
-			log.Fatalf("failed to update: %v\n", err)
-		}
-		rows, err := result.RowsAffected()
-		if err != nil {
-			log.Fatalf("no to get update rows: %v\n", err)
-		}
-		if rows == 0 {
-			log.Fatalf("no rows updated\n")
-		}
-	}
+	result, err := m.db.Exec(q, i, i)
+	mustExec(result, err, "update")
 }
 
-func (m *SQLite) deletes(from, to int) {
+func (m *SQLite) deletes(i int) {
 	const q = "DELETE FROM accounts WHERE id = ?"
-	for i := from; i < to; i++ {
-		result, err := m.db.Exec(q, i)
-		if err != nil {
-			log.Fatalf("failed to delete: %v\n", err)
-		}
-		rows, err := result.RowsAffected()
-		if err != nil {
-			log.Fatalf("no to get deleted rows: %v\n", err)
-		}
-		if rows == 0 {
-			log.Fatalf("no rows deleted\n")
-		}
-	}
+	result, err := m.db.Exec(q, i)
+	mustExec(result, err, "delete")
 }

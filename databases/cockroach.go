@@ -63,38 +63,30 @@ func (p *Cockroach) Cleanup() {
 	}
 }
 
-func (p *Cockroach) inserts(from, to int) {
+func (p *Cockroach) inserts(i int) {
 	const q = "INSERT INTO dbbench.accounts VALUES($1, $2);"
-	for i := from; i < to; i++ {
-		if _, err := p.db.Exec(q, i, i); err != nil {
-			log.Fatalf("failed to insert: %v\n", err)
-		}
+	if _, err := p.db.Exec(q, i, i); err != nil {
+		log.Fatalf("failed to insert: %v\n", err)
 	}
 }
 
-func (p *Cockroach) selects(from, to int) {
+func (p *Cockroach) selects(i int) {
 	const q = "SELECT * FROM dbbench.accounts WHERE id = $1;"
-	for i := from; i < to; i++ {
-		if _, err := p.db.Exec(q, i); err != nil {
-			log.Fatalf("failed to select: %v\n", err)
-		}
+	if _, err := p.db.Exec(q, i); err != nil {
+		log.Fatalf("failed to select: %v\n", err)
 	}
 }
 
-func (p *Cockroach) updates(from, to int) {
+func (p *Cockroach) updates(i int) {
 	const q = "UPDATE dbbench.accounts SET balance = $1 WHERE id = $2;"
-	for i := from; i < to; i++ {
-		if _, err := p.db.Exec(q, i, i); err != nil {
-			log.Fatalf("failed to update: %v\n", err)
-		}
+	if _, err := p.db.Exec(q, i, i); err != nil {
+		log.Fatalf("failed to update: %v\n", err)
 	}
 }
 
-func (p *Cockroach) deletes(from, to int) {
+func (p *Cockroach) deletes(i int) {
 	const q = "DELETE FROM dbbench.accounts WHERE id = $1"
-	for i := from; i < to; i++ {
-		if _, err := p.db.Exec(q, i); err != nil {
-			log.Fatalf("failed to delete: %v\n", err)
-		}
+	if _, err := p.db.Exec(q, i); err != nil {
+		log.Fatalf("failed to delete: %v\n", err)
 	}
 }

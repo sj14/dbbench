@@ -13,6 +13,7 @@ import (
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/sj14/dbbench/databases"
+	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
 // Bencher is the interface a benchmark has to impelement.
@@ -22,6 +23,13 @@ type Bencher interface {
 	Benchmarks() []databases.Benchmark
 }
 
+var (
+	app      = kingpin.New("chat", "A command-line chat application.")
+	debug    = app.Flag("debug", "Enable debug mode.").Bool()
+	serverIP = app.Flag("server", "Server address.").Default("127.0.0.1").IP()
+	asd      = app.Flag("asd", "asdsd").Hidden()
+)
+
 func main() {
 	// TODO: add database name flag (especially for mysql)
 	// global flags
@@ -30,9 +38,10 @@ func main() {
 	port := flag.Int("port", 0, "port of the server")
 	user := flag.String("user", "root", "user name to connect with the server")
 	pass := flag.String("pass", "root", "password to connect with the server")
-	iterations := flag.Int("iter", 1000, "how many iterations should be run")
-	goroutines := flag.Int("threads", 25, "max. number of green threads")
-	maxOpenConns := flag.Int("conns", 0, "max. number of open connections")
+	conns := flag.Int("conns", 0, "max. number of open connections")
+
+	iter := flag.Int("iter", 1000, "how many iterations should be run")
+	threads := flag.Int("threads", 25, "max. number of green threads")
 	clean := flag.Bool("clean", false, "only cleanup previous benchmark data, e.g. due to a crash")
 	noclean := flag.Bool("noclean", false, "dont cleanup benchmark data")
 	// version := flag.Bool("version", false, "print version information") // TODO
@@ -42,9 +51,9 @@ func main() {
 	// cassandra := flag.NewFlagSet("cassandra", flag.ExitOnError)
 	flag.Parse()
 
-	bencher := getImpl(*db, *host, *port, *user, *pass, *maxOpenConns)
+	bencher := getImpl(*db, *host, *port, *user, *pass, *conns)
 
-	// try to clean old data and exit when clean flag is set
+	// only clean old data when clean flag is set
 	if *clean {
 		bencher.Cleanup()
 		os.Exit(0)
@@ -58,13 +67,12 @@ func main() {
 		defer bencher.Cleanup()
 	}
 
-	start := time.Now()
-
 	// split benchmark names when "-run 'bench0 bench1 ...'" flag was used
 	toRun := strings.Split(*runBench, " ")
 
+	start := time.Now()
 	for _, r := range toRun {
-		benchmark(bencher, r, *iterations, *goroutines)
+		benchmark(bencher, r, *iter, *threads)
 	}
 	fmt.Printf("total: %v\n", time.Since(start))
 }
@@ -73,7 +81,7 @@ func getImpl(dbType string, host string, port int, user, password string, maxOpe
 	switch dbType {
 	case "sqlite":
 		if maxOpenConns != 0 {
-			log.Fatalln("can't use flag 'conns' for SQLite")
+			log.Fatalln("can't use 'conns' with SQLite")
 		}
 		return databases.NewSQLite()
 	case "mysql", "mariadb":
@@ -84,7 +92,7 @@ func getImpl(dbType string, host string, port int, user, password string, maxOpe
 		return databases.NewCockroach(host, port, user, password, maxOpenConns)
 	case "cassandra", "scylla":
 		if maxOpenConns != 0 {
-			log.Fatalln("can't use flag 'conns' for Cassandra or ScyllaDB")
+			log.Fatalln("can't use 'conns' with Cassandra or ScyllaDB")
 		}
 		return databases.NewCassandra(host, port, user, password)
 	}
@@ -111,7 +119,9 @@ func benchmark(bencher Bencher, runBench string, iterations, goroutines int) {
 
 			go func() {
 				defer wg.Done()
-				b.Func(from, to)
+				for i := from; i < to; i++ {
+					b.Func(i)
+				}
 			}()
 		}
 		wg.Wait()
