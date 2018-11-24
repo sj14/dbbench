@@ -30,10 +30,10 @@ func NewCockroach(host string, port int, user, password string, maxOpenConns int
 // Benchmarks returns the individual benchmark functions for the cockroach db.
 func (p *Cockroach) Benchmarks() []Benchmark {
 	return []Benchmark{
-		{"inserts", p.inserts},
-		{"updates", p.updates},
-		{"selects", p.selects},
-		{"deletes", p.deletes},
+		{"inserts", Loop, p.inserts},
+		{"updates", Loop, p.updates},
+		{"selects", Loop, p.selects},
+		{"deletes", Loop, p.deletes},
 	}
 }
 

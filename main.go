@@ -13,7 +13,6 @@ import (
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/sj14/dbbench/databases"
-	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
 // Bencher is the interface a benchmark has to impelement.
@@ -23,35 +22,30 @@ type Bencher interface {
 	Benchmarks() []databases.Benchmark
 }
 
-var (
-	app      = kingpin.New("chat", "A command-line chat application.")
-	debug    = app.Flag("debug", "Enable debug mode.").Bool()
-	serverIP = app.Flag("server", "Server address.").Default("127.0.0.1").IP()
-	asd      = app.Flag("asd", "asdsd").Hidden()
-)
-
 func main() {
 	// TODO: add database name flag (especially for mysql)
 	// global flags
-	db := flag.String("db", "", "database to use (sqlite|mariadb|mysql|postgres|cockroach|cassandra|scylla)")
-	host := flag.String("host", "localhost", "address of the server")
-	port := flag.Int("port", 0, "port of the server")
-	user := flag.String("user", "root", "user name to connect with the server")
-	pass := flag.String("pass", "root", "password to connect with the server")
-	conns := flag.Int("conns", 0, "max. number of open connections")
+	var (
+		dbType = flag.String("type", "", "database to use (sqlite|mariadb|mysql|postgres|cockroach|cassandra|scylla)")
+		host   = flag.String("host", "localhost", "address of the server")
+		port   = flag.Int("port", 0, "port of the server")
+		user   = flag.String("user", "root", "user name to connect with the server")
+		pass   = flag.String("pass", "root", "password to connect with the server")
+		// dbName = flag.String("db", "dbbench", "database created for the benchmark")
+		// file   = flag.String("file", "dbbench.sqlite", "database file (sqlite only)")
+		conns = flag.Int("conns", 0, "max. number of open connections")
 
-	iter := flag.Int("iter", 1000, "how many iterations should be run")
-	threads := flag.Int("threads", 25, "max. number of green threads")
-	clean := flag.Bool("clean", false, "only cleanup previous benchmark data, e.g. due to a crash")
-	noclean := flag.Bool("noclean", false, "dont cleanup benchmark data")
-	// version := flag.Bool("version", false, "print version information") // TODO
-	runBench := flag.String("run", "all", "only run the specified benchmarks, e.g. \"inserts deletes\"") // TODO
+		iter    = flag.Int("iter", 1000, "how many iterations should be run")
+		threads = flag.Int("threads", 25, "max. number of green threads")
+		clean   = flag.Bool("clean", false, "only cleanup benchmark data, e.g. after a crash")
+		noclean = flag.Bool("noclean", false, "keep benchmark data")
+		// version = flag.Bool("version", false, "print version information") // TODO
+		runBench = flag.String("run", "all", "only run the specified benchmarks, e.g. \"inserts deletes\"") // TODO
+	)
 
-	// subcommands and local flags
-	// cassandra := flag.NewFlagSet("cassandra", flag.ExitOnError)
 	flag.Parse()
 
-	bencher := getImpl(*db, *host, *port, *user, *pass, *conns)
+	bencher := getImpl(*dbType, *host, *port, *user, *pass, *conns)
 
 	// only clean old data when clean flag is set
 	if *clean {
@@ -119,8 +113,16 @@ func benchmark(bencher Bencher, runBench string, iterations, goroutines int) {
 
 			go func() {
 				defer wg.Done()
-				for i := from; i < to; i++ {
-					b.Func(i)
+
+				switch b.Type {
+				case databases.Single:
+					// execute once
+					b.Func(1)
+				case databases.Loop:
+					// execute several times
+					for i := from; i < to; i++ {
+						b.Func(i)
+					}
 				}
 			}()
 		}

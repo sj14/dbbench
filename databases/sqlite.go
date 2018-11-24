@@ -27,10 +27,10 @@ func NewSQLite() *SQLite {
 // Benchmarks returns the individual benchmark functions for the mysql db.
 func (m *SQLite) Benchmarks() []Benchmark {
 	return []Benchmark{
-		{"inserts", m.inserts},
-		{"updates", m.updates},
-		{"selects", m.selects},
-		{"deletes", m.deletes},
+		{"inserts", Loop, m.inserts},
+		{"updates", Loop, m.updates},
+		{"selects", Loop, m.selects},
+		{"deletes", Loop, m.deletes},
 	}
 }
 

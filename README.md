@@ -4,17 +4,15 @@
 
 ``` bash
   -clean
-        only cleanup previous benchmark data, e.g. due to a crash
+        only cleanup benchmark data, e.g. after a crash
   -conns int
         max. number of open connections
-  -db string
-        database to use (sqlite|mariadb|mysql|postgres|cockroach|cassandra|scylla)
   -host string
         address of the server (default "localhost")
   -iter int
         how many iterations should be run (default 1000)
   -noclean
-        dont cleanup benchmark data
+        keep benchmark data
   -pass string
         password to connect with the server (default "root")
   -port int
@@ -23,6 +21,8 @@
         only run the specified benchmarks, e.g. "inserts deletes" (default "all")
   -threads int
         max. number of green threads (default 25)
+  -type string
+        database to use (sqlite|mariadb|mysql|postgres|cockroach|cassandra|scylla)
   -user string
         user name to connect with the server (default "root")
 ``` 
@@ -35,7 +35,7 @@ Below are some examples how to run different databases with docker and the equiv
 driver: sqlite3
 
 ``` bash
-go run main.go -db sqlite
+go run main.go -type sqlite
 ``` 
 
 ## MySQL
@@ -45,7 +45,7 @@ driver: mysql
 ``` bash
 docker run --name some-mysql -p 3306:3306 -d -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=dbbench mysql
 
-go run main.go -db mysql -port 3306 -user root -password root
+go run main.go -type mysql -port 3306 -user root -password root
 ``` 
 
 ## MariaDB
@@ -55,7 +55,7 @@ driver: mysql
 ``` bash
 docker run --name some-mariadb -p 3306:3306 -d -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=dbbench mariadb 
 
-go run main.go -db mariadb -port 3306 -user root -password root
+go run main.go -type mariadb -port 3306 -user root -password root
 ``` 
 
 ## PostgreSQL
@@ -86,7 +86,7 @@ driver: gocql
 ``` bash
 docker run --name some-cassandra -p 9042:9042 -d cassandra:latest
 
-go run main.go -db cassandra -port 9042
+go run main.go -type cassandra -port 9042
 ```
 
 ## ScyllaDB
@@ -96,7 +96,7 @@ driver: gocql
 ``` bash
 docker run --name some-scylla -p 9042:9042 -d scylladb/scylla
 
-go run main.go -db scylla -port 9042
+go run main.go -type scylla -port 9042
 ``` 
 
 # Troubleshooting

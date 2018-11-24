@@ -32,10 +32,10 @@ func NewMySQL(host string, port int, user, password string, maxOpenConns int) *M
 // Benchmarks returns the individual benchmark functions for the mysql db.
 func (m *Mysql) Benchmarks() []Benchmark {
 	return []Benchmark{
-		{"inserts", m.inserts},
-		{"updates", m.updates},
-		{"selects", m.selects},
-		{"deletes", m.deletes},
+		{"inserts", Loop, m.inserts},
+		{"updates", Loop, m.updates},
+		{"selects", Loop, m.selects},
+		{"deletes", Loop, m.deletes},
 	}
 }
 

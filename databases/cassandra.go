@@ -42,10 +42,10 @@ func NewCassandra(host string, port int, user, password string) *Cassandra {
 // Benchmarks returns the individual benchmark functions for the cassandra db.
 func (c *Cassandra) Benchmarks() []Benchmark {
 	return []Benchmark{
-		{"inserts", c.inserts},
-		{"updates", c.updates},
-		{"selects", c.selects},
-		{"deletes", c.deletes},
+		{"inserts", Loop, c.inserts},
+		{"updates", Loop, c.updates},
+		{"selects", Loop, c.selects},
+		{"deletes", Loop, c.deletes},
 	}
 }
 
