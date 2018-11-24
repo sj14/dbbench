@@ -71,34 +71,32 @@ func (p *Postgres) Cleanup() {
 
 // Exec executes the given statement on the database.
 func (p *Postgres) Exec(stmt string) {
-	result, err := p.db.Exec(stmt)
-	mustExec(result, err, stmt)
+	_, err := p.db.Exec(stmt)
+	if err != nil {
+		log.Printf("%v failed: %v", stmt, err)
+	}
 }
 
 func (p *Postgres) inserts(i int) {
 	const q = "INSERT INTO dbbench.accounts VALUES($1, $2);"
-	if _, err := p.db.Exec(q, i, i); err != nil {
-		log.Fatalf("failed to insert: %v\n", err)
-	}
+	result, err := p.db.Exec(q, i, i)
+	mustExec(result, err, "insert")
 }
 
 func (p *Postgres) selects(i int) {
 	const q = "SELECT * FROM dbbench.accounts WHERE id = $1;"
-	if _, err := p.db.Exec(q, i); err != nil {
-		log.Fatalf("failed to select: %v\n", err)
-	}
+	result, err := p.db.Exec(q, i)
+	mustExec(result, err, "select")
 }
 
 func (p *Postgres) updates(i int) {
 	const q = "UPDATE dbbench.accounts SET balance = $1 WHERE id = $2;"
-	if _, err := p.db.Exec(q, i, i); err != nil {
-		log.Fatalf("failed to update: %v\n", err)
-	}
+	result, err := p.db.Exec(q, i, i)
+	mustExec(result, err, "update")
 }
 
 func (p *Postgres) deletes(i int) {
 	const q = "DELETE FROM dbbench.accounts WHERE id = $1"
-	if _, err := p.db.Exec(q, i); err != nil {
-		log.Fatalf("failed to delete: %v\n", err)
-	}
+	result, err := p.db.Exec(q, i)
+	mustExec(result, err, "delete")
 }

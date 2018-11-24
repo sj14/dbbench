@@ -73,8 +73,10 @@ func (m *Mysql) Cleanup() {
 
 // Exec executes the given statement on the database.
 func (m *Mysql) Exec(stmt string) {
-	result, err := m.db.Exec(stmt)
-	mustExec(result, err, stmt)
+	_, err := m.db.Exec(stmt)
+	if err != nil {
+		log.Printf("%v failed: %v", stmt, err)
+	}
 }
 
 func (m *Mysql) inserts(i int) {
