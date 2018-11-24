@@ -65,6 +65,12 @@ func (p *Postgres) Cleanup() {
 	}
 }
 
+// Exec executes the given statement on the database.
+func (p *Postgres) Exec(stmt string) {
+	result, err := p.db.Exec(stmt)
+	mustExec(result, err, stmt)
+}
+
 func (p *Postgres) inserts(i int) {
 	const q = "INSERT INTO dbbench.accounts VALUES($1, $2);"
 	if _, err := p.db.Exec(q, i, i); err != nil {

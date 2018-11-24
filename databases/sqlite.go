@@ -54,6 +54,14 @@ func (m *SQLite) Cleanup() {
 	}
 }
 
+// Exec executes the given statement on the database.
+func (m *SQLite) Exec(stmt string) {
+	_, err := m.db.Exec(stmt)
+	if err != nil {
+		log.Printf("%v failed: %v", stmt, err)
+	}
+}
+
 func (m *SQLite) inserts(i int) {
 	const q = "INSERT INTO accounts VALUES(?, ?);"
 	result, err := m.db.Exec(q, i, i)

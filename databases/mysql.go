@@ -65,6 +65,12 @@ func (m *Mysql) Cleanup() {
 	}
 }
 
+// Exec executes the given statement on the database.
+func (m *Mysql) Exec(stmt string) {
+	result, err := m.db.Exec(stmt)
+	mustExec(result, err, stmt)
+}
+
 func (m *Mysql) inserts(i int) {
 	const q = "INSERT INTO dbbench.accounts VALUES(?, ?);"
 	if _, err := m.db.Exec(q, i, i); err != nil {

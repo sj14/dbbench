@@ -75,8 +75,15 @@ func (c *Cassandra) Cleanup() {
 	c.session.Close()
 }
 
+// Exec executes the given statement on the database.
+func (c *Cassandra) Exec(stmt string) {
+	if err := c.session.Query(stmt).Exec(); err != nil {
+		log.Fatalf("%v: failed: %v\n", stmt, err)
+	}
+}
+
 func (c *Cassandra) inserts(i int) {
-	const q = "INSERT INTO dbbench.accounts (id, balance) VALUES(?, ?);"
+	const q = "INSERT INTO dbbench.accounts (id, balance) VALUES(?, ?) IF NOT EXISTS;"
 	if err := c.session.Query(q, i, i).Exec(); err != nil {
 		log.Fatalf("failed to insert: %v\n", err)
 	}
