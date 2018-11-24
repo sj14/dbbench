@@ -116,7 +116,7 @@ dbbench -type sqlite
 ``` text
 docker run --name dbbench-mysql -p 3306:3306 -d -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=dbbench mysql
 
-dbbench -type mysql -user root -pass root
+dbbench -type mysql
 ```
 
 ### MariaDB
@@ -124,7 +124,7 @@ dbbench -type mysql -user root -pass root
 ``` text
 docker run --name dbbench-mariadb -p 3306:3306 -d -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=dbbench mariadb
 
-dbbench -type mariadb -user root -pass root
+dbbench -type mariadb
 ```
 
 ### PostgreSQL
@@ -141,7 +141,7 @@ dbbench -type postgres -user postgres -pass example
 # port 8080 is the webinterface (optional)
 docker run --name dbbench-cockroach -d -p 26257:26257 -p 8080:8080 cockroachdb/cockroach:latest start --iternsecure
 
-dbbench -type cockroach -user root
+dbbench -type cockroach
 ```
 
 ### Cassandra
