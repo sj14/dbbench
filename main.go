@@ -26,7 +26,9 @@ type Bencher interface {
 
 func main() {
 	var (
-		version = "version undefined"
+		version = "dev version"
+		commit  = "none"
+		date    = "unknown"
 
 		dbType      = flag.String("type", "", "database to use (sqlite|mariadb|mysql|postgres|cockroach|cassandra|scylla)")
 		host        = flag.String("host", "localhost", "address of the server")
@@ -48,7 +50,7 @@ func main() {
 	flag.Parse()
 
 	if *versionFlag {
-		fmt.Printf("dbbench %s\n", version)
+		fmt.Printf("dbbench %v, commit %v, built at %v\n", version, commit, date)
 		os.Exit(0)
 	}
 
