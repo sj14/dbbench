@@ -21,5 +21,5 @@ func TestExecScript(t *testing.T) {
 	sqlite.Setup()
 	defer sqlite.Cleanup()
 
-	execScript(sqlite, "sqlite_bench.sql", 100, 25)
+	execScript(sqlite, "../scripts/sqlite_bench.sql", 100, 25)
 }
