@@ -28,13 +28,12 @@ func main() {
 	var (
 		version = "version undefined"
 
-		dbType = flag.String("type", "", "database to use (sqlite|mariadb|mysql|postgres|cockroach|cassandra|scylla)")
-		host   = flag.String("host", "localhost", "address of the server")
-		port   = flag.Int("port", 0, "port of the server")
-		user   = flag.String("user", "root", "user name to connect with the server")
-		pass   = flag.String("pass", "root", "password to connect with the server")
-		// dbName = flag.String("db", "dbbench", "database created for the benchmark")
-		// path   = flag.String("path", "dbbench.sqlite", "database file (sqlite only)")
+		dbType      = flag.String("type", "", "database to use (sqlite|mariadb|mysql|postgres|cockroach|cassandra|scylla)")
+		host        = flag.String("host", "localhost", "address of the server")
+		port        = flag.Int("port", 0, "port of the server (0 -> db defaults)")
+		user        = flag.String("user", "root", "user name to connect with the server")
+		pass        = flag.String("pass", "root", "password to connect with the server")
+		path        = flag.String("path", "dbbench.sqlite", "database file (sqlite only)")
 		conns       = flag.Int("conns", 0, "max. number of open connections")
 		iter        = flag.Int("iter", 1000, "how many iterations should be run")
 		threads     = flag.Int("threads", 25, "max. number of green threads")
@@ -53,7 +52,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	bencher := getImpl(*dbType, *host, *port, *user, *pass, *conns)
+	bencher := getImpl(*dbType, *host, *port, *user, *pass, *path, *conns)
 
 	// only clean old data when clean flag is set
 	if *clean {
@@ -81,13 +80,13 @@ func main() {
 	fmt.Printf("total: %v\n", time.Since(start))
 }
 
-func getImpl(dbType string, host string, port int, user, password string, maxOpenConns int) Bencher {
+func getImpl(dbType string, host string, port int, user, password, path string, maxOpenConns int) Bencher {
 	switch dbType {
 	case "sqlite":
 		if maxOpenConns != 0 {
 			log.Fatalln("can't use 'conns' with SQLite")
 		}
-		return databases.NewSQLite()
+		return databases.NewSQLite(path)
 	case "mysql", "mariadb":
 		return databases.NewMySQL(host, port, user, password, maxOpenConns)
 	case "postgres":
@@ -106,36 +105,30 @@ func getImpl(dbType string, host string, port int, user, password string, maxOpe
 }
 
 func benchmark(bencher Bencher, filename, runBench string, iterations, goroutines int) {
-	wg := &sync.WaitGroup{}
-	// w := tabwriter.NewWriter(os.Stdout, 0, 4, 4, '\t', tabwriter.AlignRight)
-
+	// run specified script
 	if filename != "" {
 		start := time.Now()
-		execScript(wg, bencher, filename, iterations, goroutines)
+		execScript(bencher, filename, iterations, goroutines)
 		elapsed := time.Since(start)
 		fmt.Printf("custom script: %v\t%v\tns/op\n", elapsed, elapsed.Nanoseconds()/int64(iterations))
 		return
 	}
 
+	// run built-in benchmarks
 	for _, b := range bencher.Benchmarks() {
 		// check if we want to run this particular benchmark
 		if runBench != "all" && b.Name != runBench {
 			continue
 		}
 
-		wg.Add(goroutines)
 		start := time.Now()
-		execBenchmark(wg, b, iterations, goroutines)
-		wg.Wait()
+		execBenchmark(b, iterations, goroutines)
 		elapsed := time.Since(start)
 		fmt.Printf("%v\t%v\t%v\tns/op\n", b.Name, elapsed, elapsed.Nanoseconds()/int64(iterations))
-
-		// fmt.Fprintf(w, "%v\t%v\t%v\tns/op\n", name, elapsed, elapsed.Nanoseconds()/int64(iterations))
 	}
-	// w.Flush()
 }
 
-func execScript(wg *sync.WaitGroup, bencher Bencher, filename string, iterations, goroutines int) {
+func execScript(bencher Bencher, filename string, iterations, goroutines int) {
 	lines, err := readLines(filename)
 	if err != nil {
 		log.Fatalf("failed to read file: %v", err)
@@ -148,7 +141,10 @@ func execScript(wg *sync.WaitGroup, bencher Bencher, filename string, iterations
 		script += l
 	}
 
+	wg := &sync.WaitGroup{}
 	wg.Add(goroutines)
+	defer wg.Wait()
+
 	for i := 0; i < goroutines; i++ {
 		from := (iterations / goroutines) * i
 		to := (iterations / goroutines) * (i + 1)
@@ -160,10 +156,13 @@ func execScript(wg *sync.WaitGroup, bencher Bencher, filename string, iterations
 			}
 		}()
 	}
-	wg.Wait()
 }
 
-func execBenchmark(wg *sync.WaitGroup, b databases.Benchmark, iterations, goroutines int) {
+func execBenchmark(b databases.Benchmark, iterations, goroutines int) {
+	wg := &sync.WaitGroup{}
+	wg.Add(goroutines)
+	defer wg.Wait()
+
 	for i := 0; i < goroutines; i++ {
 		from := (iterations / goroutines) * i
 		to := (iterations / goroutines) * (i + 1)
@@ -195,5 +194,6 @@ func readLines(path string) ([]string, error) {
 	for scanner.Scan() {
 		lines = append(lines, scanner.Text())
 	}
+
 	return lines, scanner.Err()
 }

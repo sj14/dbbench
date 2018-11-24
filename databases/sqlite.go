@@ -2,6 +2,7 @@ package databases
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"os"
 )
@@ -12,9 +13,9 @@ type SQLite struct {
 }
 
 // NewSQLite a new mysql bencher.
-func NewSQLite() *SQLite {
+func NewSQLite(path string) *SQLite {
 	// TODO: filename as flag
-	db, err := sql.Open("sqlite3", "./dbbench.sqlite?cache=shared")
+	db, err := sql.Open("sqlite3", fmt.Sprintf("%s?cache=shared", path))
 	if err != nil {
 		log.Fatalf("failed to open connection: %v\n", err)
 	}

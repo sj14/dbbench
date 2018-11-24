@@ -13,6 +13,10 @@ type Cockroach struct {
 
 // New returns a new cockroach bencher.
 func NewCockroach(host string, port int, user, password string, maxOpenConns int) *Cockroach {
+	if port == 0 {
+		port = 26257
+	}
+
 	dataSourceName := fmt.Sprintf("host=%v port=%v user='%v' password='%v' sslmode=disable", host, port, user, password)
 
 	db, err := sql.Open("postgres", dataSourceName)

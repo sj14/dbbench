@@ -11,8 +11,11 @@ type Mysql struct {
 	db *sql.DB
 }
 
-// New NewMySQL a new mysql bencher.
+// NewMySQL returns a new mysql bencher.
 func NewMySQL(host string, port int, user, password string, maxOpenConns int) *Mysql {
+	if port == 0 {
+		port = 3306
+	}
 	// username:password@protocol(address)/dbname?param=value
 	dataSourceName := fmt.Sprintf("%v:%v@tcp(%v:%v)/dbbench?charset=utf8", user, password, host, port)
 
@@ -57,7 +60,10 @@ func (m *Mysql) Cleanup() {
 	if _, err := m.db.Exec("DROP TABLE dbbench.accounts"); err != nil {
 		log.Printf("failed to drop table: %v\n", err)
 	}
-	// if _, err := m.db.Exec("DROP SCHEMA dbbench"); err != nil {
+	// When the database will be dropped here,
+	// the tool is not able recreate it during setup.
+	//
+	// if _, err := m.db.Exec("DROP DATABASE dbbench"); err != nil {
 	// 	log.Printf("failed drop schema: %v\n", err)
 	// }
 	if err := m.db.Close(); err != nil {

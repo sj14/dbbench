@@ -15,6 +15,9 @@ type Cassandra struct {
 
 // NewCassandra returns a new cassandra bencher.
 func NewCassandra(host string, port int, user, password string) *Cassandra {
+	if port == 0 {
+		port = 9042
+	}
 	dataSourceName := fmt.Sprintf("%v:%v", host, port) // TODO: check how to do with port, user and password
 
 	cluster := gocql.NewCluster(dataSourceName)

@@ -64,7 +64,7 @@ driver: mysql
 ``` bash
 docker run --name some-mysql -p 3306:3306 -d -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=dbbench mysql
 
-go run main.go -type mysql -port 3306 -user root -password root
+go run main.go -type mysql -port 3306 -user root -pass root
 ``` 
 
 ## MariaDB
@@ -74,7 +74,7 @@ driver: mysql
 ``` bash
 docker run --name some-mariadb -p 3306:3306 -d -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=dbbench mariadb 
 
-go run main.go -type mariadb -port 3306 -user root -password root
+go run main.go -type mariadb -port 3306 -user root -pass root
 ``` 
 
 ## PostgreSQL
@@ -84,7 +84,7 @@ driver: pg
 ``` bash
 docker run -d -p 5432:5432 postgres
 
-go run main.go -type postgres -port 5432 -user postgres -password example
+go run main.go -type postgres -port 5432 -user postgres -pass example
 ``` 
 
 ## CockroachDB

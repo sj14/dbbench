@@ -13,6 +13,10 @@ type Postgres struct {
 
 // NewPostgres returns a new postgres bencher.
 func NewPostgres(host string, port int, user, password string, maxOpenConns int) *Postgres {
+	if port == 0 {
+		port = 5432
+	}
+
 	dataSourceName := fmt.Sprintf("host=%v port=%v user='%v' password='%v' sslmode=disable", host, port, user, password)
 
 	db, err := sql.Open("postgres", dataSourceName)
