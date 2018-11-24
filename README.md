@@ -1,6 +1,6 @@
 # dbbench
 
-`dbbench` is a simple tool to benchmark or stress test a databases. You can use the simple built-in benchmarks or run your own queries. 
+`dbbench` is a simple tool to benchmark or stress test a databases. You can use the simple built-in benchmarks or run your own queries.  
 
 **Attention**: This tool comes with no warranty. Don't run it on a production database or know what you are doing.
 
@@ -13,7 +13,7 @@ updates 7.74049898s     77404   ns/op
 selects 2.911541197s    29115   ns/op
 deletes 5.999572479s    59995   ns/op
 total: 22.85141994s
-``` 
+```
 
 ## Supported Databases
 
@@ -25,8 +25,8 @@ total: 22.85141994s
 - [x] PostgreSQL
 - [x] ScyllaDB
 
+## TODO
 
-## TODO 
 - [ ] More and database specific benchmarks
   - [ ] Relational DB specific (e.g. MySQL)
   - [ ] Non-relational DB specific (e.g. Cassandra)
@@ -37,9 +37,9 @@ total: 22.85141994s
 
 ## Installation
 
-```
+``` text
 go install github.com/sj14/dbbench
-``` 
+```
 
 ## Flags
 
@@ -74,30 +74,32 @@ go install github.com/sj14/dbbench
         user name to connect with the server (default "root")
   -version
         print version information
-``` 
+```
 
 ## Scripts
 
 You can run your own SQL statements with the `-script` flag. You can use the auto-generate tables. Beware the file size as it will be completely loaded into memory!
 
-```
-$ dbbench -type sqlite -script sqlite_bench.sql- iter 1000
+``` text
+$ dbbench -type sqlite -script scripts/sqlite_bench.sql- iter 1000
 custom script: 3.851557272s     3851557 ns/op
 total: 3.85158506s
 ```
 
-The script must only contain valid SQL statements for your database. 
+The script must only contain valid SQL statements for your database.
 
-`sqlite_bench.sql`: 
-``` sql 
+`sqlite_bench.sql`:
+
+``` sql
 INSERT INTO accounts VALUES(1, 1);
-DELETE FROM accounts WHERE id = 1; 
-``` 
+DELETE FROM accounts WHERE id = 1;
+```
+
 **Don't use comments** in the file, it will be transformed to a single line before execution:
 
-``` sql 
+``` sql
 -- my comment uncommented everything INSERT INTO accounts VALUES(1, 1); DELETE FROM accounts WHERE id = 1;
-``` 
+```
 
 ## Examples
 
@@ -107,7 +109,7 @@ Below are some examples how to run different databases and the equivalent call o
 
 ``` text
 dbbench -type sqlite
-``` 
+```
 
 ### MySQL
 
@@ -115,15 +117,15 @@ dbbench -type sqlite
 docker run --name dbbench-mysql -p 3306:3306 -d -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=dbbench mysql
 
 dbbench -type mysql -user root -pass root
-``` 
+```
 
 ### MariaDB
 
 ``` text
-docker run --name dbbench-mariadb -p 3306:3306 -d -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=dbbench mariadb 
+docker run --name dbbench-mariadb -p 3306:3306 -d -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=dbbench mariadb
 
 dbbench -type mariadb -user root -pass root
-``` 
+```
 
 ### PostgreSQL
 
@@ -131,7 +133,7 @@ dbbench -type mariadb -user root -pass root
 docker run --name dbbench-postgres -p 5432:5432 -d postgres
 
 dbbench -type postgres -user postgres -pass example
-``` 
+```
 
 ### CockroachDB
 
@@ -156,16 +158,17 @@ dbbench -type cassandra
 docker run --name dbbench-scylla -p 9042:9042 -d scylladb/scylla
 
 dbbench -type scylla
-``` 
+```
 
 ## Troubleshooting
 
 I get the following error:
 
-```
+``` text
 failed to insert: UNIQUE constraint failed: accounts.id
 exit status 1
-``` 
+```
+
 The previous data wasn't removed (e.g. because the benchmark was canceled). Try to run the same command again, but with the `-clean` flag attached, which will remove the old data. Then run the original command again.
 
 ## Acknowledgements
