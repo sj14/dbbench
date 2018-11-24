@@ -43,7 +43,7 @@ func (m *Mysql) Benchmarks() []Benchmark {
 }
 
 // Setup initializes the database for the benchmark.
-func (m *Mysql) Setup(...string) {
+func (m *Mysql) Setup() {
 	if _, err := m.db.Exec("CREATE DATABASE IF NOT EXISTS dbbench"); err != nil {
 		log.Fatalf("failed to create database: %v\n", err)
 	}

@@ -53,7 +53,7 @@ func (c *Cassandra) Benchmarks() []Benchmark {
 }
 
 // Setup initializes the database for the benchmark.
-func (c *Cassandra) Setup(...string) {
+func (c *Cassandra) Setup() {
 	// TODO: flags for class and replication factor
 	if err := c.session.Query("CREATE KEYSPACE IF NOT EXISTS dbbench WITH replication = { 'class':'SimpleStrategy', 'replication_factor' : 1 }").Exec(); err != nil {
 		log.Fatalf("failed to create keyspace: %v\n", err)

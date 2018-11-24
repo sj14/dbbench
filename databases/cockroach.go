@@ -11,7 +11,7 @@ type Cockroach struct {
 	db *sql.DB
 }
 
-// New returns a new cockroach bencher.
+// NewCockroach returns a new cockroach bencher.
 func NewCockroach(host string, port int, user, password string, maxOpenConns int) *Cockroach {
 	if port == 0 {
 		port = 26257
@@ -42,7 +42,7 @@ func (p *Cockroach) Benchmarks() []Benchmark {
 }
 
 // Setup initializes the database for the benchmark.
-func (p *Cockroach) Setup(...string) {
+func (p *Cockroach) Setup() {
 	if _, err := p.db.Exec("CREATE DATABASE IF NOT EXISTS dbbench"); err != nil {
 		log.Fatalf("failed to create database: %v\n", err)
 	}

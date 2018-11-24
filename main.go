@@ -18,7 +18,7 @@ import (
 
 // Bencher is the interface a benchmark has to impelement.
 type Bencher interface {
-	Setup(...string)
+	Setup()
 	Cleanup()
 	Benchmarks() []databases.Benchmark
 	Exec(string)

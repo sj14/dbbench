@@ -44,7 +44,7 @@ func (p *Postgres) Benchmarks() []Benchmark {
 }
 
 // Setup initializes the database for the benchmark.
-func (p *Postgres) Setup(...string) {
+func (p *Postgres) Setup() {
 	if _, err := p.db.Exec("CREATE SCHEMA IF NOT EXISTS dbbench"); err != nil {
 		log.Fatalf("failed to create schema: %v\n", err)
 	}

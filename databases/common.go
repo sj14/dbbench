@@ -5,6 +5,7 @@ import (
 	"log"
 )
 
+// BenchType determines if the particular benchmark should be run several times or only once.
 type BenchType int
 
 const (
