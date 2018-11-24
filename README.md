@@ -2,7 +2,7 @@
 
 `dbbench` is a simple tool to benchmark or stress test a databases. You can use the simple built-in benchmarks or run your own queries.  
 
-**Attention**: This tool comes with no warranty. Don't run it on a production database or know what you are doing.
+**Attention**: This tool comes with no warranty. Don't run it on a production database or know what you do.
 
 ## Example
 
@@ -139,7 +139,7 @@ dbbench -type postgres -user postgres -pass example
 
 ``` text
 # port 8080 is the webinterface (optional)
-docker run --name dbbench-cockroach -d -p 26257:26257 -p 8080:8080 cockroachdb/cockroach:latest start --iternsecure
+docker run --name dbbench-cockroach -d -p 26257:26257 -p 8080:8080 cockroachdb/cockroach:latest start --insecure
 
 dbbench -type cockroach
 ```
