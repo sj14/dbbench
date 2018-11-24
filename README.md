@@ -81,7 +81,7 @@ go install github.com/sj14/dbbench
 You can run your own SQL statements with the `-script` flag. You can use the auto-generate tables. Beware the file size as it will be completely loaded into memory!
 
 ``` text
-$ dbbench -type sqlite -script scripts/sqlite_bench.sql- iter 1000
+$ dbbench -type sqlite -script scripts/sqlite_bench.sql -iter 1000
 custom script: 3.851557272s     3851557 ns/op
 total: 3.85158506s
 ```
