@@ -27,6 +27,25 @@
         user name to connect with the server (default "root")
 ``` 
 
+## Scripts
+
+`sqlite_bench.sql`: 
+``` sql 
+BEGIN TRANSACTION;
+INSERT INTO accounts VALUES(1, 1);
+DELETE FROM accounts WHERE id = 1; 
+COMMIT;
+``` 
+
+Dont' use any comments in the file, it will be transformed to a single line before execution:
+
+``` sql 
+BEGIN TRANSACTION; INSERT INTO accounts VALUES(1, 1); DELETE FROM accounts WHERE id = 1; COMMIT;
+``` 
+
+`go run main.go -type sqlite -script sqlite_bench.sql`
+
+## 
 
 Below are some examples how to run different databases with docker and the equivalent call of dbbench for testing/developing.
 

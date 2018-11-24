@@ -38,6 +38,7 @@ func main() {
 		conns       = flag.Int("conns", 0, "max. number of open connections")
 		iter        = flag.Int("iter", 1000, "how many iterations should be run")
 		threads     = flag.Int("threads", 25, "max. number of green threads")
+		nosetup     = flag.Bool("noinit", false, "do not initialize database and tables, e.g. when only running own script")
 		clean       = flag.Bool("clean", false, "only cleanup benchmark data, e.g. after a crash")
 		noclean     = flag.Bool("noclean", false, "keep benchmark data")
 		versionFlag = flag.Bool("version", false, "print version information")
@@ -61,7 +62,9 @@ func main() {
 	}
 
 	// setup database
-	bencher.Setup()
+	if !*nosetup {
+		bencher.Setup()
+	}
 
 	// only cleanup benchmark data when noclean flag is not set
 	if !*noclean {
@@ -107,23 +110,8 @@ func benchmark(bencher Bencher, filename, runBench string, iterations, goroutine
 	// w := tabwriter.NewWriter(os.Stdout, 0, 4, 4, '\t', tabwriter.AlignRight)
 
 	if filename != "" {
-		lines, err := readLines(filename)
-		if err != nil {
-			log.Fatalf("failed to read file: %v", err)
-		}
-		wg.Add(goroutines)
 		start := time.Now()
-
-		script := ""
-
-		// store statements in a single line, to execute them at once,
-		// otherwise it would cause race conditions with the database and the goroutines
-		for _, l := range lines {
-			script += l
-		}
-
-		execScript(wg, bencher, script, iterations, goroutines)
-		wg.Wait()
+		execScript(wg, bencher, filename, iterations, goroutines)
 		elapsed := time.Since(start)
 		fmt.Printf("custom script: %v\t%v\tns/op\n", elapsed, elapsed.Nanoseconds()/int64(iterations))
 		return
@@ -147,7 +135,20 @@ func benchmark(bencher Bencher, filename, runBench string, iterations, goroutine
 	// w.Flush()
 }
 
-func execScript(wg *sync.WaitGroup, bencher Bencher, script string, iterations, goroutines int) {
+func execScript(wg *sync.WaitGroup, bencher Bencher, filename string, iterations, goroutines int) {
+	lines, err := readLines(filename)
+	if err != nil {
+		log.Fatalf("failed to read file: %v", err)
+	}
+
+	// store statements in a single line, to execute them at once,
+	// otherwise it would cause race conditions with the database and the goroutines
+	script := ""
+	for _, l := range lines {
+		script += l
+	}
+
+	wg.Add(goroutines)
 	for i := 0; i < goroutines; i++ {
 		from := (iterations / goroutines) * i
 		to := (iterations / goroutines) * (i + 1)
@@ -159,6 +160,7 @@ func execScript(wg *sync.WaitGroup, bencher Bencher, script string, iterations, 
 			}
 		}()
 	}
+	wg.Wait()
 }
 
 func execBenchmark(wg *sync.WaitGroup, b databases.Benchmark, iterations, goroutines int) {
