@@ -24,12 +24,14 @@ type Bencher interface {
 	Exec(string)
 }
 
+var (
+	version = "dev version"
+	commit  = "none"
+	date    = "unknown"
+)
+
 func main() {
 	var (
-		version = "dev version"
-		commit  = "none"
-		date    = "unknown"
-
 		dbType      = flag.String("type", "", "database to use (sqlite|mariadb|mysql|postgres|cockroach|cassandra|scylla)")
 		host        = flag.String("host", "localhost", "address of the server")
 		port        = flag.Int("port", 0, "port of the server (0 -> db defaults)")
