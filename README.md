@@ -19,10 +19,10 @@ total: 22.85141994s
 
 Databases | Driver
 ----------|-----------
-SQLite3 and compatible databases | github.com/mattn/go-sqlite3
-MySQL and compatible databases (e.g. MariaDB) | github.com/go-sql-driver/mysql
-PostgreSQL and compatible databases (e.g. CockroachDB) | github.com/lib/pq
-Cassandra and compatible databases (e.g. ScyllaDB) | github.com/gocql/gocql
+SQLite3 and compatible databases | [github.com/mattn/go-sqlite3]
+MySQL and compatible databases (e.g. MariaDB) | [github.com/go-sql-driver/mysql]
+PostgreSQL and compatible databases (e.g. CockroachDB) | [github.com/lib/pq]
+Cassandra and compatible databases (e.g. ScyllaDB) | [github.com/gocql/gocql]
 
 ## TODO
 
@@ -35,6 +35,15 @@ Cassandra and compatible databases (e.g. ScyllaDB) | github.com/gocql/gocql
   - [ ] ...
 
 ## Installation
+
+### Precompiled binaries
+
+Binaries are available for all major platforms. See the [releases](https://github.com/sj14/dbbench/releases) page.
+
+
+### Manually
+
+It's also possible to install the current development snapshot with `go get` (not recommended):
 
 ``` text
 go get -u github.com/sj14/dbbench
