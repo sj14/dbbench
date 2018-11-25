@@ -15,15 +15,14 @@ deletes 5.999572479s    59995   ns/op
 total: 22.85141994s
 ```
 
-## Supported Databases
+## Supported Databases / Driver
 
-- [x] SQLite
-- [x] Cassandra
-- [x] CockroachDB
-- [x] MySQL
-- [x] MariaDB
-- [x] PostgreSQL
-- [x] ScyllaDB
+Databases | Driver
+----------|-----------
+SQLite3 and compatible databases | github.com/mattn/go-sqlite3
+MySQL and compatible databases (e.g. MariaDB) | github.com/go-sql-driver/mysql
+PostgreSQL and compatible databases (e.g. CockroachDB) | github.com/lib/pq
+Cassandra and compatible databases (e.g. ScyllaDB) | github.com/gocql/gocql
 
 ## TODO
 
@@ -172,5 +171,7 @@ exit status 1
 The previous data wasn't removed (e.g. because the benchmark was canceled). Try to run the same command again, but with the `-clean` flag attached, which will remove the old data. Then run the original command again.
 
 ## Acknowledgements
+
+Thanks to the authors of Go and those of the directly and indirectly used libraries, especially the driver developers. It wouldn't be possible without all your work.
 
 This tool was highly inspired by the snipped from user [Fale](https://github.com/cockroachdb/cockroach/issues/23061#issue-300012178) and the tool [pgbench](https://www.postgresql.org/docs/current/pgbench.html).
