@@ -63,5 +63,9 @@ brew:
   description: "dbbench is a simple database benchmarking tool which supports several databases"
 
 release:
+  github:
+    owner: sj14
+    name: dbbench
+  disable: false
   draft: true
   prerelease: true
