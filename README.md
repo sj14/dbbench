@@ -1,19 +1,24 @@
 # dbbench
 
-`dbbench` is a simple tool to benchmark or stress test a databases. You can use the simple built-in benchmarks or run your own queries.  
+## Table of Contents
 
-**Attention**: This tool comes with no warranty. Don't run it on a production database or know what you do.
-
-# Table of Contents
-
+1. [Description](#Description)
 1. [Example](#example)
 4. [Installation](#installation)
 2. [Supported Databases](#Supported-Databases-/-Driver)
 4. [Usage](#usage)
 4. [Custom Scripts](#custom-scripts)
 3. [TODO](#TODO)
+3. [Troubeshooting](#troubleshooting)
 4. [Development](#development)
 4. [Acknowledgements](#Acknowledgements)
+
+## Description
+
+`dbbench` is a simple tool to benchmark or stress test a databases. You can use the simple built-in benchmarks or run your own queries.  
+
+**Attention**: This tool comes with no warranty. Don't run it on a production database or know what you do.
+
 
 ## Example
 
@@ -120,6 +125,17 @@ DELETE FROM accounts WHERE id = 1;
   - [ ] MongoDB
   - [ ] ...
 
+## Troubleshooting
+
+I get the following error:
+
+``` text
+failed to insert: UNIQUE constraint failed: accounts.id
+exit status 1
+```
+
+The previous data wasn't removed (e.g. because the benchmark was canceled). Try to run the same command again, but with the `-clean` flag attached, which will remove the old data. Then run the original command again.
+
 ## Development
 
 Below are some examples how to run different databases and the equivalent call of `dbbench` for testing/developing.
@@ -178,17 +194,6 @@ docker run --name dbbench-scylla -p 9042:9042 -d scylladb/scylla
 
 dbbench -type scylla
 ```
-
-## Troubleshooting
-
-I get the following error:
-
-``` text
-failed to insert: UNIQUE constraint failed: accounts.id
-exit status 1
-```
-
-The previous data wasn't removed (e.g. because the benchmark was canceled). Try to run the same command again, but with the `-clean` flag attached, which will remove the old data. Then run the original command again.
 
 ## Acknowledgements
 
