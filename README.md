@@ -4,6 +4,17 @@
 
 **Attention**: This tool comes with no warranty. Don't run it on a production database or know what you do.
 
+# Table of Contents
+
+1. [Example](#example)
+4. [Installation](#installation)
+2. [Supported Databases](#Supported-Databases-/-Driver)
+4. [Usage](#usage)
+4. [Custom Scripts](#custom-scripts)
+3. [TODO](#TODO)
+4. [Development](#development)
+4. [Acknowledgements](#Acknowledgements)
+
 ## Example
 
 ``` text
@@ -14,25 +25,6 @@ selects 2.911541197s    29115   ns/op
 deletes 5.999572479s    59995   ns/op
 total: 22.85141994s
 ```
-
-## Supported Databases / Driver
-
-Databases | Driver
-----------|-----------
-SQLite3 and compatible databases | [github.com/mattn/go-sqlite3]
-MySQL and compatible databases (e.g. MariaDB) | [github.com/go-sql-driver/mysql]
-PostgreSQL and compatible databases (e.g. CockroachDB) | [github.com/lib/pq]
-Cassandra and compatible databases (e.g. ScyllaDB) | [github.com/gocql/gocql]
-
-## TODO
-
-- [ ] More and database specific benchmarks
-  - [ ] Relational DB specific (e.g. MySQL)
-  - [ ] Non-relational DB specific (e.g. Cassandra)
-- [ ] More databases
-  - [ ] MSSQL
-  - [ ] MongoDB
-  - [ ] ...
 
 ## Installation
 
@@ -48,6 +40,15 @@ It's also possible to install the current development snapshot with `go get` (no
 ``` text
 go get -u github.com/sj14/dbbench
 ```
+
+## Supported Databases / Driver
+
+Databases | Driver
+----------|-----------
+SQLite3 and compatible databases | github.com/mattn/go-sqlite3
+MySQL and compatible databases (e.g. MariaDB) | github.com/go-sql-driver/mysql
+PostgreSQL and compatible databases (e.g. CockroachDB) | github.com/lib/pq
+Cassandra and compatible databases (e.g. ScyllaDB) | github.com/gocql/gocql
 
 ## Usage
 
@@ -84,7 +85,7 @@ go get -u github.com/sj14/dbbench
         print version information
 ```
 
-## Scripts
+## Custom Scripts
 
 You can run your own SQL statements with the `-script` flag. You can use the auto-generate tables. Beware the file size as it will be completely loaded into memory!
 
@@ -109,7 +110,17 @@ DELETE FROM accounts WHERE id = 1;
 -- my comment uncommented everything INSERT INTO accounts VALUES(1, 1); DELETE FROM accounts WHERE id = 1;
 ```
 
-## Examples
+## TODO
+
+- [ ] More and database specific benchmarks
+  - [ ] Relational DB specific (e.g. MySQL)
+  - [ ] Non-relational DB specific (e.g. Cassandra)
+- [ ] More databases
+  - [ ] MSSQL
+  - [ ] MongoDB
+  - [ ] ...
+
+## Development
 
 Below are some examples how to run different databases and the equivalent call of `dbbench` for testing/developing.
 
