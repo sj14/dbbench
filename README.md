@@ -38,10 +38,10 @@ total: 22.85141994s
 ## Installation
 
 ``` text
-go install github.com/sj14/dbbench
+go get -u github.com/sj14/dbbench
 ```
 
-## Flags
+## Usage
 
 ``` text
   -clean
