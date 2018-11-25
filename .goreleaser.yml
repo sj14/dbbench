@@ -57,7 +57,7 @@ nfpm:
     - rpm
 
 brew:
-  name: brew_formular
+  name: brew_formula
   github:
     owner: sj14
     name: dbbench
