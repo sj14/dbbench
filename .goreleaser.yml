@@ -1,0 +1,67 @@
+# This is an example goreleaser.yaml file with some sane defaults.
+# Make sure to check the documentation at http://goreleaser.com
+project_name: dbbench
+
+before:
+  hooks:
+    - go mod download
+builds:
+- 
+  main: ./cmd/main.go
+  env:
+  - CGO_ENABLED=0
+  goos:
+  - linux
+  - darwin
+  - freebsd
+  - openbsd
+  - netbsd
+  - solaris
+  # -plan9
+  - dragonfly
+  - windows
+  goarch:
+  - 386
+  - amd64
+  - arm
+  - arm64
+  - ppc64
+  - ppc64le
+  - mips
+  - mipsle
+  - mips64
+  - mips64le
+  goarm:
+    - 6
+    - 7
+
+archive:
+  wrap_in_directory: true
+  format_overrides:
+    - goos: windows
+      format: zip
+
+checksum:
+  name_template: 'checksums.txt'
+
+snapshot:
+  name_template: "{{ .Tag }}-next-{{.Commit}}"
+
+nfpm:
+  maintainer: Simon Jürgensmeyyer <simon.juergensmeyer@gmail.com>
+  homepage: https://github.com/sj14/dbbench/
+  description: dbbench is a simple database benchmarking tool which supports several databases
+  license: MIT
+  formats:
+    - deb
+    - rpm
+
+brew:
+  github:
+    owner: sj14
+    name: dbbench
+  description: "dbbench is a simple database benchmarking tool which supports several databases"
+
+release:
+  draft: true
+  prerelease: true
