@@ -1,4 +1,4 @@
 BEGIN TRANSACTION;
-INSERT INTO accounts VALUES(1, 1);
-DELETE FROM accounts WHERE id = 1; 
+INSERT INTO accounts (id, balance) VALUES( {{.Iter}}, {{.Iter}} );
+DELETE FROM accounts WHERE id = {{.Iter}}; 
 COMMIT;

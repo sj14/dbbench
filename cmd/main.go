@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"text/template"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -133,16 +134,9 @@ func benchmark(bencher Bencher, filename, runBench string, iterations, goroutine
 }
 
 func execScript(bencher Bencher, filename string, iterations, goroutines int) {
-	lines, err := readLines(filename)
+	t, err := template.ParseFiles(filename)
 	if err != nil {
-		log.Fatalf("failed to read file: %v", err)
-	}
-
-	// store statements in a single line, to execute them at once,
-	// otherwise it would cause race conditions with the database and the goroutines
-	script := ""
-	for _, l := range lines {
-		script += l
+		log.Fatalf("failed to parse template: %v", err)
 	}
 
 	wg := &sync.WaitGroup{}
@@ -156,7 +150,19 @@ func execScript(bencher Bencher, filename string, iterations, goroutines int) {
 		go func() {
 			defer wg.Done()
 			for i := from; i < to; i++ {
-				bencher.Exec(script)
+				b := &strings.Builder{}
+
+				data := struct {
+					Iter int
+				}{
+					Iter: i,
+				}
+
+				if err = t.Execute(b, data); err != nil {
+					log.Fatalf("failed to execute template: %v", err)
+				}
+
+				bencher.Exec(b.String())
 			}
 		}()
 	}

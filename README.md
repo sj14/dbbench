@@ -17,7 +17,7 @@
 
 `dbbench` is a simple tool to benchmark or stress test a databases. You can use the simple built-in benchmarks or run your own queries.  
 
-**Attention**: This tool comes with no warranty. Don't run it on a production database or know what you do.
+**Attention**: This tool comes with no warranty. Don't run it on production databases.
 
 
 ## Example
@@ -33,7 +33,7 @@ total: 22.85141994s
 
 ## Installation
 
-### Precompiled binaries
+### Precompiled Binaries
 
 Binaries are available for all major platforms. See the [releases](https://github.com/sj14/dbbench/releases) page.
 
@@ -100,19 +100,31 @@ custom script: 3.851557272s     3851557 ns/op
 total: 3.85158506s
 ```
 
-The script must only contain valid SQL statements for your database.
+The script must contain valid SQL statements for your database.
+
+Currently, there is only one built-in variable `.Iter` which will be replaced with the current iteration of the benchmark run. It's using golangs template engine which uses the delimiters `{{` and `}}`.
 
 `sqlite_bench.sql`:
 
 ``` sql
-INSERT INTO accounts VALUES(1, 1);
-DELETE FROM accounts WHERE id = 1;
+INSERT INTO accounts (id, balance) VALUES( {{.Iter}}, {{.Iter}} );
+DELETE FROM accounts WHERE id = {{.Iter}}; 
 ```
 
-**Don't use comments** in the file, it will be transformed to a single line before execution:
+will be replaced to:
+
+iteration 0
 
 ``` sql
--- my comment uncommented everything INSERT INTO accounts VALUES(1, 1); DELETE FROM accounts WHERE id = 1;
+INSERT INTO accounts (id, balance) VALUES( 0, 0 );
+DELETE FROM accounts WHERE id = 0; 
+```
+
+iteration 7834
+
+``` sql
+INSERT INTO accounts (id, balance) VALUES( 7834, 7834 );
+DELETE FROM accounts WHERE id = 7834; 
 ```
 
 ## TODO
