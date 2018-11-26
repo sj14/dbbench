@@ -40,6 +40,11 @@ archive:
   format_overrides:
     - goos: windows
       format: zip
+  files:
+  - LICENSE
+  - README.md
+  - scripts/**/*
+
 
 checksum:
   name_template: 'checksums.txt'
