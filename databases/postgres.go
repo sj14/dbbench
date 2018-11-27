@@ -33,13 +33,13 @@ func NewPostgres(host string, port int, user, password string, maxOpenConns int)
 	return p
 }
 
-// Benchmarks returns the individual benchmark functions for the postgres db.
+// Benchmarks returns the individual benchmark statements for the postgres db.
 func (p *Postgres) Benchmarks() []Benchmark {
 	return []Benchmark{
-		{"inserts", Loop, p.inserts},
-		{"updates", Loop, p.updates},
-		{"selects", Loop, p.selects},
-		{"deletes", Loop, p.deletes},
+		{"inserts", Loop, "INSERT INTO dbbench.accounts (id, balance) VALUES( {{.Iter}}, {{.Iter}});"},
+		{"updates", Loop, "UPDATE dbbench.accounts SET balance = balance + balance WHERE id = {{.Iter}};"},
+		{"selects", Loop, "SELECT * FROM dbbench.accounts WHERE id = {{.Iter}};"},
+		{"deletes", Loop, "DELETE FROM dbbench.accounts WHERE id = {{.Iter}};"},
 	}
 }
 
@@ -75,28 +75,4 @@ func (p *Postgres) Exec(stmt string) {
 	if err != nil {
 		log.Printf("%v failed: %v", stmt, err)
 	}
-}
-
-func (p *Postgres) inserts(i int) {
-	const q = "INSERT INTO dbbench.accounts VALUES($1, $2);"
-	result, err := p.db.Exec(q, i, i)
-	mustExec(result, err, "insert")
-}
-
-func (p *Postgres) selects(i int) {
-	const q = "SELECT * FROM dbbench.accounts WHERE id = $1;"
-	result, err := p.db.Exec(q, i)
-	mustExec(result, err, "select")
-}
-
-func (p *Postgres) updates(i int) {
-	const q = "UPDATE dbbench.accounts SET balance = $1 WHERE id = $2;"
-	result, err := p.db.Exec(q, i, i)
-	mustExec(result, err, "update")
-}
-
-func (p *Postgres) deletes(i int) {
-	const q = "DELETE FROM dbbench.accounts WHERE id = $1"
-	result, err := p.db.Exec(q, i)
-	mustExec(result, err, "delete")
 }

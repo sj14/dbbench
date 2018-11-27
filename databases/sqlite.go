@@ -28,13 +28,13 @@ func NewSQLite(path string) *SQLite {
 	return p
 }
 
-// Benchmarks returns the individual benchmark functions for the mysql db.
+// Benchmarks returns the individual benchmark statements for sqlite.
 func (m *SQLite) Benchmarks() []Benchmark {
 	return []Benchmark{
-		{"inserts", Loop, m.inserts},
-		{"updates", Loop, m.updates},
-		{"selects", Loop, m.selects},
-		{"deletes", Loop, m.deletes},
+		{"inserts", Loop, "INSERT INTO accounts (id, balance) VALUES( {{.Iter}}, {{.Iter}});"},
+		{"updates", Loop, "UPDATE accounts SET balance = balance + balance WHERE id = {{.Iter}};"},
+		{"selects", Loop, "SELECT * FROM accounts WHERE id = {{.Iter}};"},
+		{"deletes", Loop, "DELETE FROM accounts WHERE id = {{.Iter}};"},
 	}
 }
 
@@ -66,28 +66,4 @@ func (m *SQLite) Exec(stmt string) {
 	if err != nil {
 		log.Printf("%v failed: %v", stmt, err)
 	}
-}
-
-func (m *SQLite) inserts(i int) {
-	const q = "INSERT INTO accounts VALUES(?, ?);"
-	result, err := m.db.Exec(q, i, i)
-	mustExec(result, err, "insert")
-}
-
-func (m *SQLite) selects(i int) {
-	const q = "SELECT * FROM accounts WHERE id = ?;"
-	result, err := m.db.Exec(q, i)
-	mustExec(result, err, "select")
-}
-
-func (m *SQLite) updates(i int) {
-	const q = "UPDATE accounts SET balance = ? WHERE id = ?;"
-	result, err := m.db.Exec(q, i, i)
-	mustExec(result, err, "update")
-}
-
-func (m *SQLite) deletes(i int) {
-	const q = "DELETE FROM accounts WHERE id = ?"
-	result, err := m.db.Exec(q, i)
-	mustExec(result, err, "delete")
 }

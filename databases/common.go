@@ -11,15 +11,15 @@ type BenchType int
 const (
 	// Loop executes the benchmark several times.
 	Loop BenchType = iota
-	// Single executes the benchmark once.
-	Single BenchType = iota
+	// Once executes the benchmark once.
+	Once BenchType = iota
 )
 
-// Benchmark contains a benchmark func and its name.
+// Benchmark contains the benchmark name, its db statement and its type.
 type Benchmark struct {
 	Name string
 	Type BenchType
-	Func func(int)
+	Stmt string
 }
 
 func mustExec(result sql.Result, err error, name string) {

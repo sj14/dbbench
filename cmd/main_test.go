@@ -10,16 +10,12 @@ func TestExecBenchmark(t *testing.T) {
 	sqlite := databases.NewSQLite("dbbench_test.sqlite")
 	sqlite.Setup()
 	defer sqlite.Cleanup()
-
-	for _, b := range sqlite.Benchmarks() {
-		execBenchmark(b, 100, 25)
-	}
+	benchmark(sqlite, "", "all", 100, 25)
 }
 
 func TestExecScript(t *testing.T) {
 	sqlite := databases.NewSQLite("dbbench_test.sqlite")
 	sqlite.Setup()
 	defer sqlite.Cleanup()
-
-	execScript(sqlite, "../scripts/sqlite_bench.sql", 100, 25)
+	benchmark(sqlite, "../scripts/sqlite_bench.sql", "all", 100, 25)
 }

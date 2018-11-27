@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -110,31 +111,40 @@ func getImpl(dbType string, host string, port int, user, password, path string, 
 }
 
 func benchmark(bencher Bencher, filename, runBench string, iterations, goroutines int) {
-	// run specified script
+	// will store the benchmark to execute
+	benchmarks := []databases.Benchmark{}
+
 	if filename != "" {
-		start := time.Now()
-		execScript(bencher, filename, iterations, goroutines)
-		elapsed := time.Since(start)
-		fmt.Printf("custom script: %v\t%v\tns/op\n", elapsed, elapsed.Nanoseconds()/int64(iterations))
-		return
+		// select specified script
+		dat, err := ioutil.ReadFile(filename)
+		if err != nil {
+			log.Fatalf("failed to read file: %v", err)
+		}
+		b := databases.Benchmark{Name: "script", Type: databases.Loop, Stmt: string(dat)}
+		benchmarks = append(benchmarks, b)
+	} else {
+		// select built-in benchmarks
+		for _, b := range bencher.Benchmarks() {
+			// check if we want to run this particular benchmark
+			if runBench != "all" && b.Name != runBench {
+				continue
+			}
+			benchmarks = append(benchmarks, b)
+		}
 	}
 
-	// run built-in benchmarks
-	for _, b := range bencher.Benchmarks() {
-		// check if we want to run this particular benchmark
-		if runBench != "all" && b.Name != runBench {
-			continue
-		}
-
+	// run selected benchmarks
+	for _, b := range benchmarks {
 		start := time.Now()
-		execBenchmark(b, iterations, goroutines)
+		execBenchmark(b, bencher, iterations, goroutines)
 		elapsed := time.Since(start)
-		fmt.Printf("%v\t%v\t%v\tns/op\n", b.Name, elapsed, elapsed.Nanoseconds()/int64(iterations))
+		fmt.Printf("%v:\t%v\t%v\tns/op\n", b.Name, elapsed, elapsed.Nanoseconds()/int64(iterations))
 	}
 }
 
-func execScript(bencher Bencher, filename string, iterations, goroutines int) {
-	t, err := template.ParseFiles(filename)
+func execBenchmark(b databases.Benchmark, bencher Bencher, iterations, goroutines int) {
+	t := template.New(b.Name)
+	t, err := t.Parse(b.Stmt)
 	if err != nil {
 		log.Fatalf("failed to parse template: %v", err)
 	}
@@ -143,53 +153,39 @@ func execScript(bencher Bencher, filename string, iterations, goroutines int) {
 	wg.Add(goroutines)
 	defer wg.Wait()
 
-	for i := 0; i < goroutines; i++ {
-		from := (iterations / goroutines) * i
-		to := (iterations / goroutines) * (i + 1)
-
-		go func() {
-			defer wg.Done()
-			for i := from; i < to; i++ {
-				b := &strings.Builder{}
-
-				data := struct {
-					Iter int
-				}{
-					Iter: i,
-				}
-
-				if err = t.Execute(b, data); err != nil {
-					log.Fatalf("failed to execute template: %v", err)
-				}
-
-				bencher.Exec(b.String())
-			}
-		}()
-	}
-}
-
-func execBenchmark(b databases.Benchmark, iterations, goroutines int) {
-	wg := &sync.WaitGroup{}
-	wg.Add(goroutines)
-	defer wg.Wait()
-
-	for i := 0; i < goroutines; i++ {
-		from := (iterations / goroutines) * i
-		to := (iterations / goroutines) * (i + 1)
+	for routine := 0; routine < goroutines; routine++ {
+		from := (iterations / goroutines) * routine
+		to := (iterations / goroutines) * (routine + 1)
 
 		go func() {
 			defer wg.Done()
 
 			switch b.Type {
-			case databases.Single:
-				b.Func(1)
+			// TODO: would be executed several times because of the goroutines loop
+			// case databases.Once:
+			// 	exec(bencher, t, 0)
 			case databases.Loop:
 				for i := from; i < to; i++ {
-					b.Func(i)
+					exec(bencher, t, i)
 				}
 			}
 		}()
 	}
+}
+
+// TODO: find better names/structure of functions
+func exec(bencher Bencher, t *template.Template, i int) {
+	sb := &strings.Builder{}
+
+	data := struct {
+		Iter int
+	}{
+		Iter: i,
+	}
+	if err := t.Execute(sb, data); err != nil {
+		log.Fatalf("failed to execute template: %v", err)
+	}
+	bencher.Exec(sb.String())
 }
 
 func readLines(path string) ([]string, error) {

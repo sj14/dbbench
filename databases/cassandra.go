@@ -43,12 +43,13 @@ func NewCassandra(host string, port int, user, password string) *Cassandra {
 }
 
 // Benchmarks returns the individual benchmark functions for the cassandra db.
+// TODO: update is not like other db statements balance = balance + balance!
 func (c *Cassandra) Benchmarks() []Benchmark {
 	return []Benchmark{
-		{"inserts", Loop, c.inserts},
-		{"updates", Loop, c.updates},
-		{"selects", Loop, c.selects},
-		{"deletes", Loop, c.deletes},
+		{"inserts", Loop, "INSERT INTO dbbench.accounts (id, balance) VALUES({{.Iter}}, {{.Iter}}) IF NOT EXISTS;"},
+		{"updates", Loop, "UPDATE dbbench.accounts SET balance = {{.Iter}} WHERE id = {{.Iter}} IF EXISTS;"},
+		{"selects", Loop, "SELECT * FROM dbbench.accounts WHERE id = {{.Iter}};"},
+		{"deletes", Loop, "DELETE FROM dbbench.accounts WHERE id = {{.Iter}} IF EXISTS;"},
 	}
 }
 
@@ -82,33 +83,5 @@ func (c *Cassandra) Cleanup() {
 func (c *Cassandra) Exec(stmt string) {
 	if err := c.session.Query(stmt).Exec(); err != nil {
 		log.Fatalf("%v: failed: %v\n", stmt, err)
-	}
-}
-
-func (c *Cassandra) inserts(i int) {
-	const q = "INSERT INTO dbbench.accounts (id, balance) VALUES(?, ?) IF NOT EXISTS;"
-	if err := c.session.Query(q, i, i).Exec(); err != nil {
-		log.Fatalf("failed to insert: %v\n", err)
-	}
-}
-
-func (c *Cassandra) selects(i int) {
-	const q = "SELECT * FROM dbbench.accounts WHERE id = ?;"
-	if err := c.session.Query(q, i).Exec(); err != nil {
-		log.Fatalf("failed to select: %v\n", err)
-	}
-}
-
-func (c *Cassandra) updates(i int) {
-	const q = "UPDATE dbbench.accounts SET balance = ? WHERE id = ?;"
-	if err := c.session.Query(q, i, i).Exec(); err != nil {
-		log.Fatalf("failed to update: %v\n", err)
-	}
-}
-
-func (c *Cassandra) deletes(i int) {
-	const q = "DELETE FROM dbbench.accounts WHERE id = ?"
-	if err := c.session.Query(q, i).Exec(); err != nil {
-		log.Fatalf("failed to delete: %v\n", err)
 	}
 }

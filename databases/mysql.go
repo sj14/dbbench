@@ -32,13 +32,18 @@ func NewMySQL(host string, port int, user, password string, maxOpenConns int) *M
 	return p
 }
 
+// const q = "INSERT INTO dbbench.accounts VALUES(?, ?);"
+// const q = "SELECT * FROM dbbench.accounts WHERE id = ?;"
+// const q = "UPDATE dbbench.accounts SET balance = ? WHERE id = ?;"
+// const q = "DELETE FROM dbbench.accounts WHERE id = ?"
+
 // Benchmarks returns the individual benchmark functions for the mysql db.
 func (m *Mysql) Benchmarks() []Benchmark {
 	return []Benchmark{
-		{"inserts", Loop, m.inserts},
-		{"updates", Loop, m.updates},
-		{"selects", Loop, m.selects},
-		{"deletes", Loop, m.deletes},
+		{"inserts", Loop, "INSERT INTO dbbench.accounts (id, balance) VALUES( {{.Iter}}, {{.Iter}});"},
+		{"updates", Loop, "UPDATE dbbench.accounts SET balance = balance + balance WHERE id = {{.Iter}};"},
+		{"selects", Loop, "SELECT * FROM dbbench.accounts WHERE id = {{.Iter}};"},
+		{"deletes", Loop, "DELETE FROM dbbench.accounts WHERE id = {{.Iter}};"},
 	}
 }
 
@@ -76,33 +81,5 @@ func (m *Mysql) Exec(stmt string) {
 	_, err := m.db.Exec(stmt)
 	if err != nil {
 		log.Printf("%v failed: %v", stmt, err)
-	}
-}
-
-func (m *Mysql) inserts(i int) {
-	const q = "INSERT INTO dbbench.accounts VALUES(?, ?);"
-	if _, err := m.db.Exec(q, i, i); err != nil {
-		log.Fatalf("failed to insert: %v\n", err)
-	}
-}
-
-func (m *Mysql) selects(i int) {
-	const q = "SELECT * FROM dbbench.accounts WHERE id = ?;"
-	if _, err := m.db.Exec(q, i); err != nil {
-		log.Fatalf("failed to select: %v\n", err)
-	}
-}
-
-func (m *Mysql) updates(i int) {
-	const q = "UPDATE dbbench.accounts SET balance = ? WHERE id = ?;"
-	if _, err := m.db.Exec(q, i, i); err != nil {
-		log.Fatalf("failed to update: %v\n", err)
-	}
-}
-
-func (m *Mysql) deletes(i int) {
-	const q = "DELETE FROM dbbench.accounts WHERE id = ?"
-	if _, err := m.db.Exec(q, i); err != nil {
-		log.Fatalf("failed to delete: %v\n", err)
 	}
 }
