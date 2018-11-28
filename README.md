@@ -37,6 +37,13 @@ total: 22.85141994s
 
 Binaries are available for all major platforms. See the [releases](https://github.com/sj14/dbbench/releases) page.
 
+### Homebrew
+
+Using the [Homebrew](https://brew.sh/) package manager for macOS:
+
+```
+brew install sj14/tap/dbbench
+``` 
 
 ### Manually
 
