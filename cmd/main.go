@@ -76,14 +76,37 @@ func main() {
 		defer bencher.Cleanup()
 	}
 
+	// Benchmark specified script and quit
+	if *scriptname != "" {
+		dat, err := ioutil.ReadFile(*scriptname)
+		if err != nil {
+			log.Fatalf("failed to read file: %v", err)
+		}
+		b := databases.Benchmark{Name: "script", Type: databases.Loop, Stmt: string(dat)}
+
+		start := time.Now()
+		benchmark(b, bencher, *iter, *threads)
+		elapsed := time.Since(start)
+		fmt.Printf("%v:\t%v\t%v\tns/op\n", b.Name, elapsed, elapsed.Nanoseconds()/int64(*iter))
+		return
+	}
+
 	// split benchmark names when "-run 'bench0 bench1 ...'" flag was used
 	toRun := strings.Split(*runBench, " ")
 
-	start := time.Now()
-	for _, r := range toRun {
-		benchmark(bencher, *scriptname, r, *iter, *threads)
+	startTotal := time.Now()
+	// select built-in benchmarks
+	for _, b := range bencher.Benchmarks() {
+		// check if we want to run this particular benchmark
+		if !contains(toRun, "all") && !contains(toRun, b.Name) {
+			continue
+		}
+		start := time.Now()
+		benchmark(b, bencher, *iter, *threads)
+		elapsed := time.Since(start)
+		fmt.Printf("%v:\t%v\t%v\tns/op\n", b.Name, elapsed, elapsed.Nanoseconds()/int64(*iter))
 	}
-	fmt.Printf("total: %v\n", time.Since(start))
+	fmt.Printf("total: %v\n", time.Since(startTotal))
 }
 
 func getImpl(dbType string, host string, port int, user, password, path string, maxOpenConns int) Bencher {
@@ -110,39 +133,7 @@ func getImpl(dbType string, host string, port int, user, password, path string, 
 	return nil
 }
 
-func benchmark(bencher Bencher, filename, runBench string, iterations, goroutines int) {
-	// will store the benchmark to execute
-	benchmarks := []databases.Benchmark{}
-
-	if filename != "" {
-		// select specified script
-		dat, err := ioutil.ReadFile(filename)
-		if err != nil {
-			log.Fatalf("failed to read file: %v", err)
-		}
-		b := databases.Benchmark{Name: "script", Type: databases.Loop, Stmt: string(dat)}
-		benchmarks = append(benchmarks, b)
-	} else {
-		// select built-in benchmarks
-		for _, b := range bencher.Benchmarks() {
-			// check if we want to run this particular benchmark
-			if runBench != "all" && b.Name != runBench {
-				continue
-			}
-			benchmarks = append(benchmarks, b)
-		}
-	}
-
-	// run selected benchmarks
-	for _, b := range benchmarks {
-		start := time.Now()
-		execBenchmark(b, bencher, iterations, goroutines)
-		elapsed := time.Since(start)
-		fmt.Printf("%v:\t%v\t%v\tns/op\n", b.Name, elapsed, elapsed.Nanoseconds()/int64(iterations))
-	}
-}
-
-func execBenchmark(b databases.Benchmark, bencher Bencher, iterations, goroutines int) {
+func benchmark(b databases.Benchmark, bencher Bencher, iterations, goroutines int) {
 	t := template.New(b.Name)
 	t, err := t.Parse(b.Stmt)
 	if err != nil {
@@ -202,4 +193,13 @@ func readLines(path string) ([]string, error) {
 	}
 
 	return lines, scanner.Err()
+}
+
+func contains(options []string, want string) bool {
+	for _, o := range options {
+		if o == want {
+			return true
+		}
+	}
+	return false
 }
