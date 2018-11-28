@@ -62,10 +62,11 @@ nfpm:
     - rpm
 
 brew:
-  name: brew_formula
+  # name: dbbench
+  folder: Formula
   github:
     owner: sj14
-    name: dbbench
+    name: homebrew-tap
   description: "dbbench is a simple database benchmarking tool which supports several databases"
 
 release:
