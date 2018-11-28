@@ -75,3 +75,8 @@ release:
   disable: false
   draft: true
   prerelease: true
+
+changelog:
+  filters:
+    exclude:
+      - typo
