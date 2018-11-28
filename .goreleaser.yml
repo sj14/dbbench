@@ -63,7 +63,7 @@ nfpm:
 
 brew:
   # name: dbbench
-  folder: Formula
+  folder: homebrew-tap
   github:
     owner: sj14
     name: homebrew-tap
