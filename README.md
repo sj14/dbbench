@@ -111,16 +111,16 @@ The script must contain valid SQL statements for your database.
 
 There are some built-in variables and functions which can be used in the script. It's using golangs template engine which uses the delimiters `{{` and `}}`. Functions are executed with the `call` command.
 
-Name            | Description                                   | Example
-----------------|-----------------------------------------------|---------
-Iter            | iteration counter                             | {{.Iter}}
-Seed            | https://golang.org/pkg/math/rand/#Seed        | {{call .Seed 42}}
-RandInt63       | https://golang.org/pkg/math/rand/#Int63       | {{call .RandInt63}}
-RandInt63n      | https://golang.org/pkg/math/rand/#Int63n      | {{call .RandInt63n 9999}}
-RandFloat32     | https://golang.org/pkg/math/rand/#Float32     | {{call .RandFloat32}}
-RandFloat64     | https://golang.org/pkg/math/rand/#Float64     | {{call .RandFloat64}}
-RandExpFloat64  | https://golang.org/pkg/math/rand/#ExpFloat64  | {{call .RandExpFloat64}}
-RandNormFloat64 | https://golang.org/pkg/math/rand/#NormFloat64 | {{call .RandNormFloat64}}
+Usage                     | Description                                   |
+--------------------------|-----------------------------------------------|
+{{.Iter}}                 | iteration counter                             
+{{call .Seed 42}}         | [godoc](https://golang.org/pkg/math/rand/#Seed)     
+{{call .RandInt63}}       | [godoc](https://golang.org/pkg/math/rand/#Int63)   
+{{call .RandInt63n 9999}} | [godoc](https://golang.org/pkg/math/rand/#Int63n)  
+{{call .RandFloat32}}     | [godoc](https://golang.org/pkg/math/rand/#Float32)  
+{{call .RandFloat64}}     | [godoc](https://golang.org/pkg/math/rand/#Float64)
+{{call .RandExpFloat64}}  | [godoc](https://golang.org/pkg/math/rand/#ExpFloat64)
+{{call .RandNormFloat64}} | [godoc](https://golang.org/pkg/math/rand/#NormFloat64)
 
 `sqlite_bench.sql`:
 
