@@ -109,7 +109,7 @@ total: 3.85158506s
 
 The script must contain valid SQL statements for your database.
 
-There are some built-in variables and functions which can be used in the script. It's using golangs template engine which uses the delimiters `{{` and `}}`. Functions are executed with the `call` command.
+There are some built-in variables and functions which can be used in the script. It's using the golang [template engine](https://golang.org/pkg/text/template/) which uses the delimiters `{{` and `}}`. Functions are executed with the `call` command and arguments are passed after the function name.
 
 Usage                     | Description                                   |
 --------------------------|-----------------------------------------------|
@@ -134,14 +134,14 @@ will be replaced to:
 iteration 0
 
 ``` sql
-INSERT INTO accounts (id, balance) VALUES( 0, 0 );
+INSERT INTO accounts (id, balance) VALUES( 0, 423412 );
 DELETE FROM accounts WHERE id = 0; 
 ```
 
 iteration 7834
 
 ``` sql
-INSERT INTO accounts (id, balance) VALUES( 7834, 7834 );
+INSERT INTO accounts (id, balance) VALUES( 7834, 3248 );
 DELETE FROM accounts WHERE id = 7834; 
 ```
 
