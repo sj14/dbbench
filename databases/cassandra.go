@@ -46,9 +46,9 @@ func NewCassandra(host string, port int, user, password string) *Cassandra {
 // TODO: update is not like other db statements balance = balance + balance!
 func (c *Cassandra) Benchmarks() []Benchmark {
 	return []Benchmark{
-		{"inserts", Loop, "INSERT INTO dbbench.accounts (id, balance) VALUES({{.Iter}}, {{.Iter}}) IF NOT EXISTS;"},
-		{"updates", Loop, "UPDATE dbbench.accounts SET balance = {{.Iter}} WHERE id = {{.Iter}} IF EXISTS;"},
+		{"inserts", Loop, "INSERT INTO dbbench.accounts (id, balance) VALUES({{.Iter}}, {{call .RandInt63}}) IF NOT EXISTS;"},
 		{"selects", Loop, "SELECT * FROM dbbench.accounts WHERE id = {{.Iter}};"},
+		{"updates", Loop, "UPDATE dbbench.accounts SET balance = {{call .RandInt63}} WHERE id = {{.Iter}} IF EXISTS;"},
 		{"deletes", Loop, "DELETE FROM dbbench.accounts WHERE id = {{.Iter}} IF EXISTS;"},
 	}
 }

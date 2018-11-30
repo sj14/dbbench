@@ -31,9 +31,9 @@ func NewSQLite(path string) *SQLite {
 // Benchmarks returns the individual benchmark statements for sqlite.
 func (m *SQLite) Benchmarks() []Benchmark {
 	return []Benchmark{
-		{"inserts", Loop, "INSERT INTO accounts (id, balance) VALUES( {{.Iter}}, {{.Iter}});"},
-		{"updates", Loop, "UPDATE accounts SET balance = balance + balance WHERE id = {{.Iter}};"},
+		{"inserts", Loop, "INSERT INTO accounts (id, balance) VALUES( {{.Iter}}, {{call .RandInt63}});"},
 		{"selects", Loop, "SELECT * FROM accounts WHERE id = {{.Iter}};"},
+		{"updates", Loop, "UPDATE accounts SET balance = {{call .RandInt63}} WHERE id = {{.Iter}};"},
 		{"deletes", Loop, "DELETE FROM accounts WHERE id = {{.Iter}};"},
 	}
 }

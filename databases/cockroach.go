@@ -34,9 +34,9 @@ func NewCockroach(host string, port int, user, password string, maxOpenConns int
 // Benchmarks returns the individual benchmark functions for the cockroach db.
 func (p *Cockroach) Benchmarks() []Benchmark {
 	return []Benchmark{
-		{"inserts", Loop, "INSERT INTO dbbench.accounts (id, balance) VALUES( {{.Iter}}, {{.Iter}});"},
-		{"updates", Loop, "UPDATE dbbench.accounts SET balance = balance + balance WHERE id = {{.Iter}};"},
+		{"inserts", Loop, "INSERT INTO dbbench.accounts (id, balance) VALUES( {{.Iter}}, {{call .RandInt63}});"},
 		{"selects", Loop, "SELECT * FROM dbbench.accounts WHERE id = {{.Iter}};"},
+		{"updates", Loop, "UPDATE dbbench.accounts SET balance = {{call .RandInt63}} WHERE id = {{.Iter}};"},
 		{"deletes", Loop, "DELETE FROM dbbench.accounts WHERE id = {{.Iter}};"},
 	}
 }
