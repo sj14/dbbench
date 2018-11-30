@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"os"
 	"strings"
 	"sync"
@@ -169,9 +170,23 @@ func exec(bencher Bencher, t *template.Template, i int) {
 	sb := &strings.Builder{}
 
 	data := struct {
-		Iter int
+		Iter            int
+		Seed            func(int64)
+		RandInt63       func() int64
+		RandInt63n      func(int64) int64
+		RandFloat32     func() float32
+		RandFloat64     func() float64
+		RandExpFloat64  func() float64
+		RandNormFloat64 func() float64
 	}{
-		Iter: i,
+		Iter:            i,
+		Seed:            rand.Seed,
+		RandInt63:       rand.Int63,
+		RandInt63n:      rand.Int63n,
+		RandFloat32:     rand.Float32,
+		RandFloat64:     rand.Float64,
+		RandExpFloat64:  rand.ExpFloat64,
+		RandNormFloat64: rand.NormFloat64,
 	}
 	if err := t.Execute(sb, data); err != nil {
 		log.Fatalf("failed to execute template: %v", err)
