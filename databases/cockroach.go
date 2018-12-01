@@ -34,10 +34,14 @@ func NewCockroach(host string, port int, user, password string, maxOpenConns int
 // Benchmarks returns the individual benchmark functions for the cockroach db.
 func (p *Cockroach) Benchmarks() []Benchmark {
 	return []Benchmark{
-		{"inserts", Loop, "INSERT INTO dbbench.dbbench_simple (id, balance) VALUES( {{.Iter}}, {{call .RandInt63}});"},
-		{"selects", Loop, "SELECT * FROM dbbench.dbbench_simple WHERE id = {{.Iter}};"},
-		{"updates", Loop, "UPDATE dbbench.dbbench_simple SET balance = {{call .RandInt63}} WHERE id = {{.Iter}};"},
-		{"deletes", Loop, "DELETE FROM dbbench.dbbench_simple WHERE id = {{.Iter}};"},
+		{"inserts", Loop, "INSERT INTO dbbench.simple (id, balance) VALUES( {{.Iter}}, {{call .RandInt63}});"},
+		{"selects", Loop, "SELECT * FROM dbbench.simple WHERE id = {{.Iter}};"},
+		{"updates", Loop, "UPDATE dbbench.simple SET balance = {{call .RandInt63}} WHERE id = {{.Iter}};"},
+		{"deletes", Loop, "DELETE FROM dbbench.simple WHERE id = {{.Iter}};"},
+		{"relation_insert0", Loop, "INSERT INTO dbbench.relational_one (oid, balance_one) VALUES( {{.Iter}}, {{call .RandInt63}});"},
+		{"relation_insert1", Loop, "INSERT INTO dbbench.relational_two (relation, balance_two) VALUES( {{.Iter}}, {{call .RandInt63}});"},
+		{"relation_delete1", Loop, "DELETE FROM dbbench.relational_two WHERE relation = {{.Iter}};"},
+		{"relation_delete0", Loop, "DELETE FROM dbbench.relational_one WHERE oid = {{.Iter}};"},
 	}
 }
 
@@ -46,19 +50,29 @@ func (p *Cockroach) Setup() {
 	if _, err := p.db.Exec("CREATE DATABASE IF NOT EXISTS dbbench"); err != nil {
 		log.Fatalf("failed to create database: %v\n", err)
 	}
-	if _, err := p.db.Exec("CREATE TABLE IF NOT EXISTS dbbench.dbbench_simple (id INT PRIMARY KEY, balance DECIMAL);"); err != nil {
+	if _, err := p.db.Exec("CREATE TABLE IF NOT EXISTS dbbench.simple (id INT PRIMARY KEY, balance DECIMAL);"); err != nil {
 		log.Fatalf("failed to create table: %v\n", err)
 	}
-	if _, err := p.db.Exec("TRUNCATE dbbench.dbbench_simple;"); err != nil {
-		log.Fatalf("failed to truncate table: %v\n", err)
+	if _, err := p.db.Exec("CREATE TABLE IF NOT EXISTS dbbench.relational_one (oid INT PRIMARY KEY, balance_one DECIMAL);"); err != nil {
+		log.Fatalf("failed to create table relational_one: %v\n", err)
+	}
+	if _, err := p.db.Exec("CREATE TABLE IF NOT EXISTS dbbench.relational_two (balance_two DECIMAL, relation INT, FOREIGN KEY(relation) REFERENCES dbbench.relational_one(oid));"); err != nil {
+		log.Fatalf("failed to create table relational_two: %v\n", err)
 	}
 }
 
 // Cleanup removes all remaining benchmarking data.
 func (p *Cockroach) Cleanup() {
-	if _, err := p.db.Exec("DROP TABLE dbbench.dbbench_simple"); err != nil {
+	if _, err := p.db.Exec("DROP TABLE dbbench.simple"); err != nil {
 		log.Printf("failed to drop table: %v\n", err)
 	}
+	if _, err := p.db.Exec("DROP TABLE dbbench.relational_two"); err != nil {
+		log.Printf("failed to drop table: %v\n", err)
+	}
+	if _, err := p.db.Exec("DROP TABLE dbbench.relational_one"); err != nil {
+		log.Printf("failed to drop table: %v\n", err)
+	}
+
 	if _, err := p.db.Exec("DROP DATABASE dbbench"); err != nil {
 		log.Printf("failed to drop database: %v\n", err)
 	}
@@ -76,26 +90,26 @@ func (p *Cockroach) Exec(stmt string) {
 }
 
 func (p *Cockroach) inserts(i int) {
-	const q = "INSERT INTO dbbench.dbbench_simple VALUES($1, $2);"
+	const q = "INSERT INTO dbbench.simple VALUES($1, $2);"
 	result, err := p.db.Exec(q, i, i)
 	mustExec(result, err, "insert")
 }
 
 func (p *Cockroach) selects(i int) {
-	const q = "SELECT * FROM dbbench.dbbench_simple WHERE id = $1;"
+	const q = "SELECT * FROM dbbench.simple WHERE id = $1;"
 	result, err := p.db.Exec(q, i)
 	mustExec(result, err, "select")
 
 }
 
 func (p *Cockroach) updates(i int) {
-	const q = "UPDATE dbbench.dbbench_simple SET balance = $1 WHERE id = $2;"
+	const q = "UPDATE dbbench.simple SET balance = $1 WHERE id = $2;"
 	result, err := p.db.Exec(q, i, i)
 	mustExec(result, err, "update")
 }
 
 func (p *Cockroach) deletes(i int) {
-	const q = "DELETE FROM dbbench.dbbench_simple WHERE id = $1"
+	const q = "DELETE FROM dbbench.simple WHERE id = $1"
 	result, err := p.db.Exec(q, i)
 	mustExec(result, err, "delete")
 }
