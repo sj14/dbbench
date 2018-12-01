@@ -37,6 +37,7 @@ func (m *SQLite) Benchmarks() []Benchmark {
 		{"deletes", Loop, "DELETE FROM dbbench_simple WHERE id = {{.Iter}};"},
 		{"relation_insert0", Loop, "INSERT INTO dbbench_relational_one (oid, balance_one) VALUES( {{.Iter}}, {{call .RandInt63}});"},
 		{"relation_insert1", Loop, "INSERT INTO dbbench_relational_two (relation, balance_two) VALUES( {{.Iter}}, {{call .RandInt63}});"},
+		{"relation_select", Loop, "SELECT * FROM dbbench_relational_two INNER JOIN dbbench_relational_one ON dbbench_relational_one.oid = relation WHERE relation = {{.Iter}};"},
 		{"relation_delete1", Loop, "DELETE FROM dbbench_relational_two WHERE relation = {{.Iter}};"},
 		{"relation_delete0", Loop, "DELETE FROM dbbench_relational_one WHERE oid = {{.Iter}};"},
 	}
