@@ -40,6 +40,8 @@ func (p *Postgres) Benchmarks() []Benchmark {
 		{"selects", Loop, "SELECT * FROM dbbench.dbbench_simple WHERE id = {{.Iter}};"},
 		{"updates", Loop, "UPDATE dbbench.dbbench_simple SET balance = {{call .RandInt63}} WHERE id = {{.Iter}};"},
 		{"deletes", Loop, "DELETE FROM dbbench.dbbench_simple WHERE id = {{.Iter}};"},
+		{"relation_insert0", Loop, "INSERT INTO dbbench.dbbench_relational_one (oid, balance_one) VALUES( {{.Iter}}, {{call .RandInt63}});"},
+		{"relation_insert1", Loop, "INSERT INTO dbbench.dbbench_relational_two (relation, balance_two) VALUES( {{.Iter}}, {{call .RandInt63}});"},
 	}
 }
 
@@ -51,6 +53,12 @@ func (p *Postgres) Setup() {
 	if _, err := p.db.Exec("CREATE TABLE IF NOT EXISTS dbbench.dbbench_simple (id INT PRIMARY KEY, balance DECIMAL);"); err != nil {
 		log.Fatalf("failed to create table: %v\n", err)
 	}
+	if _, err := p.db.Exec("CREATE TABLE IF NOT EXISTS dbbench.dbbench_relational_one (oid INT PRIMARY KEY, balance_one DECIMAL);"); err != nil {
+		log.Fatalf("failed to create table dbbench_relational_one: %v\n", err)
+	}
+	if _, err := p.db.Exec("CREATE TABLE IF NOT EXISTS dbbench.dbbench_relational_two (balance_two DECIMAL, relation INT, FOREIGN KEY(relation) REFERENCES dbbench.dbbench_relational_one(oid));"); err != nil {
+		log.Fatalf("failed to create table dbbench_relational_two: %v\n", err)
+	}
 	if _, err := p.db.Exec("TRUNCATE dbbench.dbbench_simple;"); err != nil {
 		log.Fatalf("failed to truncate table: %v\n", err)
 	}
@@ -61,6 +69,13 @@ func (p *Postgres) Cleanup() {
 	if _, err := p.db.Exec("DROP TABLE dbbench.dbbench_simple"); err != nil {
 		log.Printf("failed to drop table: %v\n", err)
 	}
+	if _, err := p.db.Exec("DROP TABLE dbbench.dbbench_relational_two"); err != nil {
+		log.Printf("failed to drop table: %v\n", err)
+	}
+	if _, err := p.db.Exec("DROP TABLE dbbench.dbbench_relational_one"); err != nil {
+		log.Printf("failed to drop table: %v\n", err)
+	}
+
 	if _, err := p.db.Exec("DROP SCHEMA dbbench"); err != nil {
 		log.Printf("failed drop schema: %v\n", err)
 	}
