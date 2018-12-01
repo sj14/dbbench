@@ -148,7 +148,7 @@ DELETE FROM accounts WHERE id = 7834;
 
 ## Known Issues
 
-- [ ] Release builds are built without CGO support (no support for sqlite) #1
+- Release are built without CGO support (no support for sqlite) [#1](https://github.com/sj14/dbbench/issues/1)
 
 ## TODO
 
@@ -162,14 +162,25 @@ DELETE FROM accounts WHERE id = 7834;
 
 ## Troubleshooting
 
-I get the following error:
+**Error message**
 
 ``` text
 failed to insert: UNIQUE constraint failed: accounts.id
-exit status 1
 ```
 
+**Description**   
 The previous data wasn't removed (e.g. because the benchmark was canceled). Try to run the same command again, but with the `-clean` flag attached, which will remove the old data. Then run the original command again.
+
+---
+
+**Error message**
+
+``` text
+failed to create table: Binary was compiled with 'CGO_ENABLED=0', go-sqlite3 requires cgo to work. This is a stub
+```
+
+**Description**  
+Currently, the released binary builds don't contain SQLite support. You have to compile dbbench manually, either from the particular release source code (recommended) or from the current master branch with `go get -u github.com/sj4/dbbench` (not recommended).
 
 ## Development
 
