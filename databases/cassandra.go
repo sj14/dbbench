@@ -46,10 +46,10 @@ func NewCassandra(host string, port int, user, password string) *Cassandra {
 // TODO: update is not like other db statements balance = balance + balance!
 func (c *Cassandra) Benchmarks() []Benchmark {
 	return []Benchmark{
-		{"inserts", Loop, "INSERT INTO dbbench.accounts (id, balance) VALUES({{.Iter}}, {{call .RandInt63}}) IF NOT EXISTS;"},
-		{"selects", Loop, "SELECT * FROM dbbench.accounts WHERE id = {{.Iter}};"},
-		{"updates", Loop, "UPDATE dbbench.accounts SET balance = {{call .RandInt63}} WHERE id = {{.Iter}} IF EXISTS;"},
-		{"deletes", Loop, "DELETE FROM dbbench.accounts WHERE id = {{.Iter}} IF EXISTS;"},
+		{"inserts", Loop, "INSERT INTO dbbench.dbbench_simple (id, balance) VALUES({{.Iter}}, {{call .RandInt63}}) IF NOT EXISTS;"},
+		{"selects", Loop, "SELECT * FROM dbbench.dbbench_simple WHERE id = {{.Iter}};"},
+		{"updates", Loop, "UPDATE dbbench.dbbench_simple SET balance = {{call .RandInt63}} WHERE id = {{.Iter}} IF EXISTS;"},
+		{"deletes", Loop, "DELETE FROM dbbench.dbbench_simple WHERE id = {{.Iter}} IF EXISTS;"},
 	}
 }
 
@@ -60,17 +60,17 @@ func (c *Cassandra) Setup() {
 		log.Fatalf("failed to create keyspace: %v\n", err)
 	}
 	// TODO: other tests use decimal for balance, cassandra or gocql doesn't do an automatic casting from int to decimal
-	if err := c.session.Query("CREATE TABLE IF NOT EXISTS dbbench.accounts (id INT PRIMARY KEY, balance INT);").Exec(); err != nil {
+	if err := c.session.Query("CREATE TABLE IF NOT EXISTS dbbench.dbbench_simple (id INT PRIMARY KEY, balance INT);").Exec(); err != nil {
 		log.Fatalf("failed to create table: %v\n", err)
 	}
-	if err := c.session.Query("TRUNCATE dbbench.accounts;").Exec(); err != nil {
+	if err := c.session.Query("TRUNCATE dbbench.dbbench_simple;").Exec(); err != nil {
 		log.Fatalf("failed to truncate table: %v\n", err)
 	}
 }
 
 // Cleanup removes all remaining benchmarking data.
 func (c *Cassandra) Cleanup() {
-	if err := c.session.Query("DROP TABLE dbbench.accounts").Exec(); err != nil {
+	if err := c.session.Query("DROP TABLE dbbench.dbbench_simple").Exec(); err != nil {
 		log.Printf("failed to drop table: %v\n", err)
 	}
 	if err := c.session.Query("DROP KEYSPACE dbbench").Exec(); err != nil {

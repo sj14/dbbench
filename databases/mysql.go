@@ -32,18 +32,18 @@ func NewMySQL(host string, port int, user, password string, maxOpenConns int) *M
 	return p
 }
 
-// const q = "INSERT INTO dbbench.accounts VALUES(?, ?);"
-// const q = "SELECT * FROM dbbench.accounts WHERE id = ?;"
-// const q = "UPDATE dbbench.accounts SET balance = ? WHERE id = ?;"
-// const q = "DELETE FROM dbbench.accounts WHERE id = ?"
+// const q = "INSERT INTO dbbench.dbbench_simple VALUES(?, ?);"
+// const q = "SELECT * FROM dbbench.dbbench_simple WHERE id = ?;"
+// const q = "UPDATE dbbench.dbbench_simple SET balance = ? WHERE id = ?;"
+// const q = "DELETE FROM dbbench.dbbench_simple WHERE id = ?"
 
 // Benchmarks returns the individual benchmark functions for the mysql db.
 func (m *Mysql) Benchmarks() []Benchmark {
 	return []Benchmark{
-		{"inserts", Loop, "INSERT INTO dbbench.accounts (id, balance) VALUES( {{.Iter}}, {{call .RandInt63}});"},
-		{"selects", Loop, "SELECT * FROM dbbench.accounts WHERE id = {{.Iter}};"},
-		{"updates", Loop, "UPDATE dbbench.accounts SET balance = {{call .RandInt63}} WHERE id = {{.Iter}};"},
-		{"deletes", Loop, "DELETE FROM dbbench.accounts WHERE id = {{.Iter}};"},
+		{"inserts", Loop, "INSERT INTO dbbench.dbbench_simple (id, balance) VALUES( {{.Iter}}, {{call .RandInt63}});"},
+		{"selects", Loop, "SELECT * FROM dbbench.dbbench_simple WHERE id = {{.Iter}};"},
+		{"updates", Loop, "UPDATE dbbench.dbbench_simple SET balance = {{call .RandInt63}} WHERE id = {{.Iter}};"},
+		{"deletes", Loop, "DELETE FROM dbbench.dbbench_simple WHERE id = {{.Iter}};"},
 	}
 }
 
@@ -52,17 +52,17 @@ func (m *Mysql) Setup() {
 	if _, err := m.db.Exec("CREATE DATABASE IF NOT EXISTS dbbench"); err != nil {
 		log.Fatalf("failed to create database: %v\n", err)
 	}
-	if _, err := m.db.Exec("CREATE TABLE IF NOT EXISTS dbbench.accounts (id INT PRIMARY KEY, balance DECIMAL);"); err != nil {
+	if _, err := m.db.Exec("CREATE TABLE IF NOT EXISTS dbbench.dbbench_simple (id INT PRIMARY KEY, balance DECIMAL);"); err != nil {
 		log.Fatalf("failed to create table: %v\n", err)
 	}
-	if _, err := m.db.Exec("TRUNCATE dbbench.accounts;"); err != nil {
+	if _, err := m.db.Exec("TRUNCATE dbbench.dbbench_simple;"); err != nil {
 		log.Fatalf("failed to truncate table: %v\n", err)
 	}
 }
 
 // Cleanup removes all remaining benchmarking data.
 func (m *Mysql) Cleanup() {
-	if _, err := m.db.Exec("DROP TABLE dbbench.accounts"); err != nil {
+	if _, err := m.db.Exec("DROP TABLE dbbench.dbbench_simple"); err != nil {
 		log.Printf("failed to drop table: %v\n", err)
 	}
 	// When the database will be dropped here,

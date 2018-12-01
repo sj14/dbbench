@@ -126,8 +126,8 @@ Usage                     | Description                                   |
 `sqlite_bench.sql`:
 
 ``` sql
-INSERT INTO accounts (id, balance) VALUES({{.Iter}}, {{call .RandInt63}});
-DELETE FROM accounts WHERE id = {{.Iter}}; 
+INSERT INTO dbbench_simple (id, balance) VALUES({{.Iter}}, {{call .RandInt63}});
+DELETE FROM dbbench_simple WHERE id = {{.Iter}}; 
 ```
 
 will be replaced to:
@@ -135,15 +135,15 @@ will be replaced to:
 iteration 0
 
 ``` sql
-INSERT INTO accounts (id, balance) VALUES(0, 423412);
-DELETE FROM accounts WHERE id = 0; 
+INSERT INTO dbbench_simple (id, balance) VALUES(0, 423412);
+DELETE FROM dbbench_simple WHERE id = 0; 
 ```
 
 iteration 7834
 
 ``` sql
-INSERT INTO accounts (id, balance) VALUES(7834, 3248);
-DELETE FROM accounts WHERE id = 7834; 
+INSERT INTO dbbench_simple (id, balance) VALUES(7834, 3248);
+DELETE FROM dbbench_simple WHERE id = 7834; 
 ```
 
 ## Known Issues
@@ -165,7 +165,7 @@ DELETE FROM accounts WHERE id = 7834;
 **Error message**
 
 ``` text
-failed to insert: UNIQUE constraint failed: accounts.id
+failed to insert: UNIQUE constraint failed: dbbench_simple.id
 ```
 
 **Description**   
