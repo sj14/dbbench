@@ -43,7 +43,7 @@ func main() {
 		path        = flag.String("path", "dbbench.sqlite", "database file (sqlite only)")
 		conns       = flag.Int("conns", 0, "max. number of open connections")
 		iter        = flag.Int("iter", 1000, "how many iterations should be run")
-		threads     = flag.Int("threads", 25, "max. number of green threads")
+		threads     = flag.Int("threads", 25, "max. number of green threads (iter >= threads > 0")
 		nosetup     = flag.Bool("noinit", false, "do not initialize database and tables, e.g. when only running own script")
 		clean       = flag.Bool("clean", false, "only cleanup benchmark data, e.g. after a crash")
 		noclean     = flag.Bool("noclean", false, "keep benchmark data")
@@ -75,6 +75,16 @@ func main() {
 	// only cleanup benchmark data when noclean flag is not set
 	if !*noclean {
 		defer bencher.Cleanup()
+	}
+
+	// we need at least one thread
+	if *threads == 0 {
+		*threads = 1
+	}
+
+	// can't have more threads than iterations
+	if *threads > *iter {
+		*threads = *iter
 	}
 
 	// Benchmark specified script and quit
@@ -146,10 +156,10 @@ func benchmark(b databases.Benchmark, bencher Bencher, iterations, goroutines in
 	defer wg.Wait()
 
 	for routine := 0; routine < goroutines; routine++ {
-		from := (iterations / goroutines) * routine
+		from := ((iterations / goroutines) * routine) + 1
 		to := (iterations / goroutines) * (routine + 1)
 
-		go func() {
+		go func(gofrom, togo int) {
 			defer wg.Done()
 
 			switch b.Type {
@@ -157,11 +167,11 @@ func benchmark(b databases.Benchmark, bencher Bencher, iterations, goroutines in
 			// case databases.Once:
 			// 	exec(bencher, t, 0)
 			case databases.Loop:
-				for i := from; i < to; i++ {
+				for i := gofrom; i <= togo; i++ {
 					exec(bencher, t, i)
 				}
 			}
-		}()
+		}(from, to)
 	}
 }
 
