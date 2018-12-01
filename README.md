@@ -8,6 +8,7 @@
 2. [Supported Databases](#Supported-Databases-/-Driver)
 4. [Usage](#usage)
 4. [Custom Scripts](#custom-scripts)
+4. [Known Issues](#known-issues)
 3. [TODO](#TODO)
 3. [Troubeshooting](#troubleshooting)
 4. [Development](#development)
@@ -134,16 +135,20 @@ will be replaced to:
 iteration 0
 
 ``` sql
-INSERT INTO accounts (id, balance) VALUES( 0, 423412 );
+INSERT INTO accounts (id, balance) VALUES(0, 423412);
 DELETE FROM accounts WHERE id = 0; 
 ```
 
 iteration 7834
 
 ``` sql
-INSERT INTO accounts (id, balance) VALUES( 7834, 3248 );
+INSERT INTO accounts (id, balance) VALUES(7834, 3248);
 DELETE FROM accounts WHERE id = 7834; 
 ```
+
+## Known Issues
+
+- [ ] Release builds are built without CGO support (no support for sqlite) #1
 
 ## TODO
 
