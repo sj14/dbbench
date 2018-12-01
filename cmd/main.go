@@ -35,7 +35,7 @@ var (
 
 func main() {
 	var (
-		dbType      = flag.String("type", "", "database to use (sqlite|mariadb|mysql|postgres|cockroach|cassandra|scylla)")
+		dbType      = flag.String("type", "", "database to use (sqlite|mysql|postgres|cockroach|cassandra)")
 		host        = flag.String("host", "localhost", "address of the server")
 		port        = flag.Int("port", 0, "port of the server (0 -> db defaults)")
 		user        = flag.String("user", "root", "user name to connect with the server")
