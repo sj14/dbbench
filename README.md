@@ -117,10 +117,12 @@ There are some built-in variables and functions which can be used in the script.
 
 Usage                     | Description                                   |
 --------------------------|-----------------------------------------------|
-{{.Iter}}                 | iteration counter                             
-{{call .Seed 42}}         | [godoc](https://golang.org/pkg/math/rand/#Seed)     
-{{call .RandInt63}}       | [godoc](https://golang.org/pkg/math/rand/#Int63)   
-{{call .RandInt63n 9999}} | [godoc](https://golang.org/pkg/math/rand/#Int63n)  
+\mode once                | Execute the following statements only once (e.g. to create and delete tables).
+\mode loop                | Execute the following statements in a loop. Executes them one after another and then starts a new iteration. Add another `\mode loop` to start another batch of statements.
+{{.Iter}}                 | The iteration counter.
+{{call .Seed 42}}         | [godoc](https://golang.org/pkg/math/rand/#Seed) (42 is an examplary seed)
+{{call .RandInt63}}       | [godoc](https://golang.org/pkg/math/rand/#Int63) 
+{{call .RandInt63n 9999}} | [godoc](https://golang.org/pkg/math/rand/#Int63n) (9999 is an examplary upper limit)
 {{call .RandFloat32}}     | [godoc](https://golang.org/pkg/math/rand/#Float32)  
 {{call .RandFloat64}}     | [godoc](https://golang.org/pkg/math/rand/#Float64)
 {{call .RandExpFloat64}}  | [godoc](https://golang.org/pkg/math/rand/#ExpFloat64)
@@ -129,24 +131,40 @@ Usage                     | Description                                   |
 `sqlite_bench.sql`:
 
 ``` sql
+-- create table
+\mode once
+CREATE TABLE IF NOT EXISTS dbbench_simple (id INT PRIMARY KEY, balance DECIMAL);
+
+-- how long takes an insert and delete?
+\mode loop
 INSERT INTO dbbench_simple (id, balance) VALUES({{.Iter}}, {{call .RandInt63}});
 DELETE FROM dbbench_simple WHERE id = {{.Iter}}; 
+
+-- low long takes it in a single transaction?
+\mode loop
+BEGIN TRANSACTION;
+INSERT INTO dbbench_simple (id, balance) VALUES({{.Iter}}, {{call .RandInt63}});
+DELETE FROM dbbench_simple WHERE id = {{.Iter}}; 
+COMMIT;
+
+-- delete table
+\mode once
+DROP TABLE dbbench_simple;
 ```
 
-will be replaced to:
+In this script, we exemplary create and delete the table manually, thus we will pass the `-noinit` and `-noclean` flag, which would otherwise create these default tables for us:
 
-iteration 1
-
-``` sql
-INSERT INTO dbbench_simple (id, balance) VALUES(0, 423412);
-DELETE FROM dbbench_simple WHERE id = 1; 
+``` text
+dbbench -type sqlite -script scripts/sqlite_bench.sql -iter 1000 -noinit -noclean
 ```
 
-iteration 7834
-
-``` sql
-INSERT INTO dbbench_simple (id, balance) VALUES(7834, 3248);
-DELETE FROM dbbench_simple WHERE id = 7834; 
+output:
+``` text
+once: line 6:           4.900445ms      4900    ns/op
+loop: line 10-13:       7.21157809s     7211578 ns/op
+loop: line 15-20:       3.59187861s     3591878 ns/op
+once: line 22:          2.720176ms      2720    ns/op
+total: 10.811247173s
 ```
 
 ## Known Issues
