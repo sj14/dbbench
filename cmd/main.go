@@ -2,8 +2,10 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -88,19 +90,22 @@ func main() {
 		*threads = *iter
 	}
 
-	// Benchmark specified script and quit
+	benchmarks := []databases.Benchmark{}
+
+	// Benchmark specified script
 	if *scriptname != "" {
 		dat, err := ioutil.ReadFile(*scriptname)
 		if err != nil {
 			log.Fatalf("failed to read file: %v", err)
 		}
-		b := databases.Benchmark{Name: "script", Type: databases.Loop, Stmt: string(dat)}
-
-		start := time.Now()
-		benchmark(b, bencher, *iter, *threads)
-		elapsed := time.Since(start)
-		fmt.Printf("%v:\t%v\t%v\tns/op\n", b.Name, elapsed, elapsed.Nanoseconds()/int64(*iter))
-		return
+		buf := bytes.NewBuffer(dat)
+		benchmarks = parseScript(buf)
+		for _, b := range benchmarks {
+			fmt.Printf("%+v\n", b)
+		}
+		fmt.Println()
+	} else {
+		benchmarks = bencher.Benchmarks()
 	}
 
 	// split benchmark names when "-run 'bench0 bench1 ...'" flag was used
@@ -108,13 +113,25 @@ func main() {
 
 	startTotal := time.Now()
 	// select built-in benchmarks
-	for i, b := range bencher.Benchmarks() {
+	for i, b := range benchmarks {
 		// check if we want to run this particular benchmark
 		if !contains(toRun, "all") && !contains(toRun, b.Name) {
 			continue
 		}
+
+		t := template.New(b.Name)
+		t, err := t.Parse(b.Stmt)
+		if err != nil {
+			log.Fatalf("failed to parse template: %v", err)
+		}
+
 		start := time.Now()
-		benchmark(b, bencher, *iter, *threads)
+		if b.Type == databases.Once {
+			exec(bencher, t, i)
+		} else {
+			benchmark(t, bencher, *iter, *threads)
+		}
+
 		elapsed := time.Since(start)
 		fmt.Printf("%v:\t%v\t%v\tns/op\n", b.Name, elapsed, elapsed.Nanoseconds()/int64(*iter))
 
@@ -124,6 +141,67 @@ func main() {
 		}
 	}
 	fmt.Printf("total: %v\n", time.Since(startTotal))
+}
+
+func parseScript(r io.Reader) []databases.Benchmark {
+	s := bufio.NewScanner(r)
+	benchmarks := []databases.Benchmark{}
+
+	mode := databases.Loop
+	loopStmt := ""
+	loopStart := 1
+	lineN := 1
+	for ; s.Scan(); lineN++ {
+		line := s.Text()
+
+		// skip comments and empty lines
+		if strings.HasPrefix(line, "--") || line == "" {
+			continue
+		}
+
+		if strings.HasPrefix(line, "\\mode") {
+			if strings.Contains(line, "once") {
+				// once
+				if mode == databases.Loop {
+					if loopStmt != "" {
+						// was loop before, flush loop statements
+						benchmarks = append(benchmarks, databases.Benchmark{Name: fmt.Sprintf("loop: line %v-%v", loopStart, lineN-1), Type: databases.Loop, Stmt: loopStmt})
+						loopStmt = ""
+					}
+				}
+				mode = databases.Once
+			} else if strings.Contains(line, "loop") {
+				// loop
+				if loopStmt != "" {
+					// also was loop before, flush loop statements and start a new loop statement
+					benchmarks = append(benchmarks, databases.Benchmark{Name: fmt.Sprintf("loop: line %v-%v", loopStart, lineN-1), Type: databases.Loop, Stmt: loopStmt})
+					loopStmt = ""
+				}
+				mode = databases.Loop
+				loopStart = lineN + 1
+			} else {
+				log.Fatalf("failed to parse mode: %v", line)
+			}
+			// don't append \mode line
+			continue
+		}
+
+		switch mode {
+		case databases.Once:
+			// Once, append benchmark immediately.
+			benchmarks = append(benchmarks, databases.Benchmark{Name: fmt.Sprintf("once: line %v", lineN), Type: databases.Once, Stmt: line})
+		case databases.Loop:
+			// Loop, but not finished yet, append only line.
+			loopStmt += line + "\n"
+		}
+	}
+
+	// reached the end of the file, append remaining loop statements to benchmark
+	if loopStmt != "" {
+		benchmarks = append(benchmarks, databases.Benchmark{Name: fmt.Sprintf("loop: line %v-%v", loopStart, lineN-1), Type: databases.Loop, Stmt: loopStmt})
+	}
+
+	return benchmarks
 }
 
 func getImpl(dbType string, host string, port int, user, password, path string, maxOpenConns int) Bencher {
@@ -150,13 +228,7 @@ func getImpl(dbType string, host string, port int, user, password, path string, 
 	return nil
 }
 
-func benchmark(b databases.Benchmark, bencher Bencher, iterations, goroutines int) {
-	t := template.New(b.Name)
-	t, err := t.Parse(b.Stmt)
-	if err != nil {
-		log.Fatalf("failed to parse template: %v", err)
-	}
-
+func benchmark(t *template.Template, bencher Bencher, iterations, goroutines int) {
 	wg := &sync.WaitGroup{}
 	wg.Add(goroutines)
 	defer wg.Wait()
@@ -168,14 +240,8 @@ func benchmark(b databases.Benchmark, bencher Bencher, iterations, goroutines in
 		go func(gofrom, togo int) {
 			defer wg.Done()
 
-			switch b.Type {
-			// TODO: would be executed several times because of the goroutines loop
-			// case databases.Once:
-			// 	exec(bencher, t, 0)
-			case databases.Loop:
-				for i := gofrom; i <= togo; i++ {
-					exec(bencher, t, i)
-				}
+			for i := gofrom; i <= togo; i++ {
+				exec(bencher, t, i)
 			}
 		}(from, to)
 	}

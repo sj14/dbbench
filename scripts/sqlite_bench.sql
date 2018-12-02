@@ -1,6 +1,19 @@
 -- A sample script
--- {{.Iter}} will be replaced by the current iteration count
+-- {{.Iter}} and {{call .RandInt63}} will be replaced by the current iteration count and a random number.
+\mode loop
 BEGIN TRANSACTION;
 INSERT INTO dbbench_simple (id, balance) VALUES({{.Iter}}, {{call .RandInt63}});
 DELETE FROM dbbench_simple WHERE id = {{.Iter}}; 
 COMMIT;
+\mode loop
+INSERT INTO dbbench_simple (id, balance) VALUES(1000, 1); -- inline comment
+DELETE FROM dbbench_simple WHERE id = 1000; 
+\mode once
+INSERT INTO dbbench_simple (id, balance) VALUES(1000, 1);
+DELETE FROM dbbench_simple WHERE id = 1000; 
+\mode once
+INSERT INTO dbbench_simple (id, balance) VALUES(1000, 1);
+DELETE FROM dbbench_simple WHERE id = 1000; 
+\mode loop
+INSERT INTO dbbench_simple (id, balance) VALUES(1000, 1);
+DELETE FROM dbbench_simple WHERE id = 1000; 
