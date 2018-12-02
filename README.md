@@ -155,11 +155,11 @@ dbbench -type sqlite -script scripts/sqlite_bench.sql -iter 1000 -noinit -noclea
 
 output:
 ``` text
-once: line 6:           4.900445ms      4900    ns/op
-loop: line 10-13:       7.21157809s     7211578 ns/op
-loop: line 15-20:       3.59187861s     3591878 ns/op
-once: line 22:          2.720176ms      2720    ns/op
-total: 10.811247173s
+once: line 3:           3.781231ms      3781    ns/op
+loop: line 7-10:        7.334864879s    7334864 ns/op
+loop: line 12-17:       3.481569798s    3481569 ns/op
+once: line 19:          3.903027ms      3903    ns/op
+total: 10.824351356s
 ```
 
 ## Known Issues
