@@ -51,7 +51,8 @@ brew install sj14/tap/dbbench
 It's also possible to install the current development snapshot with `go get` (not recommended):
 
 ``` text
-go get -u github.com/sj14/dbbench
+go get -u github.com/sj14/dbbench/cmd
+go install github.com/sj14/dbbench/cmd
 ```
 
 ## Supported Databases / Driver
@@ -88,10 +89,12 @@ Cassandra and compatible databases (e.g. ScyllaDB) | github.com/gocql/gocql
         only run the specified benchmarks, e.g. "inserts deletes" (default "all")
   -script string
         custom sql file to execute
+  -sleep duration
+        how long to pause after each single benchmark (valid units: ns, us, ms, s, m, h)
   -threads int
-        max. number of green threads (default 25)
+        max. number of green threads (iter >= threads > 0 (default 25)
   -type string
-        database to use (sqlite|mariadb|mysql|postgres|cockroach|cassandra|scylla)
+        database to use (sqlite|mysql|postgres|cockroach|cassandra)
   -user string
         user name to connect with the server (default "root")
   -version
@@ -132,11 +135,11 @@ DELETE FROM dbbench_simple WHERE id = {{.Iter}};
 
 will be replaced to:
 
-iteration 0
+iteration 1
 
 ``` sql
 INSERT INTO dbbench_simple (id, balance) VALUES(0, 423412);
-DELETE FROM dbbench_simple WHERE id = 0; 
+DELETE FROM dbbench_simple WHERE id = 1; 
 ```
 
 iteration 7834
@@ -152,8 +155,8 @@ DELETE FROM dbbench_simple WHERE id = 7834;
 
 ## TODO
 
-- [ ] More and database specific benchmarks
-  - [ ] Relational DB specific (e.g. MySQL)
+- [ ] More benchmarks and database specific benchmarks
+  - [x] ~~Relational DB specific (e.g. MySQL)~~
   - [ ] Non-relational DB specific (e.g. Cassandra)
 - [ ] More databases
   - [ ] MSSQL
@@ -180,7 +183,7 @@ failed to create table: Binary was compiled with 'CGO_ENABLED=0', go-sqlite3 req
 ```
 
 **Description**  
-Currently, the released binary builds don't contain SQLite support. You have to compile dbbench manually, either from the particular release source code (recommended) or from the current master branch with `go get -u github.com/sj4/dbbench` (not recommended).
+Currently, the released binary builds don't contain SQLite support. You have to compile dbbench manually, either from the particular release source code (recommended) or from the current master branch (not recommended).
 
 ## Development
 

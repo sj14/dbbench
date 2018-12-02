@@ -44,6 +44,7 @@ func main() {
 		conns       = flag.Int("conns", 0, "max. number of open connections")
 		iter        = flag.Int("iter", 1000, "how many iterations should be run")
 		threads     = flag.Int("threads", 25, "max. number of green threads (iter >= threads > 0")
+		sleep       = flag.Duration("sleep", 0, "how long to pause after each single benchmark (valid units: ns, us, ms, s, m, h)")
 		nosetup     = flag.Bool("noinit", false, "do not initialize database and tables, e.g. when only running own script")
 		clean       = flag.Bool("clean", false, "only cleanup benchmark data, e.g. after a crash")
 		noclean     = flag.Bool("noclean", false, "keep benchmark data")
@@ -107,7 +108,7 @@ func main() {
 
 	startTotal := time.Now()
 	// select built-in benchmarks
-	for _, b := range bencher.Benchmarks() {
+	for i, b := range bencher.Benchmarks() {
 		// check if we want to run this particular benchmark
 		if !contains(toRun, "all") && !contains(toRun, b.Name) {
 			continue
@@ -116,6 +117,11 @@ func main() {
 		benchmark(b, bencher, *iter, *threads)
 		elapsed := time.Since(start)
 		fmt.Printf("%v:\t%v\t%v\tns/op\n", b.Name, elapsed, elapsed.Nanoseconds()/int64(*iter))
+
+		// Don't sleep after the last benchmark
+		if i != len(bencher.Benchmarks())-1 {
+			time.Sleep(*sleep)
+		}
 	}
 	fmt.Printf("total: %v\n", time.Since(startTotal))
 }
