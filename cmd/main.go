@@ -92,19 +92,16 @@ func main() {
 
 	benchmarks := []databases.Benchmark{}
 
-	// Benchmark specified script
 	if *scriptname != "" {
+		// Benchmark specified script.
 		dat, err := ioutil.ReadFile(*scriptname)
 		if err != nil {
 			log.Fatalf("failed to read file: %v", err)
 		}
 		buf := bytes.NewBuffer(dat)
 		benchmarks = parseScript(buf)
-		for _, b := range benchmarks {
-			fmt.Printf("%+v\n", b)
-		}
-		fmt.Println()
 	} else {
+		// Use built-in benchmarks.
 		benchmarks = bencher.Benchmarks()
 	}
 
@@ -112,7 +109,7 @@ func main() {
 	toRun := strings.Split(*runBench, " ")
 
 	startTotal := time.Now()
-	// select built-in benchmarks
+	// run benchmarks
 	for i, b := range benchmarks {
 		// check if we want to run this particular benchmark
 		if !contains(toRun, "all") && !contains(toRun, b.Name) {
@@ -129,7 +126,7 @@ func main() {
 		if b.Type == databases.Once {
 			exec(bencher, t, i)
 		} else {
-			benchmark(t, bencher, *iter, *threads)
+			loop(t, bencher, *iter, *threads)
 		}
 
 		elapsed := time.Since(start)
@@ -164,7 +161,7 @@ func parseScript(r io.Reader) []databases.Benchmark {
 				// once
 				if mode == databases.Loop {
 					if loopStmt != "" {
-						// was loop before, flush loop statements
+						// was loop before, flush remaining loop statements
 						benchmarks = append(benchmarks, databases.Benchmark{Name: fmt.Sprintf("loop: line %v-%v", loopStart, lineN-1), Type: databases.Loop, Stmt: loopStmt})
 						loopStmt = ""
 					}
@@ -180,7 +177,7 @@ func parseScript(r io.Reader) []databases.Benchmark {
 				mode = databases.Loop
 				loopStart = lineN + 1
 			} else {
-				log.Fatalf("failed to parse mode: %v", line)
+				log.Fatalf("failed to parse mode, neither 'once' nor 'loop': %v", line)
 			}
 			// don't append \mode line
 			continue
@@ -228,7 +225,7 @@ func getImpl(dbType string, host string, port int, user, password, path string, 
 	return nil
 }
 
-func benchmark(t *template.Template, bencher Bencher, iterations, goroutines int) {
+func loop(t *template.Template, bencher Bencher, iterations, goroutines int) {
 	wg := &sync.WaitGroup{}
 	wg.Add(goroutines)
 	defer wg.Wait()
@@ -247,7 +244,6 @@ func benchmark(t *template.Template, bencher Bencher, iterations, goroutines int
 	}
 }
 
-// TODO: find better names/structure of functions
 func exec(bencher Bencher, t *template.Template, i int) {
 	sb := &strings.Builder{}
 
@@ -274,22 +270,6 @@ func exec(bencher Bencher, t *template.Template, i int) {
 		log.Fatalf("failed to execute template: %v", err)
 	}
 	bencher.Exec(sb.String())
-}
-
-func readLines(path string) ([]string, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	var lines []string
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
-	}
-
-	return lines, scanner.Err()
 }
 
 func contains(options []string, want string) bool {
