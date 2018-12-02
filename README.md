@@ -103,13 +103,8 @@ Cassandra and compatible databases (e.g. ScyllaDB) | github.com/gocql/gocql
 
 ## Custom Scripts
 
-You can run your own SQL statements with the `-script` flag. You can use the auto-generate tables. Beware the file size as it will be completely loaded into memory!
+You can run your own SQL statements with the `-script` flag. You can use the auto-generate tables. Beware the file size as it will be completely loaded into memory.
 
-``` text
-$ dbbench -type sqlite -script scripts/sqlite_bench.sql -iter 1000
-custom script: 3.851557272s     3851557 ns/op
-total: 3.85158506s
-```
 
 The script must contain valid SQL statements for your database.
 
@@ -152,7 +147,7 @@ COMMIT;
 DROP TABLE dbbench_simple;
 ```
 
-In this script, we exemplary create and delete the table manually, thus we will pass the `-noinit` and `-noclean` flag, which would otherwise create these default tables for us:
+In this script, we create and delete the table manually, thus we will pass the `-noinit` and `-noclean` flag, which would otherwise create this default table for us:
 
 ``` text
 dbbench -type sqlite -script scripts/sqlite_bench.sql -iter 1000 -noinit -noclean
