@@ -59,8 +59,7 @@ func (c *Cassandra) Setup() {
 	if err := c.session.Query("CREATE KEYSPACE IF NOT EXISTS dbbench WITH replication = { 'class':'SimpleStrategy', 'replication_factor' : 1 }").Exec(); err != nil {
 		log.Fatalf("failed to create keyspace: %v\n", err)
 	}
-	// TODO: other tests use decimal for balance, cassandra or gocql doesn't do an automatic casting from int to decimal
-	if err := c.session.Query("CREATE TABLE IF NOT EXISTS dbbench.dbbench_simple (id INT PRIMARY KEY, balance INT);").Exec(); err != nil {
+	if err := c.session.Query("CREATE TABLE IF NOT EXISTS dbbench.dbbench_simple (id INT PRIMARY KEY, balance DECIMAL);").Exec(); err != nil {
 		log.Fatalf("failed to create table: %v\n", err)
 	}
 	if err := c.session.Query("TRUNCATE dbbench.dbbench_simple;").Exec(); err != nil {
