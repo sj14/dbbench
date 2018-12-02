@@ -128,7 +128,7 @@ Exemplary `sqlite_bench.sql` file:
 ``` sql
 -- create table
 \mode once
-CREATE TABLE IF NOT EXISTS dbbench_simple (id INT PRIMARY KEY, balance DECIMAL);
+CREATE TABLE dbbench_simple (id INT PRIMARY KEY, balance DECIMAL);
 
 -- how long takes an insert and delete?
 \mode loop
@@ -164,7 +164,7 @@ total: 10.824351356s
 
 ## Known Issues
 
-- Release are built without CGO support (no support for sqlite) [#1](https://github.com/sj14/dbbench/issues/1)
+- Releases are built without CGO support (no support for sqlite) [#1](https://github.com/sj14/dbbench/issues/1)
 
 ## TODO
 
