@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gocql/gocql"
+	"github.com/sj14/dbbench/benchmark"
 )
 
 // Cassandra implements the bencher implementation.
@@ -44,12 +45,12 @@ func NewCassandra(host string, port int, user, password string) *Cassandra {
 
 // Benchmarks returns the individual benchmark functions for the cassandra db.
 // TODO: update is not like other db statements balance = balance + balance!
-func (c *Cassandra) Benchmarks() []Benchmark {
-	return []Benchmark{
-		{"inserts", Loop, "INSERT INTO dbbench.dbbench_simple (id, balance) VALUES({{.Iter}}, {{call .RandInt63}}) IF NOT EXISTS;"},
-		{"selects", Loop, "SELECT * FROM dbbench.dbbench_simple WHERE id = {{.Iter}};"},
-		{"updates", Loop, "UPDATE dbbench.dbbench_simple SET balance = {{call .RandInt63}} WHERE id = {{.Iter}} IF EXISTS;"},
-		{"deletes", Loop, "DELETE FROM dbbench.dbbench_simple WHERE id = {{.Iter}} IF EXISTS;"},
+func (c *Cassandra) Benchmarks() []benchmark.Benchmark {
+	return []benchmark.Benchmark{
+		{"inserts", benchmark.TypeLoop, "INSERT INTO dbbench.dbbench_simple (id, balance) VALUES({{.Iter}}, {{call .RandInt63}}) IF NOT EXISTS;"},
+		{"selects", benchmark.TypeLoop, "SELECT * FROM dbbench.dbbench_simple WHERE id = {{.Iter}};"},
+		{"updates", benchmark.TypeLoop, "UPDATE dbbench.dbbench_simple SET balance = {{call .RandInt63}} WHERE id = {{.Iter}} IF EXISTS;"},
+		{"deletes", benchmark.TypeLoop, "DELETE FROM dbbench.dbbench_simple WHERE id = {{.Iter}} IF EXISTS;"},
 	}
 }
 

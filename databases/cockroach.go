@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+
+	"github.com/sj14/dbbench/benchmark"
 )
 
 // Cockroach implements the bencher implementation.
@@ -32,17 +34,17 @@ func NewCockroach(host string, port int, user, password string, maxOpenConns int
 }
 
 // Benchmarks returns the individual benchmark functions for the cockroach db.
-func (p *Cockroach) Benchmarks() []Benchmark {
-	return []Benchmark{
-		{"inserts", Loop, "INSERT INTO dbbench.simple (id, balance) VALUES( {{.Iter}}, {{call .RandInt63}});"},
-		{"selects", Loop, "SELECT * FROM dbbench.simple WHERE id = {{.Iter}};"},
-		{"updates", Loop, "UPDATE dbbench.simple SET balance = {{call .RandInt63}} WHERE id = {{.Iter}};"},
-		{"deletes", Loop, "DELETE FROM dbbench.simple WHERE id = {{.Iter}};"},
-		{"relation_insert0", Loop, "INSERT INTO dbbench.relational_one (oid, balance_one) VALUES( {{.Iter}}, {{call .RandInt63}});"},
-		{"relation_insert1", Loop, "INSERT INTO dbbench.relational_two (relation, balance_two) VALUES( {{.Iter}}, {{call .RandInt63}});"},
-		{"relation_select", Loop, "SELECT * FROM dbbench.relational_two INNER JOIN dbbench.relational_one ON relational_one.oid = relational_two.relation WHERE relation = {{.Iter}};"},
-		{"relation_delete1", Loop, "DELETE FROM dbbench.relational_two WHERE relation = {{.Iter}};"},
-		{"relation_delete0", Loop, "DELETE FROM dbbench.relational_one WHERE oid = {{.Iter}};"},
+func (p *Cockroach) Benchmarks() []benchmark.Benchmark {
+	return []benchmark.Benchmark{
+		{"inserts", benchmark.TypeLoop, "INSERT INTO dbbench.simple (id, balance) VALUES( {{.Iter}}, {{call .RandInt63}});"},
+		{"selects", benchmark.TypeLoop, "SELECT * FROM dbbench.simple WHERE id = {{.Iter}};"},
+		{"updates", benchmark.TypeLoop, "UPDATE dbbench.simple SET balance = {{call .RandInt63}} WHERE id = {{.Iter}};"},
+		{"deletes", benchmark.TypeLoop, "DELETE FROM dbbench.simple WHERE id = {{.Iter}};"},
+		{"relation_insert0", benchmark.TypeLoop, "INSERT INTO dbbench.relational_one (oid, balance_one) VALUES( {{.Iter}}, {{call .RandInt63}});"},
+		{"relation_insert1", benchmark.TypeLoop, "INSERT INTO dbbench.relational_two (relation, balance_two) VALUES( {{.Iter}}, {{call .RandInt63}});"},
+		{"relation_select", benchmark.TypeLoop, "SELECT * FROM dbbench.relational_two INNER JOIN dbbench.relational_one ON relational_one.oid = relational_two.relation WHERE relation = {{.Iter}};"},
+		{"relation_delete1", benchmark.TypeLoop, "DELETE FROM dbbench.relational_two WHERE relation = {{.Iter}};"},
+		{"relation_delete0", benchmark.TypeLoop, "DELETE FROM dbbench.relational_one WHERE oid = {{.Iter}};"},
 	}
 }
 
@@ -88,29 +90,4 @@ func (p *Cockroach) Exec(stmt string) {
 	if err != nil {
 		log.Printf("%v failed: %v", stmt, err)
 	}
-}
-
-func (p *Cockroach) inserts(i int) {
-	const q = "INSERT INTO dbbench.simple VALUES($1, $2);"
-	result, err := p.db.Exec(q, i, i)
-	mustExec(result, err, "insert")
-}
-
-func (p *Cockroach) selects(i int) {
-	const q = "SELECT * FROM dbbench.simple WHERE id = $1;"
-	result, err := p.db.Exec(q, i)
-	mustExec(result, err, "select")
-
-}
-
-func (p *Cockroach) updates(i int) {
-	const q = "UPDATE dbbench.simple SET balance = $1 WHERE id = $2;"
-	result, err := p.db.Exec(q, i, i)
-	mustExec(result, err, "update")
-}
-
-func (p *Cockroach) deletes(i int) {
-	const q = "DELETE FROM dbbench.simple WHERE id = $1"
-	result, err := p.db.Exec(q, i)
-	mustExec(result, err, "delete")
 }

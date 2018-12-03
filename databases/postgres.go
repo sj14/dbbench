@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+
+	"github.com/sj14/dbbench/benchmark"
 )
 
 // Postgres implements the bencher implementation.
@@ -34,17 +36,17 @@ func NewPostgres(host string, port int, user, password string, maxOpenConns int)
 }
 
 // Benchmarks returns the individual benchmark statements for the postgres db.
-func (p *Postgres) Benchmarks() []Benchmark {
-	return []Benchmark{
-		{"inserts", Loop, "INSERT INTO dbbench.simple (id, balance) VALUES( {{.Iter}}, {{call .RandInt63}});"},
-		{"selects", Loop, "SELECT * FROM dbbench.simple WHERE id = {{.Iter}};"},
-		{"updates", Loop, "UPDATE dbbench.simple SET balance = {{call .RandInt63}} WHERE id = {{.Iter}};"},
-		{"deletes", Loop, "DELETE FROM dbbench.simple WHERE id = {{.Iter}};"},
-		{"relation_insert0", Loop, "INSERT INTO dbbench.relational_one (oid, balance_one) VALUES( {{.Iter}}, {{call .RandInt63}});"},
-		{"relation_insert1", Loop, "INSERT INTO dbbench.relational_two (relation, balance_two) VALUES( {{.Iter}}, {{call .RandInt63}});"},
-		{"relation_select", Loop, "SELECT * FROM dbbench.relational_two INNER JOIN dbbench.relational_one ON relational_one.oid = relational_two.relation WHERE relation = {{.Iter}};"},
-		{"relation_delete1", Loop, "DELETE FROM dbbench.relational_two WHERE relation = {{.Iter}};"},
-		{"relation_delete0", Loop, "DELETE FROM dbbench.relational_one WHERE oid = {{.Iter}};"},
+func (p *Postgres) Benchmarks() []benchmark.Benchmark {
+	return []benchmark.Benchmark{
+		{"inserts", benchmark.TypeLoop, "INSERT INTO dbbench.simple (id, balance) VALUES( {{.Iter}}, {{call .RandInt63}});"},
+		{"selects", benchmark.TypeLoop, "SELECT * FROM dbbench.simple WHERE id = {{.Iter}};"},
+		{"updates", benchmark.TypeLoop, "UPDATE dbbench.simple SET balance = {{call .RandInt63}} WHERE id = {{.Iter}};"},
+		{"deletes", benchmark.TypeLoop, "DELETE FROM dbbench.simple WHERE id = {{.Iter}};"},
+		{"relation_insert0", benchmark.TypeLoop, "INSERT INTO dbbench.relational_one (oid, balance_one) VALUES( {{.Iter}}, {{call .RandInt63}});"},
+		{"relation_insert1", benchmark.TypeLoop, "INSERT INTO dbbench.relational_two (relation, balance_two) VALUES( {{.Iter}}, {{call .RandInt63}});"},
+		{"relation_select", benchmark.TypeLoop, "SELECT * FROM dbbench.relational_two INNER JOIN dbbench.relational_one ON relational_one.oid = relational_two.relation WHERE relation = {{.Iter}};"},
+		{"relation_delete1", benchmark.TypeLoop, "DELETE FROM dbbench.relational_two WHERE relation = {{.Iter}};"},
+		{"relation_delete0", benchmark.TypeLoop, "DELETE FROM dbbench.relational_one WHERE oid = {{.Iter}};"},
 	}
 }
 

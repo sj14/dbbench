@@ -1,33 +1,22 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
 	"flag"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
-	"math/rand"
 	"os"
 	"strings"
-	"sync"
 	"text/template"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/sj14/dbbench/benchmark"
 	"github.com/sj14/dbbench/databases"
 )
-
-// Bencher is the interface a benchmark has to impelement.
-type Bencher interface {
-	Setup()
-	Cleanup()
-	Benchmarks() []databases.Benchmark
-	Exec(string)
-}
 
 var (
 	version = "dev version"
@@ -90,7 +79,7 @@ func main() {
 		*threads = *iter
 	}
 
-	benchmarks := []databases.Benchmark{}
+	benchmarks := []benchmark.Benchmark{}
 
 	if *scriptname != "" {
 		// Benchmark specified script.
@@ -99,7 +88,7 @@ func main() {
 			log.Fatalf("failed to read file: %v", err)
 		}
 		buf := bytes.NewBuffer(dat)
-		benchmarks = parseScript(buf)
+		benchmarks = benchmark.ParseScript(buf)
 	} else {
 		// Use built-in benchmarks.
 		benchmarks = bencher.Benchmarks()
@@ -123,10 +112,10 @@ func main() {
 		}
 
 		start := time.Now()
-		if b.Type == databases.Once {
-			exec(bencher, t, i)
+		if b.Type == benchmark.TypeOnce {
+			benchmark.Exec(bencher, t, i)
 		} else {
-			loop(t, bencher, *iter, *threads)
+			benchmark.Loop(t, bencher, *iter, *threads)
 		}
 
 		elapsed := time.Since(start)
@@ -140,68 +129,7 @@ func main() {
 	fmt.Printf("total: %v\n", time.Since(startTotal))
 }
 
-func parseScript(r io.Reader) []databases.Benchmark {
-	s := bufio.NewScanner(r)
-	benchmarks := []databases.Benchmark{}
-
-	mode := databases.Loop
-	loopStmt := ""
-	loopStart := 1
-	lineN := 1
-	for ; s.Scan(); lineN++ {
-		line := s.Text()
-
-		// skip comments and empty lines
-		if strings.HasPrefix(line, "--") || line == "" {
-			continue
-		}
-
-		if strings.HasPrefix(line, "\\mode") {
-			if strings.Contains(line, "once") {
-				// once
-				if mode == databases.Loop {
-					if loopStmt != "" {
-						// was loop before, flush remaining loop statements
-						benchmarks = append(benchmarks, databases.Benchmark{Name: fmt.Sprintf("loop: line %v-%v", loopStart, lineN-1), Type: databases.Loop, Stmt: loopStmt})
-						loopStmt = ""
-					}
-				}
-				mode = databases.Once
-			} else if strings.Contains(line, "loop") {
-				// loop
-				if loopStmt != "" {
-					// also was loop before, flush loop statements and start a new loop statement
-					benchmarks = append(benchmarks, databases.Benchmark{Name: fmt.Sprintf("loop: line %v-%v", loopStart, lineN-1), Type: databases.Loop, Stmt: loopStmt})
-					loopStmt = ""
-				}
-				mode = databases.Loop
-				loopStart = lineN + 1
-			} else {
-				log.Fatalf("failed to parse mode, neither 'once' nor 'loop': %v", line)
-			}
-			// don't append \mode line
-			continue
-		}
-
-		switch mode {
-		case databases.Once:
-			// Once, append benchmark immediately.
-			benchmarks = append(benchmarks, databases.Benchmark{Name: fmt.Sprintf("once: line %v", lineN), Type: databases.Once, Stmt: line})
-		case databases.Loop:
-			// Loop, but not finished yet, append only line.
-			loopStmt += line + "\n"
-		}
-	}
-
-	// reached the end of the file, append remaining loop statements to benchmark
-	if loopStmt != "" {
-		benchmarks = append(benchmarks, databases.Benchmark{Name: fmt.Sprintf("loop: line %v-%v", loopStart, lineN-1), Type: databases.Loop, Stmt: loopStmt})
-	}
-
-	return benchmarks
-}
-
-func getImpl(dbType string, host string, port int, user, password, path string, maxOpenConns int) Bencher {
+func getImpl(dbType string, host string, port int, user, password, path string, maxOpenConns int) benchmark.Bencher {
 	switch dbType {
 	case "sqlite":
 		if maxOpenConns != 0 {
@@ -223,53 +151,6 @@ func getImpl(dbType string, host string, port int, user, password, path string, 
 
 	log.Fatalln("missing or unknown type parameter")
 	return nil
-}
-
-func loop(t *template.Template, bencher Bencher, iterations, goroutines int) {
-	wg := &sync.WaitGroup{}
-	wg.Add(goroutines)
-	defer wg.Wait()
-
-	for routine := 0; routine < goroutines; routine++ {
-		from := ((iterations / goroutines) * routine) + 1
-		to := (iterations / goroutines) * (routine + 1)
-
-		go func(gofrom, togo int) {
-			defer wg.Done()
-
-			for i := gofrom; i <= togo; i++ {
-				exec(bencher, t, i)
-			}
-		}(from, to)
-	}
-}
-
-func exec(bencher Bencher, t *template.Template, i int) {
-	sb := &strings.Builder{}
-
-	data := struct {
-		Iter            int
-		Seed            func(int64)
-		RandInt63       func() int64
-		RandInt63n      func(int64) int64
-		RandFloat32     func() float32
-		RandFloat64     func() float64
-		RandExpFloat64  func() float64
-		RandNormFloat64 func() float64
-	}{
-		Iter:            i,
-		Seed:            rand.Seed,
-		RandInt63:       rand.Int63,
-		RandInt63n:      rand.Int63n,
-		RandFloat32:     rand.Float32,
-		RandFloat64:     rand.Float64,
-		RandExpFloat64:  rand.ExpFloat64,
-		RandNormFloat64: rand.NormFloat64,
-	}
-	if err := t.Execute(sb, data); err != nil {
-		log.Fatalf("failed to execute template: %v", err)
-	}
-	bencher.Exec(sb.String())
 }
 
 func contains(options []string, want string) bool {
