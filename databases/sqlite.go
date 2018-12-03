@@ -53,7 +53,7 @@ func (m *SQLite) Setup() {
 	if _, err := m.db.Exec("CREATE TABLE IF NOT EXISTS dbbench_relational_one (oid INT PRIMARY KEY, balance_one DECIMAL);"); err != nil {
 		log.Fatalf("failed to create table dbbench_relational_one: %v\n", err)
 	}
-	if _, err := m.db.Exec("CREATE TABLE IF NOT EXISTS dbbench_relational_two (balance_two DECIMAL, relation INT, FOREIGN KEY(relation) REFERENCES dbbench_relational_one(oid));"); err != nil {
+	if _, err := m.db.Exec("CREATE TABLE IF NOT EXISTS dbbench_relational_two (balance_two DECIMAL, relation INT PRIMARY KEY, FOREIGN KEY(relation) REFERENCES dbbench_relational_one(oid));"); err != nil {
 		log.Fatalf("failed to create table dbbench_relational_two: %v\n", err)
 	}
 	if _, err := m.db.Exec("PRAGMA foreign_keys = ON;"); err != nil {
