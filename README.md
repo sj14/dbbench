@@ -1,5 +1,7 @@
 # dbbench
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/sj14/dbbench)](https://goreportcard.com/report/github.com/sj14/dbbench)
+
 ## Table of Contents
 
 1. [Description](#Description)
