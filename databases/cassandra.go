@@ -25,7 +25,7 @@ func NewCassandra(host string, port int, user, password string) *Cassandra {
 	cluster.Keyspace = ""
 	cluster.Timeout = 5 * time.Minute
 	cluster.Consistency = gocql.Quorum
-	// TOOD: as flags
+	// TODO: as flags?
 	// Any         Consistency = 0x00
 	// One         Consistency = 0x01
 	// Two         Consistency = 0x02
