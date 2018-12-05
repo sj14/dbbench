@@ -113,7 +113,7 @@ func main() {
 
 		start := time.Now()
 		if b.Type == benchmark.TypeOnce {
-			benchmark.Exec(bencher, t, i)
+			benchmark.Exec(bencher, t, 1)
 		} else {
 			benchmark.Loop(t, bencher, *iter, *threads)
 		}

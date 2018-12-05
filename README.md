@@ -115,8 +115,8 @@ There are some built-in variables and functions which can be used in the script.
 Usage                     | Description                                   |
 --------------------------|-----------------------------------------------|
 `\mode once`                | Execute the following statements only once (e.g. to create and delete tables).
-`\mode loop`                | Execute the following statements in a loop. Executes them one after another and then starts a new iteration. Add another `\mode loop` to start another benchmark of statements.
-`{{.Iter}}`                 | The iteration counter.
+`\mode loop`                | Default mode. Execute the following statements in a loop. Executes them one after another and then starts a new iteration. Add another `\mode loop` to start another benchmark of statements.
+`{{.Iter}}`                 | The iteration counter. Will return `1` when `\mode once`.
 `{{call .Seed 42}}`         | [godoc](https://golang.org/pkg/math/rand/#Seed) (42 is an examplary seed)
 `{{call .RandInt63}}`       | [godoc](https://golang.org/pkg/math/rand/#Int63) 
 `{{call .RandInt63n 9999}}` | [godoc](https://golang.org/pkg/math/rand/#Int63n) (9999 is an examplary upper limit)
