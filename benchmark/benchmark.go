@@ -34,6 +34,7 @@ type Benchmark struct {
 	Stmt string
 }
 
+// Run executes the benchmark.
 func Run(bencher Bencher, b Benchmark, iter, threads int) time.Duration {
 	t := template.New(b.Name)
 	t, err := t.Parse(b.Stmt)
@@ -43,16 +44,16 @@ func Run(bencher Bencher, b Benchmark, iter, threads int) time.Duration {
 
 	start := time.Now()
 	if b.Type == TypeOnce {
-		Once(bencher, t)
+		once(bencher, t)
 	} else {
-		Loop(bencher, t, iter, threads)
+		loop(bencher, t, iter, threads)
 	}
 
 	return time.Since(start)
 }
 
-// Loop runs the benchmark concurrently several times.
-func Loop(bencher Bencher, t *template.Template, iterations, goroutines int) {
+// loop runs the benchmark concurrently several times.
+func loop(bencher Bencher, t *template.Template, iterations, goroutines int) {
 	wg := &sync.WaitGroup{}
 	wg.Add(goroutines)
 	defer wg.Wait()
@@ -72,13 +73,13 @@ func Loop(bencher Bencher, t *template.Template, iterations, goroutines int) {
 	}
 }
 
-// Once runs executes the template a single time.
-func Once(bencher Bencher, t *template.Template) {
+// once runs executes the template a single time.
+func once(bencher Bencher, t *template.Template) {
 	stmt := buildStmt(t, 1)
 	bencher.Exec(stmt)
 }
 
-// BuildStmt parses the template with variables and functions to a pure DB statement.
+// buildStmt parses the template with variables and functions to a pure DB statement.
 func buildStmt(t *template.Template, i int) string {
 	sb := &strings.Builder{}
 
