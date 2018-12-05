@@ -113,9 +113,9 @@ func main() {
 
 		start := time.Now()
 		if b.Type == benchmark.TypeOnce {
-			benchmark.Exec(bencher, t, 1)
+			benchmark.Once(bencher, t)
 		} else {
-			benchmark.Loop(t, bencher, *iter, *threads)
+			benchmark.Loop(bencher, t, *iter, *threads)
 		}
 
 		elapsed := time.Since(start)

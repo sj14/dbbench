@@ -34,7 +34,7 @@ type Benchmark struct {
 }
 
 // Loop runs the benchmark concurrently several times.
-func Loop(t *template.Template, bencher Bencher, iterations, goroutines int) {
+func Loop(bencher Bencher, t *template.Template, iterations, goroutines int) {
 	wg := &sync.WaitGroup{}
 	wg.Add(goroutines)
 	defer wg.Wait()
@@ -47,14 +47,21 @@ func Loop(t *template.Template, bencher Bencher, iterations, goroutines int) {
 			defer wg.Done()
 
 			for i := gofrom; i <= togo; i++ {
-				Exec(bencher, t, i)
+				stmt := buildStmt(t, i)
+				bencher.Exec(stmt)
 			}
 		}(from, to)
 	}
 }
 
-// Exec runs the benchmark.
-func Exec(bencher Bencher, t *template.Template, i int) {
+// Once runs executes the template a single time.
+func Once(bencher Bencher, t *template.Template) {
+	stmt := buildStmt(t, 1)
+	bencher.Exec(stmt)
+}
+
+// BuildStmt parses the template with variables and functions to a pure DB statement.
+func buildStmt(t *template.Template, i int) string {
 	sb := &strings.Builder{}
 
 	data := struct {
@@ -79,5 +86,5 @@ func Exec(bencher Bencher, t *template.Template, i int) {
 	if err := t.Execute(sb, data); err != nil {
 		log.Fatalf("failed to execute template: %v", err)
 	}
-	bencher.Exec(sb.String())
+	return sb.String()
 }
