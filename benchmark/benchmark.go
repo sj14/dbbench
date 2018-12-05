@@ -6,6 +6,7 @@ import (
 	"strings"
 	"sync"
 	"text/template"
+	"time"
 )
 
 // Bencher is the interface a benchmark has to impelement.
@@ -31,6 +32,23 @@ type Benchmark struct {
 	Name string
 	Type BenchType
 	Stmt string
+}
+
+func Run(bencher Bencher, b Benchmark, iter, threads int) time.Duration {
+	t := template.New(b.Name)
+	t, err := t.Parse(b.Stmt)
+	if err != nil {
+		log.Fatalf("failed to parse template: %v", err)
+	}
+
+	start := time.Now()
+	if b.Type == TypeOnce {
+		Once(bencher, t)
+	} else {
+		Loop(bencher, t, iter, threads)
+	}
+
+	return time.Since(start)
 }
 
 // Loop runs the benchmark concurrently several times.

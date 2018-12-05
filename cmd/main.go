@@ -8,7 +8,6 @@ import (
 	"log"
 	"os"
 	"strings"
-	"text/template"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -98,28 +97,15 @@ func main() {
 	toRun := strings.Split(*runBench, " ")
 
 	startTotal := time.Now()
-	// run benchmarks
 	for i, b := range benchmarks {
 		// check if we want to run this particular benchmark
 		if !contains(toRun, "all") && !contains(toRun, b.Name) {
 			continue
 		}
 
-		t := template.New(b.Name)
-		t, err := t.Parse(b.Stmt)
-		if err != nil {
-			log.Fatalf("failed to parse template: %v", err)
-		}
-
-		start := time.Now()
-		if b.Type == benchmark.TypeOnce {
-			benchmark.Once(bencher, t)
-		} else {
-			benchmark.Loop(bencher, t, *iter, *threads)
-		}
-
-		elapsed := time.Since(start)
-		fmt.Printf("%v:\t%v\t%v\tns/op\n", b.Name, elapsed, elapsed.Nanoseconds()/int64(*iter))
+		// Run the particular benchmark
+		took := benchmark.Run(bencher, b, *iter, *threads)
+		fmt.Printf("%v:\t%v\t%v\tns/op\n", b.Name, took, took.Nanoseconds()/int64(*iter))
 
 		// Don't sleep after the last benchmark
 		if i != len(bencher.Benchmarks())-1 {

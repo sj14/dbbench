@@ -6,6 +6,7 @@ import (
 )
 
 func TestParseScript(t *testing.T) {
+	// arrange
 	s := `
 -- A sample script
 -- {{.Iter}} and {{call .RandInt63}} will be replaced by the current iteration count and a random number.
@@ -38,13 +39,15 @@ INSERT INTO dbbench_simple (id, balance) VALUES(1000, 1);
 DELETE FROM dbbench_simple WHERE id = 1000;
 `
 	r := strings.NewReader(s)
+
+	// act
 	benchmarks := ParseScript(r)
-	{
-		t.Logf("%+v", benchmarks)
-		got := len(benchmarks)
-		want := 7
-		if got != want {
-			t.Errorf("got %v benchmarks, want %v", got, want)
-		}
+
+	// assert
+	got := len(benchmarks)
+	want := 7
+	if got != want {
+		t.Errorf("got %v benchmarks, want %v", got, want)
 	}
+
 }
