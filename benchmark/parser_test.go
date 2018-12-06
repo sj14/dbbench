@@ -15,10 +15,20 @@ func TestParseScript(t *testing.T) {
 		expect      []Benchmark
 	}{
 		{
-			description: "statement",
+			description: "one statement",
 			in:          "INSERT INTO ...;",
 			expect: []Benchmark{
 				{Name: "loop: line 1-1", Type: TypeLoop, Stmt: "INSERT INTO ...;"},
+			},
+		},
+		{
+			description: "two statements",
+			in: `
+			INSERT INTO ...;
+			DELETE FROM ...;
+			`,
+			expect: []Benchmark{
+				{Name: "loop: line 1-4", Type: TypeLoop, Stmt: "INSERT INTO ...;\nDELETE FROM ...;"},
 			},
 		},
 		{
