@@ -18,7 +18,7 @@ func ParseScript(r io.Reader) []Benchmark {
 	loopStart := 1
 	lineN := 1
 	for ; s.Scan(); lineN++ {
-		line := s.Text()
+		line := strings.TrimSpace(s.Text())
 
 		// skip comments and empty lines
 		if strings.HasPrefix(line, "--") || line == "" {
@@ -64,6 +64,7 @@ func ParseScript(r io.Reader) []Benchmark {
 
 	// reached the end of the file, append remaining loop statements to benchmark
 	if loopStmt != "" {
+		loopStmt = strings.TrimSuffix(loopStmt, "\n")
 		benchmarks = append(benchmarks, Benchmark{Name: fmt.Sprintf("loop: line %v-%v", loopStart, lineN-1), Type: TypeLoop, Stmt: loopStmt})
 	}
 
