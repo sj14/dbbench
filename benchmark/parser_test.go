@@ -76,13 +76,26 @@ func TestParseScript(t *testing.T) {
 			},
 		},
 		{
-			description: "two statements",
+			description: "loop/two statements",
 			in: `
+			\mode loop
 			INSERT INTO ...;
 			DELETE FROM ...;
 			`,
 			expect: []Benchmark{
-				{Name: "loop: line 1-4", Type: TypeLoop, Stmt: "INSERT INTO ...;\nDELETE FROM ...;"},
+				{Name: "loop: line 3-5", Type: TypeLoop, Stmt: "INSERT INTO ...;\nDELETE FROM ...;"},
+			},
+		},
+		{
+			description: "once/two statements",
+			in: `
+			\mode once
+			INSERT INTO ...;
+			DELETE FROM ...;
+			`,
+			expect: []Benchmark{
+				{Name: "once: line 3", Type: TypeOnce, Stmt: "INSERT INTO ...;"},
+				{Name: "once: line 4", Type: TypeOnce, Stmt: "DELETE FROM ...;"},
 			},
 		},
 		{
