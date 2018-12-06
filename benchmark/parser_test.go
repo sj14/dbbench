@@ -97,6 +97,19 @@ func TestParseScript(t *testing.T) {
 			},
 		},
 		{
+			description: "two loops/two statements",
+			in: `
+			\mode loop
+			INSERT INTO ...;
+			\mode loop
+			UPDATE ...;
+			`,
+			expect: []Benchmark{
+				{Name: "loop: line 3-3", Type: TypeLoop, Stmt: "INSERT INTO ...;\n"},
+				{Name: "loop: line 5-6", Type: TypeLoop, Stmt: "UPDATE ...;"},
+			},
+		},
+		{
 			description: "once/two statements",
 			in: `
 			\mode once
@@ -149,6 +162,15 @@ func TestParseScript(t *testing.T) {
 				{Name: "once: line 4", Type: TypeOnce, Stmt: "CREATE TABLE ...;"},
 				{Name: "loop: line 8-11", Type: TypeLoop, Stmt: "INSERT INTO ...;\nDELETE FROM ...;\n"},
 				{Name: "once: line 13", Type: TypeOnce, Stmt: "DROP TABLE ...;"},
+			},
+		},
+		{
+			description: "name statement",
+			in: `
+			\name mybench
+			INSERT INTO ...;`,
+			expect: []Benchmark{
+				{Name: "mybench", Type: TypeLoop, Stmt: "INSERT INTO ...;"},
 			},
 		},
 	}
