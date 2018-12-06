@@ -3,51 +3,142 @@ package benchmark
 import (
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestParseScript(t *testing.T) {
 	// arrange
-	s := `
--- A sample script
--- {{.Iter}} and {{call .RandInt63}} will be replaced by the current iteration count and a random number.
-
-\mode loop
-BEGIN TRANSACTION;
-INSERT INTO dbbench_simple (id, balance) VALUES({{.Iter}}, {{call .RandInt63}});
-DELETE FROM dbbench_simple WHERE id = {{.Iter}}; 
-COMMIT;
-/*
-INSERT INTO dbbench_simple (id, balance) VALUES("IT'S A TRAP", 1);
-*/
-
-\mode loop
-INSERT INTO dbbench_simple (id, balance) VALUES(1000, 1); -- inline comment
-DELETE FROM dbbench_simple WHERE id = 1000; 
-
-\mode once
-INSERT INTO dbbench_simple (id, balance) VALUES(1000, 1);
-
-DELETE FROM dbbench_simple WHERE id = 1000; 
-
-\mode once
-INSERT INTO dbbench_simple (id, balance) VALUES(1000, 1);
-
-DELETE FROM dbbench_simple WHERE id = 1000; 
-
-\mode loop
-INSERT INTO dbbench_simple (id, balance) VALUES(1000, 1);
-DELETE FROM dbbench_simple WHERE id = 1000;
-`
-	r := strings.NewReader(s)
-
-	// act
-	benchmarks := ParseScript(r)
-
-	// assert
-	got := len(benchmarks)
-	want := 7
-	if got != want {
-		t.Errorf("got %v benchmarks, want %v", got, want)
+	testCases := []struct {
+		description string
+		in          string
+		expect      []Benchmark
+	}{
+		{
+			description: "statement",
+			in:          "INSERT INTO ...;",
+			expect: []Benchmark{
+				{Name: "loop: line 1-1", Type: TypeLoop, Stmt: "INSERT INTO ...;"},
+			},
+		},
+		{
+			description: "once/statement",
+			in: `
+			\mode once
+			INSERT INTO ...;
+			`,
+			expect: []Benchmark{
+				{Name: "once: line 3", Type: TypeOnce, Stmt: "INSERT INTO ...;"},
+			},
+		},
+		{
+			description: "loop/once/statement",
+			in: `
+			\mode loop
+			\mode once
+			INSERT INTO ...;
+			`,
+			expect: []Benchmark{
+				{Name: "once: line 4", Type: TypeOnce, Stmt: "INSERT INTO ...;"},
+			},
+		},
+		{
+			description: "once/loop/statement",
+			in: `
+			\mode once
+			\mode loop
+			INSERT INTO ...;
+			`,
+			expect: []Benchmark{
+				{Name: "loop: line 4-5", Type: TypeLoop, Stmt: "INSERT INTO ...;"},
+			},
+		},
+		{
+			description: "once/once/statement",
+			in: `
+			\mode once
+			\mode once
+			INSERT INTO ...;
+			`,
+			expect: []Benchmark{
+				{Name: "once: line 4", Type: TypeOnce, Stmt: "INSERT INTO ...;"},
+			},
+		},
+		{
+			description: "loop/loop/statement",
+			in: `
+			\mode loop
+			\mode loop
+			INSERT INTO ...;
+			`,
+			expect: []Benchmark{
+				{Name: "loop: line 4-5", Type: TypeLoop, Stmt: "INSERT INTO ...;"},
+			},
+		},
+		{
+			description: "two statements",
+			in: `
+			INSERT INTO ...;
+			DELETE FROM ...;
+			`,
+			expect: []Benchmark{
+				{Name: "loop: line 1-4", Type: TypeLoop, Stmt: "INSERT INTO ...;\nDELETE FROM ...;"},
+			},
+		},
+		{
+			description: "comment line",
+			in: `
+			-- MY COMMENT
+			INSERT INTO ...;
+			DELETE FROM ...;
+			`,
+			expect: []Benchmark{
+				{Name: "loop: line 1-5", Type: TypeLoop, Stmt: "INSERT INTO ...;\nDELETE FROM ...;"},
+			},
+		},
+		{
+			description: "inline comment",
+			in: `
+			INSERT INTO ...; -- MY COMMENT
+			DELETE FROM ...;
+			`,
+			expect: []Benchmark{
+				{Name: "loop: line 1-4", Type: TypeLoop, Stmt: "INSERT INTO ...; -- MY COMMENT\nDELETE FROM ...;"},
+			},
+		},
+		{
+			description: "full example",
+			in: `
+			-- create table
+			\mode once
+			CREATE TABLE ...;
+			
+			-- how long takes an insert and delete?
+			\mode loop
+			INSERT INTO ...;
+			DELETE FROM ...; 
+			
+			-- delete table
+			\mode once
+			DROP TABLE ...;
+			`,
+			expect: []Benchmark{
+				{Name: "once: line 4", Type: TypeOnce, Stmt: "CREATE TABLE ...;"},
+				{Name: "loop: line 8-11", Type: TypeLoop, Stmt: "INSERT INTO ...;\nDELETE FROM ...;\n"},
+				{Name: "once: line 13", Type: TypeOnce, Stmt: "DROP TABLE ...;"},
+			},
+		},
 	}
 
+	for _, tt := range testCases {
+		t.Run(tt.description, func(t *testing.T) {
+			r := strings.NewReader(tt.in)
+
+			// act
+			got := ParseScript(r)
+
+			// assert
+			require.Equal(t, tt.expect, got)
+		})
+	}
 }
