@@ -31,6 +31,47 @@ func TestBuildStmt(t *testing.T) {
 	}
 }
 
+func TestRun(t *testing.T) {
+	testCases := []struct {
+		description string
+		givenType   BenchType
+	}{
+		{
+			description: "loop",
+			givenType:   TypeLoop,
+		},
+		{
+			description: "once",
+			givenType:   TypeOnce,
+		},
+	}
+
+	for _, tt := range testCases {
+		t.Run(tt.description, func(t *testing.T) {
+			// arrange
+			bencher := &mockedBencher{}
+			bencher.On("Exec", mock.Anything)
+
+			tmpl := template.New("test")
+			tmpl.Parse("can be ignored")
+
+			iter := 13
+			threads := 5
+			bLoop := Benchmark{Name: "test", Type: tt.givenType, Stmt: "NONE"}
+
+			// act
+			Run(bencher, bLoop, iter, threads)
+
+			// assert
+			switch tt.givenType {
+			case TypeLoop:
+				bencher.AssertNumberOfCalls(t, "Exec", iter)
+			case TypeOnce:
+				bencher.AssertNumberOfCalls(t, "Exec", 1)
+			}
+		})
+	}
+}
 func TestLoop(t *testing.T) {
 	// arrange
 	bencher := &mockedBencher{}
@@ -40,10 +81,10 @@ func TestLoop(t *testing.T) {
 	tmpl.Parse("{{.Iter}} {{call .RandInt63}}")
 
 	// act
-	loop(bencher, tmpl, 10, 5)
+	loop(bencher, tmpl, 17, 5)
 
 	// assert
-	bencher.AssertNumberOfCalls(t, "Exec", 10)
+	bencher.AssertNumberOfCalls(t, "Exec", 17)
 }
 
 func TestOnce(t *testing.T) {
