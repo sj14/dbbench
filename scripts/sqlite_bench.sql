@@ -1,5 +1,5 @@
 -- Create table
-\name create
+\name init
 \mode once
 CREATE TABLE dbbench_simple (id INT PRIMARY KEY, balance DECIMAL);
 
@@ -19,5 +19,5 @@ COMMIT;
 
 -- Delete table
 \mode once
-\name delete
+\name clean
 DROP TABLE dbbench_simple;
