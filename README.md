@@ -176,7 +176,7 @@ total: 19.204362858s
 ## TODO
 
 - [ ] More benchmarks and database specific benchmarks
-  - [x] ~~Relational DB specific (e.g. MySQL)~~
+  - [ ] Relational DB specific (e.g. MySQL)
   - [ ] Non-relational DB specific (e.g. Cassandra)
 - [ ] More databases
   - [ ] MSSQL
