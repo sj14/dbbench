@@ -62,10 +62,11 @@ go install github.com/sj14/dbbench/cmd
 
 Databases | Driver
 ----------|-----------
-SQLite3 and compatible databases | github.com/mattn/go-sqlite3
+Cassandra and compatible databases (e.g. ScyllaDB) | github.com/gocql/gocql
+MS SQL and compatible databases (no built-in benchmarks yet) | github.com/denisenkom/go-mssqldb
 MySQL and compatible databases (e.g. MariaDB) | github.com/go-sql-driver/mysql
 PostgreSQL and compatible databases (e.g. CockroachDB) | github.com/lib/pq
-Cassandra and compatible databases (e.g. ScyllaDB) | github.com/gocql/gocql
+SQLite3 and compatible databases | github.com/mattn/go-sqlite3
 
 ## Usage
 
@@ -229,6 +230,13 @@ dbbench -type mysql
 ``` text
 docker run --name dbbench-mariadb -p 3306:3306 -d -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=dbbench mariadb
 dbbench -type mariadb
+```
+
+### Microsoft SQL Server
+
+``` text
+docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=yourStrong(!)Password' -p 1433:1433 -d microsoft/mssql-server-linux
+dbbench -type mssql -user sa -pass 'yourStrong(!)Password'
 ```
 
 ### PostgreSQL

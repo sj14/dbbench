@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	_ "github.com/denisenkom/go-mssqldb"
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
@@ -25,7 +26,7 @@ var (
 
 func main() {
 	var (
-		dbType      = flag.String("type", "", "database to use (sqlite|mysql|postgres|cockroach|cassandra)")
+		dbType      = flag.String("type", "", "(compatible) database to use (cassandra|cockroach|mssql|mysql|postgres|sqlite)")
 		host        = flag.String("host", "localhost", "address of the server")
 		port        = flag.Int("port", 0, "port of the server (0 -> db defaults)")
 		user        = flag.String("user", "root", "user name to connect with the server")
@@ -108,7 +109,7 @@ func main() {
 		fmt.Printf("%v:\t%v\t%v\tns/op\n", b.Name, took, took.Nanoseconds()/int64(*iter))
 
 		// Don't sleep after the last benchmark
-		if i != len(bencher.Benchmarks())-1 {
+		if i != len(benchmarks)-1 {
 			time.Sleep(*sleep)
 		}
 	}
@@ -124,6 +125,8 @@ func getImpl(dbType string, host string, port int, user, password, path string, 
 		return databases.NewSQLite(path)
 	case "mysql", "mariadb":
 		return databases.NewMySQL(host, port, user, password, maxOpenConns)
+	case "mssql":
+		return databases.NewMSSQL(host, port, user, password, maxOpenConns)
 	case "postgres":
 		return databases.NewPostgres(host, port, user, password, maxOpenConns)
 	case "cockroach":
