@@ -128,8 +128,8 @@ Exemplary `sqlite_bench.sql` file:
 
 ``` sql
 -- Create table
-\name init
 \mode once
+\name init
 CREATE TABLE dbbench_simple (id INT PRIMARY KEY, balance DECIMAL);
 
 -- How long takes an insert and delete?
