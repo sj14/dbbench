@@ -47,10 +47,10 @@ func NewCassandra(host string, port int, user, password string) *Cassandra {
 // TODO: update is not like other db statements balance = balance + balance!
 func (c *Cassandra) Benchmarks() []benchmark.Benchmark {
 	return []benchmark.Benchmark{
-		{"inserts", benchmark.TypeLoop, "INSERT INTO dbbench.dbbench_simple (id, balance) VALUES({{.Iter}}, {{call .RandInt63}}) IF NOT EXISTS;"},
-		{"selects", benchmark.TypeLoop, "SELECT * FROM dbbench.dbbench_simple WHERE id = {{.Iter}};"},
-		{"updates", benchmark.TypeLoop, "UPDATE dbbench.dbbench_simple SET balance = {{call .RandInt63}} WHERE id = {{.Iter}} IF EXISTS;"},
-		{"deletes", benchmark.TypeLoop, "DELETE FROM dbbench.dbbench_simple WHERE id = {{.Iter}} IF EXISTS;"},
+		{Name: "inserts", Type: benchmark.TypeLoop, Stmt: "INSERT INTO dbbench.dbbench_simple (id, balance) VALUES({{.Iter}}, {{call .RandInt63}}) IF NOT EXISTS;"},
+		{Name: "selects", Type: benchmark.TypeLoop, Stmt: "SELECT * FROM dbbench.dbbench_simple WHERE id = {{.Iter}};"},
+		{Name: "updates", Type: benchmark.TypeLoop, Stmt: "UPDATE dbbench.dbbench_simple SET balance = {{call .RandInt63}} WHERE id = {{.Iter}} IF EXISTS;"},
+		{Name: "deletes", Type: benchmark.TypeLoop, Stmt: "DELETE FROM dbbench.dbbench_simple WHERE id = {{.Iter}} IF EXISTS;"},
 	}
 }
 
