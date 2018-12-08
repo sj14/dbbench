@@ -5,7 +5,7 @@ go:
 env:
   global:
   - GO111MODULE=on
-  - secure: tH05KdlZtl7NHadIiO5tUfWLibkFyGvRfgcke6sA8RZNi7wT8hspPUKfYTh9QGfxZYvRKthyHMvSCFL5EVF09RXTT4eMefNYpSMCFSC0zbRhSgPAZYOmIgXmPFqrla+uxrKo8GHcXqCp51bc4lYwDH3uS3SBaDm/qZxGJZXxReSK+Y3W4opgMPBNRXI0i3H9+qI7wmQ/J7CeO0KViCTWKda4M8qffe2iFC0y+F/lch8hHTyr5W7eUg6uUSVx7F1G6G9L4zQ9vqLF5TxPgFcAx9ay8IFWQse+csIOfer9HdZ8l9anhbH0YRAPNR5zGB1wI3CFLXNN2sLBsydGjUOvQ9Kc0F7CKA9tHE8hvJKzSzDiQvlzC15lfpmCNHO10kePhRnFNO9/b+/dVFo1eBeaykeJj1pcVSgGVKhymr6vSLMjHU+Ez7qH8J5mfAza82iS90yNxvFQIqokEB+LLkGF3DNKffoYSzVck4uHj6aMQ253tTMclb/QKaoRKpYzuyXsfgmz+msNce1fcDX4ox4rhSoIBGD/fV9VtXvHyOYvn4FzE8DW/GnGm2/oR98KUxZlxAnbXYik08Kb/l1RpnQ6Jv6xKvitCJjiLY9h+8D7My60blHjEqkrpk92EfkJziAsUSXI9IyCNdWiBeMFWR1YEjdi1vJRZFEAhZj7DOWbKsI= # COVERALLS_TOKEN
+  - secure: N7GlwGQap3GIr1RDgcaxo02MyiE78YrFRjdzXcPHvd7rkrPDQDOovB+9OVMv/pb4Tlia0Bt+GkcroefwpyLH8BkWyNv+YcNHytz18YVjImZoTN5mvnSX3kWEejX4A8s49FhaAas9aCLcHJAkSkH4hY0O3z9omkqpXp8Ll34rQJtv9TCVq5cJ2xDurraJ4Ld3im70UQbk5dZKsxzWbfBFf69vWtXoIkgOS1GITXwRqvSGgaeiK5HyhQY/wHmT2dZXHHA6vvfZV/cCghmUCoy6IbL26UQIy8vxKgGdYTsswYI89f6xXI8RrW+0S28naS2/GlOryO2JewBMHtKb+ReC8SvVbeTJCDhwMBUEI3vipZvvVNaF2yloAwuIeOkliDsh2+VfLdrqRUdsWQiiHQsYXXNfS2CRj09wWEsdPH6sEo7vndAgenUSmUMtHfDi6CQ9E4smuKb48X694o37WHQW8QtPryIrrCxj2ebKqzJPvM9MRUgRbVfMZ0vmZLyI1EVkPagc2o1k3v/SKANWbV+2x353RucMW5qr1YlntJSruOaO7NFnp0vB7C8BU7FGtivhtMl/gNCDdwXqRJ41V8pOCfA2RUoKqzOjbNJuEo9lgcbUfR15YSekSi2YY1RVD4z2GGnPso1n6BYRXlQVjWq2uu1upYiGIR4AoNyN6/PAPj4= # COVERALLS_TOKEN
 matrix:
   allow_failures:
   - go: master
@@ -16,6 +16,6 @@ script:
 - go get -t -v ./...
 - go test -v -race ./...
 - go tool vet .
-- go test -v -covermode=count -coverprofile=coverage.out
+- go test ./... -v -covermode=count -coverprofile=coverage.out
 - "$GOPATH/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken
   $COVERALLS_TOKEN"
