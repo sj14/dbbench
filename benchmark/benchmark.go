@@ -53,14 +53,19 @@ func Run(bencher Bencher, b Benchmark, iter, threads int) time.Duration {
 }
 
 // loop runs the benchmark concurrently several times.
-func loop(bencher Bencher, t *template.Template, iterations, goroutines int) {
+func loop(bencher Bencher, t *template.Template, iterations, threads int) {
 	wg := &sync.WaitGroup{}
-	wg.Add(goroutines)
+	wg.Add(threads)
 	defer wg.Wait()
 
-	for routine := 0; routine < goroutines; routine++ {
-		from := ((iterations / goroutines) * routine) + 1
-		to := (iterations / goroutines) * (routine + 1)
+	for routine := 0; routine < threads; routine++ {
+		from := ((iterations / threads) * routine) + 1
+		to := (iterations / threads) * (routine + 1)
+		if routine == threads-1 {
+			// Add the remainder of iterations to the last thread.
+			remainder := iterations - ((iterations / threads) * (routine + 1))
+			to += remainder
+		}
 
 		go func(gofrom, togo int) {
 			defer wg.Done()
