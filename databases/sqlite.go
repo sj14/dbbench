@@ -14,12 +14,21 @@ type SQLite struct {
 	db *sql.DB
 }
 
-var dbPath string
+var (
+	dbPath    string
+	dbCreated bool // DB file was created by dbbench
+)
 
 // NewSQLite retruns a new mysql bencher.
 func NewSQLite(path string) *SQLite {
 	dbPath = path
 
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		// We will create the database file.
+		dbCreated = true
+	}
+
+	// Automatically creates the DB file if it doesn't exist yet.
 	db, err := sql.Open("sqlite3", fmt.Sprintf("%s?cache=shared", path))
 	if err != nil {
 		log.Fatalf("failed to open connection: %v\n", err)
@@ -76,7 +85,11 @@ func (m *SQLite) Cleanup() {
 		log.Printf("failed to close connection: %v", err)
 	}
 
-	// TODO: Attention: should we really remove the file?
+	// The DB file existed before, don't remove it.
+	if !dbCreated {
+		return
+	}
+
 	if err := os.Remove(dbPath); err != nil {
 		log.Printf("not able to delete old database file: %v\n", err)
 	}
