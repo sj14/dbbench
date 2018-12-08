@@ -117,7 +117,7 @@ Usage                     | Description                                   |
 --------------------------|-----------------------------------------------|
 `\mode once`                | Execute the following statements only once (e.g. to create and delete tables).
 `\mode loop`                | Default mode. Execute the following statements in a loop. Executes them one after another and then starts a new iteration. Add another `\mode loop` to start another benchmark of statements.
-`\name`                     | Set a custom name for the DB statement(s), which will be output instead the line numbers.
+`\name insert`              | Set a custom name for the DB statement(s), which will be output instead the line numbers (`insert` is an examplay name).
 `{{.Iter}}`                 | The iteration counter. Will return `1` when `\mode once`.
 `{{call .Seed 42}}`         | [godoc](https://golang.org/pkg/math/rand/#Seed) (42 is an examplary seed)
 `{{call .RandInt63}}`       | [godoc](https://golang.org/pkg/math/rand/#Int63)
@@ -212,38 +212,16 @@ Currently, the released binary builds don't contain SQLite support. You have to 
 
 Below are some examples how to run different databases and the equivalent call of `dbbench` for testing/developing.
 
-### SQLite
+### Cassandra/ScyllaDB
 
 ``` text
-dbbench -type sqlite
+docker run --name dbbench-cassandra -p 9042:9042 -d cassandra:latest
+dbbench -type cassandra
 ```
 
-### MySQL
-
 ``` text
-docker run --name dbbench-mysql -p 3306:3306 -d -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=dbbench mysql
-dbbench -type mysql
-```
-
-### MariaDB
-
-``` text
-docker run --name dbbench-mariadb -p 3306:3306 -d -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=dbbench mariadb
-dbbench -type mariadb
-```
-
-### Microsoft SQL Server
-
-``` text
-docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=yourStrong(!)Password' -p 1433:1433 -d microsoft/mssql-server-linux
-dbbench -type mssql -user sa -pass 'yourStrong(!)Password'
-```
-
-### PostgreSQL
-
-``` text
-docker run --name dbbench-postgres -p 5432:5432 -d postgres
-dbbench -type postgres -user postgres -pass example
+docker run --name dbbench-scylla -p 9042:9042 -d scylladb/scylla
+dbbench -type scylla
 ```
 
 ### CockroachDB
@@ -254,18 +232,36 @@ docker run --name dbbench-cockroach -d -p 26257:26257 -p 8080:8080 cockroachdb/c
 dbbench -type cockroach
 ```
 
-### Cassandra
+### Microsoft SQL Server
 
 ``` text
-docker run --name dbbench-cassandra -p 9042:9042 -d cassandra:latest
-dbbench -type cassandra
+docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=yourStrong(!)Password' -p 1433:1433 -d microsoft/mssql-server-linux
+dbbench -type mssql -user sa -pass 'yourStrong(!)Password'
 ```
 
-### ScyllaDB
+### MySQL / MariaDB
 
 ``` text
-docker run --name dbbench-scylla -p 9042:9042 -d scylladb/scylla
-dbbench -type scylla
+docker run --name dbbench-mysql -p 3306:3306 -d -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=dbbench mysql
+dbbench -type mysql
+```
+
+``` text
+docker run --name dbbench-mariadb -p 3306:3306 -d -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=dbbench mariadb
+dbbench -type mariadb
+```
+
+### PostgreSQL
+
+``` text
+docker run --name dbbench-postgres -p 5432:5432 -d postgres
+dbbench -type postgres -user postgres -pass example
+```
+
+### SQLite
+
+``` text
+dbbench -type sqlite
 ```
 
 ## Acknowledgements
