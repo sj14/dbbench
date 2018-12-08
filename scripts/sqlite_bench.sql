@@ -1,22 +1,23 @@
--- A sample script
--- {{.Iter}} and {{call .RandInt63}} will be replaced by the current iteration count and a random number.
+-- Create table
+\name create
+\mode once
+CREATE TABLE dbbench_simple (id INT PRIMARY KEY, balance DECIMAL);
+
+-- How long takes an insert and delete?
 \mode loop
+\name single
+INSERT INTO dbbench_simple (id, balance) VALUES({{.Iter}}, {{call .RandInt63}});
+DELETE FROM dbbench_simple WHERE id = {{.Iter}}; 
+
+-- How long takes it in a single transaction?
+\mode loop
+\name batch
 BEGIN TRANSACTION;
 INSERT INTO dbbench_simple (id, balance) VALUES({{.Iter}}, {{call .RandInt63}});
 DELETE FROM dbbench_simple WHERE id = {{.Iter}}; 
 COMMIT;
-/*
-INSERT INTO dbbench_simple (id, balance) VALUES("IT'S A TRAP", 1);
-*/
-\mode loop
-INSERT INTO dbbench_simple (id, balance) VALUES(1000, 1); -- inline comment
-DELETE FROM dbbench_simple WHERE id = 1000; 
+
+-- Delete table
 \mode once
-INSERT INTO dbbench_simple (id, balance) VALUES(1000, 1);
-DELETE FROM dbbench_simple WHERE id = 1000; 
-\mode once
-INSERT INTO dbbench_simple (id, balance) VALUES(1000, 1);
-DELETE FROM dbbench_simple WHERE id = 1000; 
-\mode loop
-INSERT INTO dbbench_simple (id, balance) VALUES(1000, 1);
-DELETE FROM dbbench_simple WHERE id = 1000; 
+\name delete
+DROP TABLE dbbench_simple;
