@@ -1,14 +1,21 @@
 language: go
 go:
-  - "1.x"
-  - master
+- 1.x
+- master
 env:
   global:
-    - GO111MODULE=on
+  - GO111MODULE=on
+  - secure: tH05KdlZtl7NHadIiO5tUfWLibkFyGvRfgcke6sA8RZNi7wT8hspPUKfYTh9QGfxZYvRKthyHMvSCFL5EVF09RXTT4eMefNYpSMCFSC0zbRhSgPAZYOmIgXmPFqrla+uxrKo8GHcXqCp51bc4lYwDH3uS3SBaDm/qZxGJZXxReSK+Y3W4opgMPBNRXI0i3H9+qI7wmQ/J7CeO0KViCTWKda4M8qffe2iFC0y+F/lch8hHTyr5W7eUg6uUSVx7F1G6G9L4zQ9vqLF5TxPgFcAx9ay8IFWQse+csIOfer9HdZ8l9anhbH0YRAPNR5zGB1wI3CFLXNN2sLBsydGjUOvQ9Kc0F7CKA9tHE8hvJKzSzDiQvlzC15lfpmCNHO10kePhRnFNO9/b+/dVFo1eBeaykeJj1pcVSgGVKhymr6vSLMjHU+Ez7qH8J5mfAza82iS90yNxvFQIqokEB+LLkGF3DNKffoYSzVck4uHj6aMQ253tTMclb/QKaoRKpYzuyXsfgmz+msNce1fcDX4ox4rhSoIBGD/fV9VtXvHyOYvn4FzE8DW/GnGm2/oR98KUxZlxAnbXYik08Kb/l1RpnQ6Jv6xKvitCJjiLY9h+8D7My60blHjEqkrpk92EfkJziAsUSXI9IyCNdWiBeMFWR1YEjdi1vJRZFEAhZj7DOWbKsI= # COVERALLS_TOKEN
 matrix:
   allow_failures:
-    - go: master
-script: 
-  - go get -t -v ./...
-  - go test -v -race ./...
-  - go tool vet .
+  - go: master
+install:
+- go get golang.org/x/tools/cmd/cover
+- go get github.com/mattn/goveralls
+script:
+- go get -t -v ./...
+- go test -v -race ./...
+- go tool vet .
+- go test -v -covermode=count -coverprofile=coverage.out
+- "$GOPATH/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken
+  $COVERALLS_TOKEN"
