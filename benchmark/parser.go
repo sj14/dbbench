@@ -99,7 +99,7 @@ func ParseScript(r io.Reader) []Benchmark {
 				names = names[1:]
 			}
 		case TypeLoop:
-			// Loop, but not finished yet, only append the line to the statment.
+			// Loop, but not finished yet, only append the line to the statement.
 			loopStmt += line + "\n"
 		}
 	}
