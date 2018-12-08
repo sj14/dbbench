@@ -1,0 +1,14 @@
+language: go
+go:
+  - "1.x"
+  - master
+env:
+  global:
+    - GO111MODULE=on
+matrix:
+  allow_failures:
+    - go: master
+script: 
+  - go get -t -v ./...
+  - go test -v -race ./...
+  - go tool vet .
