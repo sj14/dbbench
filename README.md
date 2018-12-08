@@ -4,24 +4,23 @@
 
 ## Table of Contents
 
-1. [Description](#Description)
-1. [Example](#example)
-4. [Installation](#installation)
-2. [Supported Databases](#Supported-Databases-/-Driver)
-4. [Usage](#usage)
-4. [Custom Scripts](#custom-scripts)
-4. [Known Issues](#known-issues)
-3. [TODO](#TODO)
-3. [Troubeshooting](#troubleshooting)
-4. [Development](#development)
-4. [Acknowledgements](#Acknowledgements)
+- [Description](#Description)
+- [Example](#example)
+- [Installation](#installation)
+- [Supported Databases](#Supported-Databases-/-Driver)
+- [Usage](#usage)
+- [Custom Scripts](#custom-scripts)
+- [Known Issues](#known-issues)
+- [TODO](#TODO)
+- [Troubeshooting](#troubleshooting)
+- [Development](#development)
+- [Acknowledgements](#Acknowledgements)
 
 ## Description
 
 `dbbench` is a simple tool to benchmark or stress test a databases. You can use the simple built-in benchmarks or run your own queries.  
 
 **Attention**: This tool comes with no warranty. Don't run it on production databases.
-
 
 ## Example
 
@@ -44,9 +43,9 @@ Binaries are available for all major platforms. See the [releases](https://githu
 
 Using the [Homebrew](https://brew.sh/) package manager for macOS:
 
-```
+``` text
 brew install sj14/tap/dbbench
-``` 
+```
 
 ### Manually
 
@@ -107,7 +106,6 @@ Cassandra and compatible databases (e.g. ScyllaDB) | github.com/gocql/gocql
 
 You can run your own SQL statements with the `-script` flag. You can use the auto-generate tables. Beware the file size as it will be completely loaded into memory.
 
-
 The script must contain valid SQL statements for your database.
 
 There are some built-in variables and functions which can be used in the script. It's using the golang [template engine](https://golang.org/pkg/text/template/) which uses the delimiters `{{` and `}}`. Functions are executed with the `call` command and arguments are passed after the function name.
@@ -116,9 +114,10 @@ Usage                     | Description                                   |
 --------------------------|-----------------------------------------------|
 `\mode once`                | Execute the following statements only once (e.g. to create and delete tables).
 `\mode loop`                | Default mode. Execute the following statements in a loop. Executes them one after another and then starts a new iteration. Add another `\mode loop` to start another benchmark of statements.
+`\name`                     | Set a custom name for the DB statement(s), which will be output instead the line numbers.
 `{{.Iter}}`                 | The iteration counter. Will return `1` when `\mode once`.
 `{{call .Seed 42}}`         | [godoc](https://golang.org/pkg/math/rand/#Seed) (42 is an examplary seed)
-`{{call .RandInt63}}`       | [godoc](https://golang.org/pkg/math/rand/#Int63) 
+`{{call .RandInt63}}`       | [godoc](https://golang.org/pkg/math/rand/#Int63)
 `{{call .RandInt63n 9999}}` | [godoc](https://golang.org/pkg/math/rand/#Int63n) (9999 is an examplary upper limit)
 `{{call .RandFloat32}}`     | [godoc](https://golang.org/pkg/math/rand/#Float32)  
 `{{call .RandFloat64}}`     | [godoc](https://golang.org/pkg/math/rand/#Float64)
@@ -128,45 +127,51 @@ Usage                     | Description                                   |
 Exemplary `sqlite_bench.sql` file:
 
 ``` sql
--- create table
+-- Create table
+\name init
 \mode once
 CREATE TABLE dbbench_simple (id INT PRIMARY KEY, balance DECIMAL);
 
--- how long takes an insert and delete?
+-- How long takes an insert and delete?
 \mode loop
+\name single
 INSERT INTO dbbench_simple (id, balance) VALUES({{.Iter}}, {{call .RandInt63}});
-DELETE FROM dbbench_simple WHERE id = {{.Iter}}; 
+DELETE FROM dbbench_simple WHERE id = {{.Iter}};
 
--- low long takes it in a single transaction?
+-- How long takes it in a single transaction?
 \mode loop
+\name batch
 BEGIN TRANSACTION;
 INSERT INTO dbbench_simple (id, balance) VALUES({{.Iter}}, {{call .RandInt63}});
-DELETE FROM dbbench_simple WHERE id = {{.Iter}}; 
+DELETE FROM dbbench_simple WHERE id = {{.Iter}};
 COMMIT;
 
--- delete table
+-- Delete table
 \mode once
+\name clean
 DROP TABLE dbbench_simple;
 ```
 
 In this script, we create and delete the table manually, thus we will pass the `-noinit` and `-noclean` flag, which would otherwise create this default table for us:
 
 ``` text
-dbbench -type sqlite -script scripts/sqlite_bench.sql -iter 1000 -noinit -noclean
+dbbench -type sqlite -script scripts/sqlite_bench.sql -iter 5000 -noinit -noclean
 ```
 
 output:
+
 ``` text
-once: line 3:           3.781231ms      3781    ns/op
-loop: line 7-10:        7.334864879s    7334864 ns/op
-loop: line 12-17:       3.481569798s    3481569 ns/op
-once: line 19:          3.903027ms      3903    ns/op
-total: 10.824351356s
+(once) init:    4.100387ms      820     ns/op
+(loop) single:  12.623048911s   2524609 ns/op
+(loop) batch:   6.575640186s    1315128 ns/op
+(once) clean:   1.110485ms      222     ns/op
+total: 19.204362858s
 ```
 
 ## Known Issues
 
 - Releases are built without CGO support (no support for sqlite) [#1](https://github.com/sj14/dbbench/issues/1)
+- Benchmark names can be mixed under certain circumstances [#5](https://github.com/sj14/dbbench/issues/5)
 
 ## TODO
 
@@ -186,7 +191,7 @@ total: 10.824351356s
 failed to insert: UNIQUE constraint failed: dbbench_simple.id
 ```
 
-**Description**   
+**Description**
 The previous data wasn't removed (e.g. because the benchmark was canceled). Try to run the same command again, but with the `-clean` flag attached, which will remove the old data. Then run the original command again.
 
 ---
