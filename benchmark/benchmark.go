@@ -63,7 +63,7 @@ func loop(bencher Bencher, t *template.Template, iterations, threads int) {
 		to := (iterations / threads) * (routine + 1)
 		if routine == threads-1 {
 			// Add the remainder of iterations to the last thread.
-			remainder := iterations - ((iterations / threads) * (routine + 1))
+			remainder := iterations - to
 			to += remainder
 		}
 
