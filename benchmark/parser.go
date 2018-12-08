@@ -25,11 +25,9 @@ func ParseScript(r io.Reader) []Benchmark {
 		if len(names) > 0 {
 			if mode == TypeLoop {
 				name := "(loop) " + names[0]
-				// names = names[1:]
 				return name
 			}
 			name := "(once) " + names[0]
-			// names = names[1:]
 			return name
 		}
 		switch mode {
