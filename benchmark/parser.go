@@ -41,56 +41,58 @@ func ParseScript(r io.Reader) []Benchmark {
 		return "" // shouldn't happen
 	}
 
-	// Scan each line of the file
+	// Helper function to append a new loop benchmark
+	flushLoop := func() {
+		if loopStmt != "" {
+			// was loop before, flush remaining loop statements
+			loopStmt = strings.TrimSuffix(loopStmt, "\n")
+			benchmarks = append(benchmarks, Benchmark{Name: getName(), Type: TypeLoop, Stmt: loopStmt})
+			loopStmt = ""
+			if len(names) > 0 {
+				names = names[1:]
+			}
+		}
+	}
+
+	// Parse each line of the script file
 	for ; scanner.Scan(); lineN++ {
 		line := strings.TrimSpace(scanner.Text())
 
-		// skip comments and empty lines
+		// Skip comments and empty lines.
 		if strings.HasPrefix(line, "--") || line == "" {
 			continue
 		}
 
-		// Found name command. Set name and continue with next line.
+		// Parse '\name' command. Set name and continue with next line.
 		if strings.HasPrefix(line, "\\name ") {
 			names = append(names, strings.TrimPrefix(line, "\\name "))
 			continue
 		}
 
+		// Parse '\mode' command.
 		if strings.HasPrefix(line, "\\mode ") {
 			if strings.Contains(line, "once") {
 				// once
 				if mode == TypeLoop {
-					if loopStmt != "" {
-						// was loop before, flush remaining loop statements
-						loopStmt = strings.TrimSuffix(loopStmt, "\n")
-						benchmarks = append(benchmarks, Benchmark{Name: getName(), Type: TypeLoop, Stmt: loopStmt})
-						loopStmt = ""
-						if len(names) > 0 {
-							names = names[1:]
-						}
-					}
+					flushLoop()
 				}
 				mode = TypeOnce
 			} else if strings.Contains(line, "loop") {
 				// loop
-				if loopStmt != "" {
-					// also was loop before, flush loop statements and start a new loop statement
-					loopStmt = strings.TrimSuffix(loopStmt, "\n")
-					benchmarks = append(benchmarks, Benchmark{Name: getName(), Type: TypeLoop, Stmt: loopStmt})
-					loopStmt = ""
-					if len(names) > 0 {
-						names = names[1:]
-					}
-				}
+				flushLoop()
 				mode = TypeLoop
 				loopStart = lineN + 1
 			} else {
 				log.Fatalf("failed to parse mode, neither 'once' nor 'loop': %v", line)
 			}
-			// don't append \mode line
+
+			// don't append '\mode' line
 			continue
 		}
 
+		// Neither a '\mode' nor '\name' command line.
+		// Append the line either as benchmark type once
+		// or append line for loop benchmark.
 		switch mode {
 		case TypeOnce:
 			// Once, append benchmark immediately.
@@ -99,7 +101,7 @@ func ParseScript(r io.Reader) []Benchmark {
 				names = names[1:]
 			}
 		case TypeLoop:
-			// Loop, but not finished yet, append only line.
+			// Loop, but not finished yet, only append the line to the statment.
 			loopStmt += line + "\n"
 		}
 	}
