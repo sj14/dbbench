@@ -91,7 +91,7 @@ func (m *SQLite) Cleanup() {
 	}
 
 	if err := os.Remove(dbPath); err != nil {
-		log.Printf("not able to delete old database file: %v\n", err)
+		log.Printf("not able to delete created database file: %v\n", err)
 	}
 }
 
