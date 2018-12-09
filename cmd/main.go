@@ -72,12 +72,12 @@ func main() {
 		cockroach.AddFlagSet(maxconnsSet)
 		cockroach.Parse(os.Args[2:])
 		bencher = databases.NewCockroach(*host, *port, *user, *pass, *maxconns)
-	case "cassandra":
+	case "cassandra", "scylla":
 		cassandra.AddFlagSet(defaults)
 		cassandra.AddFlagSet(conn)
 		cockroach.Parse(os.Args[2:])
 		bencher = databases.NewCassandra(*host, *port, *user, *pass)
-	case "mysql":
+	case "mysql", "mariadb":
 		mysql.AddFlagSet(defaults)
 		mysql.AddFlagSet(conn)
 		mysql.AddFlagSet(maxconnsSet)
