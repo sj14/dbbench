@@ -38,12 +38,16 @@ func main() {
 		runBench    = defaults.String("run", "all", "only run the specified benchmarks, e.g. \"inserts deletes\"")
 		scriptname  = defaults.String("script", "", "custom sql file to execute")
 
-		// Connection flags, applicable for most databases.
+		// Connection flags, applicable for most databases (not sqlite).
 		conn = pflag.NewFlagSet("conn", pflag.ExitOnError)
 		host = conn.String("host", "localhost", "address of the server")
 		port = conn.Int("port", 0, "port of the server (0 -> db defaults)")
 		user = conn.String("user", "root", "user name to connect with the server")
 		pass = conn.String("pass", "root", "password to connect with the server")
+
+		// Max. connections, applicable for most databases (not cassandra, sqlite).
+		maxconnsSet = pflag.NewFlagSet("conns", pflag.ExitOnError)
+		maxconns    = maxconnsSet.Int("conns", 0, "max. number of open connections")
 
 		// Flag sets for each database. DB specific flags are set in the switch statement below.
 		postgres  = pflag.NewFlagSet("postgres", pflag.ExitOnError)
@@ -59,15 +63,15 @@ func main() {
 	case "postgres":
 		postgres.AddFlagSet(defaults)
 		postgres.AddFlagSet(conn)
-		conns := postgres.Int("conns", 0, "max. number of open connections")
+		postgres.AddFlagSet(maxconnsSet)
 		postgres.Parse(os.Args[2:])
-		bencher = databases.NewPostgres(*host, *port, *user, *pass, *conns)
+		bencher = databases.NewPostgres(*host, *port, *user, *pass, *maxconns)
 	case "cockroach":
 		cockroach.AddFlagSet(defaults)
 		cockroach.AddFlagSet(conn)
-		conns := cockroach.Int("conns", 0, "max. number of open connections")
+		cockroach.AddFlagSet(maxconnsSet)
 		cockroach.Parse(os.Args[2:])
-		bencher = databases.NewCockroach(*host, *port, *user, *pass, *conns)
+		bencher = databases.NewCockroach(*host, *port, *user, *pass, *maxconns)
 	case "cassandra":
 		cassandra.AddFlagSet(defaults)
 		cassandra.AddFlagSet(conn)
@@ -76,15 +80,15 @@ func main() {
 	case "mysql":
 		mysql.AddFlagSet(defaults)
 		mysql.AddFlagSet(conn)
-		conns := mysql.Int("conns", 0, "max. number of open connections")
+		mysql.AddFlagSet(maxconnsSet)
 		mysql.Parse(os.Args[2:])
-		bencher = databases.NewMySQL(*host, *port, *user, *pass, *conns)
+		bencher = databases.NewMySQL(*host, *port, *user, *pass, *maxconns)
 	case "mssql":
 		mssql.AddFlagSet(defaults)
 		mssql.AddFlagSet(conn)
-		conns := mssql.Int("conns", 0, "max. number of open connections")
+		mssql.AddFlagSet(maxconnsSet)
 		mssql.Parse(os.Args[2:])
-		bencher = databases.NewMSSQL(*host, *port, *user, *pass, *conns)
+		bencher = databases.NewMSSQL(*host, *port, *user, *pass, *maxconns)
 	case "sqlite":
 		sqlite.AddFlagSet(defaults)
 		path := sqlite.String("path", "dbbench.sqlite", "database file (sqlite only)")
