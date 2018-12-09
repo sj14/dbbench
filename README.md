@@ -11,7 +11,7 @@
 - [Installation](#installation)
 - [Supported Databases](#Supported-Databases-/-Driver)
 - [Usage](#usage)
-- [Custom Scripts](#custom-scripts)
+- [Custom Scripts](#custom--scripts)
 - [Known Issues](#known-issues)
 - [TODO](#TODO)
 - [Troubeshooting](#troubleshooting)
@@ -27,7 +27,7 @@
 ## Example
 
 ``` text
-$ dbbench -type postgres -user postgres -pass example -iter 100000
+$ dbbench postgres --user postgres --pass example --iter 100000
 inserts 6.199670776s    61996   ns/op
 updates 7.74049898s     77404   ns/op
 selects 2.911541197s    29115   ns/op
@@ -71,43 +71,23 @@ SQLite3 and compatible databases | github.com/mattn/go-sqlite3
 ## Usage
 
 ``` text
-  -clean
-        only cleanup benchmark data, e.g. after a crash
-  -conns int
-        max. number of open connections
-  -host string
-        address of the server (default "localhost")
-  -iter int
-        how many iterations should be run (default 1000)
-  -noclean
-        keep benchmark data
-  -noinit
-        do not initialize database and tables, e.g. when only running own script
-  -pass string
-        password to connect with the server (default "root")
-  -path string
-        database file (sqlite only) (default "dbbench.sqlite")
-  -port int
-        port of the server (0 -> db defaults)
-  -run string
-        only run the specified benchmarks, e.g. "inserts deletes" (default "all")
-  -script string
-        custom sql file to execute
-  -sleep duration
-        how long to pause after each single benchmark (valid units: ns, us, ms, s, m, h)
-  -threads int
-        max. number of green threads (iter >= threads > 0 (default 25)
-  -type string
-        database to use (sqlite|mysql|postgres|cockroach|cassandra)
-  -user string
-        user name to connect with the server (default "root")
-  -version
-        print version information
+Available subcommands:
+        cassandra|cockroach|mssql|mysql|postgres|sqlite
+Generic flags:
+      --clean            only cleanup benchmark data, e.g. after a crash
+      --iter int         how many iterations should be run (default 1000)
+      --noclean          keep benchmark data
+      --noinit           do not initialize database and tables, e.g. when only running own script
+      --run string       only run the specified benchmarks, e.g. "inserts deletes" (default "all")
+      --script string    custom sql file to execute
+      --sleep duration   how long to pause after each single benchmark (valid units: ns, us, ms, s, m, h)
+      --threads int      max. number of green threads (iter >= threads > 0) (default 25)
+      --version          print version information
 ```
 
 ## Custom Scripts
 
-You can run your own SQL statements with the `-script` flag. You can use the auto-generate tables. Beware the file size as it will be completely loaded into memory.
+You can run your own SQL statements with the `--script` flag. You can use the auto-generate tables. Beware the file size as it will be completely loaded into memory.
 
 The script must contain valid SQL statements for your database.
 
@@ -155,10 +135,10 @@ COMMIT;
 DROP TABLE dbbench_simple;
 ```
 
-In this script, we create and delete the table manually, thus we will pass the `-noinit` and `-noclean` flag, which would otherwise create this default table for us:
+In this script, we create and delete the table manually, thus we will pass the `--noinit` and `--noclean` flag, which would otherwise create this default table for us:
 
 ``` text
-dbbench -type sqlite -script scripts/sqlite_bench.sql -iter 5000 -noinit -noclean
+dbbench sqlite --script scripts/sqlite_bench.sql --iter 5000 --noinit --noclean
 ```
 
 output:
@@ -195,7 +175,7 @@ failed to insert: UNIQUE constraint failed: dbbench_simple.id
 ```
 
 **Description**
-The previous data wasn't removed (e.g. because the benchmark was canceled). Try to run the same command again, but with the `-clean` flag attached, which will remove the old data. Then run the original command again.
+The previous data wasn't removed (e.g. because the benchmark was canceled). Try to run the same command again, but with the `--clean` flag attached, which will remove the old data. Then run the original command again.
 
 ---
 
@@ -216,12 +196,12 @@ Below are some examples how to run different databases and the equivalent call o
 
 ``` text
 docker run --name dbbench-cassandra -p 9042:9042 -d cassandra:latest
-dbbench -type cassandra
+dbbench cassandra
 ```
 
 ``` text
 docker run --name dbbench-scylla -p 9042:9042 -d scylladb/scylla
-dbbench -type scylla
+dbbench scylla
 ```
 
 ### CockroachDB
@@ -229,39 +209,39 @@ dbbench -type scylla
 ``` text
 # port 8080 is the webinterface (optional)
 docker run --name dbbench-cockroach -d -p 26257:26257 -p 8080:8080 cockroachdb/cockroach:latest start --insecure
-dbbench -type cockroach
+dbbench cockroach
 ```
 
 ### Microsoft SQL Server
 
 ``` text
 docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=yourStrong(!)Password' -p 1433:1433 -d microsoft/mssql-server-linux
-dbbench -type mssql -user sa -pass 'yourStrong(!)Password'
+dbbench mssql -user sa -pass 'yourStrong(!)Password'
 ```
 
 ### MySQL / MariaDB
 
 ``` text
 docker run --name dbbench-mysql -p 3306:3306 -d -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=dbbench mysql
-dbbench -type mysql
+dbbench mysql
 ```
 
 ``` text
 docker run --name dbbench-mariadb -p 3306:3306 -d -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=dbbench mariadb
-dbbench -type mariadb
+dbbench mariadb
 ```
 
 ### PostgreSQL
 
 ``` text
 docker run --name dbbench-postgres -p 5432:5432 -d postgres
-dbbench -type postgres -user postgres -pass example
+dbbench postgres --user postgres --pass example
 ```
 
 ### SQLite
 
 ``` text
-dbbench -type sqlite
+dbbench sqlite
 ```
 
 ## Acknowledgements

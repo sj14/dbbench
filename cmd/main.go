@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -16,42 +15,95 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/sj14/dbbench/benchmark"
 	"github.com/sj14/dbbench/databases"
+	"github.com/spf13/pflag"
 )
 
 var (
 	version = "dev version"
 	commit  = "none"
-	date    = "unknown"
+	date    = time.Now().String()
 )
 
 func main() {
 	var (
-		dbType      = flag.String("type", "", "(compatible) database to use (cassandra|cockroach|mssql|mysql|postgres|sqlite)")
-		host        = flag.String("host", "localhost", "address of the server")
-		port        = flag.Int("port", 0, "port of the server (0 -> db defaults)")
-		user        = flag.String("user", "root", "user name to connect with the server")
-		pass        = flag.String("pass", "root", "password to connect with the server")
-		path        = flag.String("path", "dbbench.sqlite", "database file (sqlite only)")
-		conns       = flag.Int("conns", 0, "max. number of open connections")
-		iter        = flag.Int("iter", 1000, "how many iterations should be run")
-		threads     = flag.Int("threads", 25, "max. number of green threads (iter >= threads > 0")
-		sleep       = flag.Duration("sleep", 0, "how long to pause after each single benchmark (valid units: ns, us, ms, s, m, h)")
-		nosetup     = flag.Bool("noinit", false, "do not initialize database and tables, e.g. when only running own script")
-		clean       = flag.Bool("clean", false, "only cleanup benchmark data, e.g. after a crash")
-		noclean     = flag.Bool("noclean", false, "keep benchmark data")
-		versionFlag = flag.Bool("version", false, "print version information")
-		runBench    = flag.String("run", "all", "only run the specified benchmarks, e.g. \"inserts deletes\"")
-		scriptname  = flag.String("script", "", "custom sql file to execute")
+		// Default set of flags, available for all subcommands (benchmark options).
+		defaults    = pflag.NewFlagSet("defaults", pflag.ExitOnError)
+		iter        = defaults.Int("iter", 1000, "how many iterations should be run")
+		threads     = defaults.Int("threads", 25, "max. number of green threads (iter >= threads > 0)")
+		sleep       = defaults.Duration("sleep", 0, "how long to pause after each single benchmark (valid units: ns, us, ms, s, m, h)")
+		nosetup     = defaults.Bool("noinit", false, "do not initialize database and tables, e.g. when only running own script")
+		clean       = defaults.Bool("clean", false, "only cleanup benchmark data, e.g. after a crash")
+		noclean     = defaults.Bool("noclean", false, "keep benchmark data")
+		versionFlag = defaults.Bool("version", false, "print version information")
+		runBench    = defaults.String("run", "all", "only run the specified benchmarks, e.g. \"inserts deletes\"")
+		scriptname  = defaults.String("script", "", "custom sql file to execute")
+
+		// Connection flags, applicable for most databases.
+		conn = pflag.NewFlagSet("conn", pflag.ExitOnError)
+		host = conn.String("host", "localhost", "address of the server")
+		port = conn.Int("port", 0, "port of the server (0 -> db defaults)")
+		user = conn.String("user", "root", "user name to connect with the server")
+		pass = conn.String("pass", "root", "password to connect with the server")
+
+		// Flag sets for each database. DB specific flags are set in the switch statement below.
+		postgres  = pflag.NewFlagSet("postgres", pflag.ExitOnError)
+		mysql     = pflag.NewFlagSet("mysql", pflag.ExitOnError)
+		sqlite    = pflag.NewFlagSet("sqlite", pflag.ExitOnError)
+		cassandra = pflag.NewFlagSet("cassandra", pflag.ExitOnError)
+		mssql     = pflag.NewFlagSet("mssql", pflag.ExitOnError)
+		cockroach = pflag.NewFlagSet("cockroach", pflag.ExitOnError)
 	)
 
-	flag.Parse()
+	var bencher benchmark.Bencher
+	switch os.Args[1] {
+	case "postgres":
+		postgres.AddFlagSet(defaults)
+		postgres.AddFlagSet(conn)
+		conns := postgres.Int("conns", 0, "max. number of open connections")
+		postgres.Parse(os.Args[2:])
+		bencher = databases.NewPostgres(*host, *port, *user, *pass, *conns)
+	case "cockroach":
+		cockroach.AddFlagSet(defaults)
+		cockroach.AddFlagSet(conn)
+		conns := cockroach.Int("conns", 0, "max. number of open connections")
+		cockroach.Parse(os.Args[2:])
+		bencher = databases.NewCockroach(*host, *port, *user, *pass, *conns)
+	case "cassandra":
+		cassandra.AddFlagSet(defaults)
+		cassandra.AddFlagSet(conn)
+		cockroach.Parse(os.Args[2:])
+		bencher = databases.NewCassandra(*host, *port, *user, *pass)
+	case "mysql":
+		mysql.AddFlagSet(defaults)
+		mysql.AddFlagSet(conn)
+		conns := mysql.Int("conns", 0, "max. number of open connections")
+		mysql.Parse(os.Args[2:])
+		bencher = databases.NewMySQL(*host, *port, *user, *pass, *conns)
+	case "mssql":
+		mssql.AddFlagSet(defaults)
+		mssql.AddFlagSet(conn)
+		conns := mssql.Int("conns", 0, "max. number of open connections")
+		mssql.Parse(os.Args[2:])
+		bencher = databases.NewMSSQL(*host, *port, *user, *pass, *conns)
+	case "sqlite":
+		sqlite.AddFlagSet(defaults)
+		path := sqlite.String("path", "dbbench.sqlite", "database file (sqlite only)")
+		sqlite.Parse(os.Args[2:])
+		bencher = databases.NewSQLite(*path)
+	default:
+		defaults.Usage = func() {
+			fmt.Fprintf(os.Stderr, "Available subcommands:\n\tcassandra|cockroach|mssql|mysql|postgres|sqlite\n")
+			fmt.Fprintf(os.Stderr, "Generic flags:\n")
+			defaults.PrintDefaults()
+		}
+		defaults.Parse(os.Args)
+		defaults.Usage()
+	}
 
 	if *versionFlag {
 		fmt.Printf("dbbench %v, commit %v, built at %v\n", version, commit, date)
 		os.Exit(0)
 	}
-
-	bencher := getImpl(*dbType, *host, *port, *user, *pass, *path, *conns)
 
 	// only clean old data when clean flag is set
 	if *clean {
@@ -114,32 +166,6 @@ func main() {
 		}
 	}
 	fmt.Printf("total: %v\n", time.Since(startTotal))
-}
-
-func getImpl(dbType string, host string, port int, user, password, path string, maxOpenConns int) benchmark.Bencher {
-	switch dbType {
-	case "sqlite":
-		if maxOpenConns != 0 {
-			log.Fatalln("can't use 'conns' with SQLite")
-		}
-		return databases.NewSQLite(path)
-	case "mysql", "mariadb":
-		return databases.NewMySQL(host, port, user, password, maxOpenConns)
-	case "mssql":
-		return databases.NewMSSQL(host, port, user, password, maxOpenConns)
-	case "postgres":
-		return databases.NewPostgres(host, port, user, password, maxOpenConns)
-	case "cockroach":
-		return databases.NewCockroach(host, port, user, password, maxOpenConns)
-	case "cassandra", "scylla":
-		if maxOpenConns != 0 {
-			log.Fatalln("can't use 'conns' with Cassandra or ScyllaDB")
-		}
-		return databases.NewCassandra(host, port, user, password)
-	}
-
-	log.Fatalln("missing or unknown type parameter")
-	return nil
 }
 
 func contains(options []string, want string) bool {

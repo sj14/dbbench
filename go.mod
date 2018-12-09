@@ -13,6 +13,7 @@ require (
 	github.com/lib/pq v1.0.0
 	github.com/mattn/go-sqlite3 v1.10.0
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/spf13/pflag v1.0.3
 	github.com/stretchr/objx v0.1.1 // indirect
 	github.com/stretchr/testify v1.2.2
 	golang.org/x/crypto v0.0.0-20181203042331-505ab145d0a9 // indirect
