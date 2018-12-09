@@ -73,7 +73,8 @@ SQLite3 and compatible databases | github.com/mattn/go-sqlite3
 ``` text
 Available subcommands:
         cassandra|cockroach|mssql|mysql|postgres|sqlite
-Generic flags:
+        Use 'subcommand --help' for all flags of the specified command.
+Generic flags for all subcommands:
       --clean            only cleanup benchmark data, e.g. after a crash
       --iter int         how many iterations should be run (default 1000)
       --noclean          keep benchmark data

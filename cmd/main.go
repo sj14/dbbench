@@ -93,7 +93,8 @@ func main() {
 	default:
 		defaults.Usage = func() {
 			fmt.Fprintf(os.Stderr, "Available subcommands:\n\tcassandra|cockroach|mssql|mysql|postgres|sqlite\n")
-			fmt.Fprintf(os.Stderr, "Generic flags:\n")
+			fmt.Fprintf(os.Stderr, "\tUse 'subcommand --help' for all flags of the specified command.\n")
+			fmt.Fprintf(os.Stderr, "Generic flags for all subcommands:\n")
 			defaults.PrintDefaults()
 		}
 		defaults.Parse(os.Args)
