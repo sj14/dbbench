@@ -7,7 +7,7 @@ before:
     - go mod download
 builds:
 - 
-  main: ./cmd/main.go
+  main: ./cmd/dbbench/main.go
   env:
   - CGO_ENABLED=0
   goos:

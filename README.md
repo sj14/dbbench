@@ -54,8 +54,7 @@ brew install sj14/tap/dbbench
 It's also possible to install the current development snapshot with `go get` (not recommended):
 
 ``` text
-go get -u github.com/sj14/dbbench/cmd
-go install github.com/sj14/dbbench/cmd
+go get -u github.com/sj14/dbbench/cmd/dbbench
 ```
 
 ## Supported Databases / Driver
