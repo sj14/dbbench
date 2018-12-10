@@ -58,6 +58,12 @@ func main() {
 		cockroach = pflag.NewFlagSet("cockroach", pflag.ExitOnError)
 	)
 
+	// No comamnd given. Print usage help and exit.
+	if len(os.Args) < 2 {
+		printUsage(defaults)
+		os.Exit(1)
+	}
+
 	var bencher benchmark.Bencher
 	switch os.Args[1] {
 	case "postgres":
@@ -95,14 +101,9 @@ func main() {
 		sqlite.Parse(os.Args[2:])
 		bencher = databases.NewSQLite(*path)
 	default:
-		defaults.Usage = func() {
-			fmt.Fprintf(os.Stderr, "Available subcommands:\n\tcassandra|cockroach|mssql|mysql|postgres|sqlite\n")
-			fmt.Fprintf(os.Stderr, "\tUse 'subcommand --help' for all flags of the specified command.\n")
-			fmt.Fprintf(os.Stderr, "Generic flags for all subcommands:\n")
-			defaults.PrintDefaults()
-		}
-		defaults.Parse(os.Args)
-		defaults.Usage()
+		// Command not recognized. Print usage help and exit.
+		printUsage(defaults)
+		os.Exit(1)
 	}
 
 	if *versionFlag {
@@ -180,4 +181,16 @@ func contains(options []string, want string) bool {
 		}
 	}
 	return false
+}
+
+func printUsage(defaults *pflag.FlagSet) {
+	defaults.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Available subcommands:\n\tcassandra|cockroach|mssql|mysql|postgres|sqlite\n")
+		fmt.Fprintf(os.Stderr, "\tUse 'subcommand --help' for all flags of the specified command.\n")
+		fmt.Fprintf(os.Stderr, "Generic flags for all subcommands:\n")
+		defaults.PrintDefaults()
+	}
+	defaults.Parse(os.Args)
+	defaults.Usage()
+	os.Exit(1)
 }
