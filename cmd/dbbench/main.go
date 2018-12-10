@@ -58,6 +58,12 @@ func main() {
 		cockroach = pflag.NewFlagSet("cockroach", pflag.ExitOnError)
 	)
 
+	// Only show version information and exit.
+	if *versionFlag {
+		fmt.Printf("dbbench %v, commit %v, built at %v\n", version, commit, date)
+		os.Exit(0)
+	}
+
 	// No comamnd given. Print usage help and exit.
 	if len(os.Args) < 2 {
 		printUsage(defaults)
@@ -104,11 +110,6 @@ func main() {
 		// Command not recognized. Print usage help and exit.
 		printUsage(defaults)
 		os.Exit(1)
-	}
-
-	if *versionFlag {
-		fmt.Printf("dbbench %v, commit %v, built at %v\n", version, commit, date)
-		os.Exit(0)
 	}
 
 	// only clean old data when clean flag is set
