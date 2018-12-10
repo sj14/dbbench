@@ -21,7 +21,7 @@ import (
 var (
 	version = "dev version"
 	commit  = "none"
-	date    = time.Now().String()
+	date    = "unknown"
 )
 
 func main() {
