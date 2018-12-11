@@ -78,13 +78,13 @@ func loop(bencher Bencher, t *template.Template, iterations, threads int) {
 	}
 }
 
-// once runs executes the template a single time.
+// once runs the benchmark a single time.
 func once(bencher Bencher, t *template.Template) {
 	stmt := buildStmt(t, 1)
 	bencher.Exec(stmt)
 }
 
-// buildStmt parses the template with variables and functions to a pure DB statement.
+// buildStmt parses the given template with variables and functions to a pure DB statement.
 func buildStmt(t *template.Template, i int) string {
 	sb := &strings.Builder{}
 
