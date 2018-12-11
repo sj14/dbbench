@@ -39,7 +39,7 @@ total: 22.85141994s
 
 ### Precompiled Binaries
 
-Binaries are available for all major platforms. See the [releases](https://github.com/sj14/dbbench/releases) page. Unfortunately, CGO is disabled for these builds, which means they are not compiled with SQLite support.
+Binaries are available for all major platforms. See the [releases](https://github.com/sj14/dbbench/releases) page. Unfortunately, CGO is disabled for these builds, which means there is *no SQLite support*.
 
 ### Homebrew
 
