@@ -20,7 +20,7 @@
 
 ## Description
 
-`dbbench` is a simple tool to benchmark or stress test a databases. You can use the simple built-in benchmarks or run your own queries.  
+`dbbench` is a simple tool to benchmark or stress test databases. You can use the simple built-in benchmarks or run your own queries.  
 
 **Attention**: This tool comes with no warranty. Don't run it on production databases.
 
