@@ -27,94 +27,104 @@ var (
 func main() {
 	var (
 		// Default set of flags, available for all subcommands (benchmark options).
-		defaults    = pflag.NewFlagSet("defaults", pflag.ExitOnError)
-		iter        = defaults.Int("iter", 1000, "how many iterations should be run")
-		threads     = defaults.Int("threads", 25, "max. number of green threads (iter >= threads > 0)")
-		sleep       = defaults.Duration("sleep", 0, "how long to pause after each single benchmark (valid units: ns, us, ms, s, m, h)")
-		nosetup     = defaults.Bool("noinit", false, "do not initialize database and tables, e.g. when only running own script")
-		clean       = defaults.Bool("clean", false, "only cleanup benchmark data, e.g. after a crash")
-		noclean     = defaults.Bool("noclean", false, "keep benchmark data")
-		versionFlag = defaults.Bool("version", false, "print version information")
-		runBench    = defaults.String("run", "all", "only run the specified benchmarks, e.g. \"inserts deletes\"")
-		scriptname  = defaults.String("script", "", "custom sql file to execute")
+		defaultFlags = pflag.NewFlagSet("defaults", pflag.ExitOnError)
+		iter         = defaultFlags.Int("iter", 1000, "how many iterations should be run")
+		threads      = defaultFlags.Int("threads", 25, "max. number of green threads (iter >= threads > 0)")
+		sleep        = defaultFlags.Duration("sleep", 0, "how long to pause after each single benchmark (valid units: ns, us, ms, s, m, h)")
+		nosetup      = defaultFlags.Bool("noinit", false, "do not initialize database and tables, e.g. when only running own script")
+		clean        = defaultFlags.Bool("clean", false, "only cleanup benchmark data, e.g. after a crash")
+		noclean      = defaultFlags.Bool("noclean", false, "keep benchmark data")
+		versionFlag  = defaultFlags.Bool("version", false, "print version information")
+		runBench     = defaultFlags.String("run", "all", "only run the specified benchmarks, e.g. \"inserts deletes\"")
+		scriptname   = defaultFlags.String("script", "", "custom sql file to execute")
 
 		// Connection flags, applicable for most databases (not sqlite).
-		conn = pflag.NewFlagSet("conn", pflag.ExitOnError)
-		host = conn.String("host", "localhost", "address of the server")
-		port = conn.Int("port", 0, "port of the server (0 -> db defaults)")
-		user = conn.String("user", "root", "user name to connect with the server")
-		pass = conn.String("pass", "root", "password to connect with the server")
+		connFlags = pflag.NewFlagSet("conn", pflag.ExitOnError)
+		host      = connFlags.String("host", "localhost", "address of the server")
+		port      = connFlags.Int("port", 0, "port of the server (0 -> db defaults)")
+		user      = connFlags.String("user", "root", "user name to connect with the server")
+		pass      = connFlags.String("pass", "root", "password to connect with the server")
 
 		// Max. connections, applicable for most databases (not cassandra, sqlite).
-		maxconnsSet = pflag.NewFlagSet("conns", pflag.ExitOnError)
-		maxconns    = maxconnsSet.Int("conns", 0, "max. number of open connections")
+		maxconnsFlags = pflag.NewFlagSet("conns", pflag.ExitOnError)
+		maxconns      = maxconnsFlags.Int("conns", 0, "max. number of open connections")
 
 		// Flag sets for each database. DB specific flags are set in the switch statement below.
-		postgres  = pflag.NewFlagSet("postgres", pflag.ExitOnError)
-		mysql     = pflag.NewFlagSet("mysql", pflag.ExitOnError)
-		sqlite    = pflag.NewFlagSet("sqlite", pflag.ExitOnError)
-		cassandra = pflag.NewFlagSet("cassandra", pflag.ExitOnError)
-		mssql     = pflag.NewFlagSet("mssql", pflag.ExitOnError)
-		cockroach = pflag.NewFlagSet("cockroach", pflag.ExitOnError)
+		cassandraFlags = pflag.NewFlagSet("cassandra", pflag.ExitOnError)
+		cockroachFlags = pflag.NewFlagSet("cockroach", pflag.ExitOnError)
+		mssqlFlags     = pflag.NewFlagSet("mssql", pflag.ExitOnError)
+		mysqlFlags     = pflag.NewFlagSet("mysql", pflag.ExitOnError)
+		postgresFlags  = pflag.NewFlagSet("postgres", pflag.ExitOnError)
+		sqliteFlags    = pflag.NewFlagSet("sqlite", pflag.ExitOnError)
 	)
 
-	// Only show version information and exit.
-	if *versionFlag {
-		fmt.Printf("dbbench %v, commit %v, built at %v\n", version, commit, date)
-		os.Exit(0)
+	defaultFlags.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Available subcommands:\n\tcassandra|cockroach|mssql|mysql|postgres|sqlite\n")
+		fmt.Fprintf(os.Stderr, "\tUse 'subcommand --help' for all flags of the specified command.\n")
+		fmt.Fprintf(os.Stderr, "Generic flags for all subcommands:\n")
+		defaultFlags.PrintDefaults()
 	}
 
 	// No comamnd given. Print usage help and exit.
 	if len(os.Args) < 2 {
-		printUsage(defaults)
+		defaultFlags.Usage()
 		os.Exit(1)
 	}
 
 	var bencher benchmark.Bencher
 	switch os.Args[1] {
 	case "postgres":
-		postgres.AddFlagSet(defaults)
-		postgres.AddFlagSet(conn)
-		postgres.AddFlagSet(maxconnsSet)
-		postgres.Parse(os.Args[2:])
+		postgresFlags.AddFlagSet(defaultFlags)
+		postgresFlags.AddFlagSet(connFlags)
+		postgresFlags.AddFlagSet(maxconnsFlags)
+		postgresFlags.Parse(os.Args[2:])
 		bencher = databases.NewPostgres(*host, *port, *user, *pass, *maxconns)
 	case "cockroach":
-		cockroach.AddFlagSet(defaults)
-		cockroach.AddFlagSet(conn)
-		cockroach.AddFlagSet(maxconnsSet)
-		cockroach.Parse(os.Args[2:])
+		cockroachFlags.AddFlagSet(defaultFlags)
+		cockroachFlags.AddFlagSet(connFlags)
+		cockroachFlags.AddFlagSet(maxconnsFlags)
+		cockroachFlags.Parse(os.Args[2:])
 		bencher = databases.NewCockroach(*host, *port, *user, *pass, *maxconns)
 	case "cassandra", "scylla":
-		cassandra.AddFlagSet(defaults)
-		cassandra.AddFlagSet(conn)
-		cockroach.Parse(os.Args[2:])
+		cassandraFlags.AddFlagSet(defaultFlags)
+		cassandraFlags.AddFlagSet(connFlags)
+		cockroachFlags.Parse(os.Args[2:])
 		bencher = databases.NewCassandra(*host, *port, *user, *pass)
 	case "mysql", "mariadb":
-		mysql.AddFlagSet(defaults)
-		mysql.AddFlagSet(conn)
-		mysql.AddFlagSet(maxconnsSet)
-		mysql.Parse(os.Args[2:])
+		mysqlFlags.AddFlagSet(defaultFlags)
+		mysqlFlags.AddFlagSet(connFlags)
+		mysqlFlags.AddFlagSet(maxconnsFlags)
+		mysqlFlags.Parse(os.Args[2:])
 		bencher = databases.NewMySQL(*host, *port, *user, *pass, *maxconns)
 	case "mssql":
-		mssql.AddFlagSet(defaults)
-		mssql.AddFlagSet(conn)
-		mssql.AddFlagSet(maxconnsSet)
-		mssql.Parse(os.Args[2:])
+		mssqlFlags.AddFlagSet(defaultFlags)
+		mssqlFlags.AddFlagSet(connFlags)
+		mssqlFlags.AddFlagSet(maxconnsFlags)
+		mssqlFlags.Parse(os.Args[2:])
 		bencher = databases.NewMSSQL(*host, *port, *user, *pass, *maxconns)
 	case "sqlite":
-		sqlite.AddFlagSet(defaults)
-		path := sqlite.String("path", "dbbench.sqlite", "database file (sqlite only)")
-		sqlite.Parse(os.Args[2:])
+		sqliteFlags.AddFlagSet(defaultFlags)
+		path := sqliteFlags.String("path", "dbbench.sqlite", "database file (sqlite only)")
+		sqliteFlags.Parse(os.Args[2:])
 		bencher = databases.NewSQLite(*path)
 	default:
+		defaultFlags.Parse(os.Args[1:])
+
+		// Only show version information and exit.
+		if *versionFlag {
+			fmt.Printf("dbbench %v, commit %v, built at %v\n", version, commit, date)
+			os.Exit(0)
+		}
+
 		// Command not recognized. Print usage help and exit.
-		printUsage(defaults)
+		defaultFlags.Usage()
 		os.Exit(1)
 	}
 
 	// only clean old data when clean flag is set
 	if *clean {
 		bencher.Cleanup()
+		fmt.Println("cleaned data")
 		os.Exit(0)
 	}
 
@@ -131,6 +141,7 @@ func main() {
 	// we need at least one thread
 	if *threads == 0 {
 		*threads = 1
+		fmt.Println("increased to 1 thread")
 	}
 
 	// can't have more threads than iterations
@@ -182,16 +193,4 @@ func contains(options []string, want string) bool {
 		}
 	}
 	return false
-}
-
-func printUsage(defaults *pflag.FlagSet) {
-	defaults.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Available subcommands:\n\tcassandra|cockroach|mssql|mysql|postgres|sqlite\n")
-		fmt.Fprintf(os.Stderr, "\tUse 'subcommand --help' for all flags of the specified command.\n")
-		fmt.Fprintf(os.Stderr, "Generic flags for all subcommands:\n")
-		defaults.PrintDefaults()
-	}
-	defaults.Parse(os.Args)
-	defaults.Usage()
-	os.Exit(1)
 }
