@@ -29,9 +29,10 @@ const (
 
 // Benchmark contains the benchmark name, its db statement and its type.
 type Benchmark struct {
-	Name string
-	Type BenchType
-	Stmt string
+	Name     string
+	Type     BenchType
+	Parallel bool
+	Stmt     string
 }
 
 // Run executes the benchmark.
@@ -43,10 +44,19 @@ func Run(bencher Bencher, b Benchmark, iter, threads int) time.Duration {
 	}
 
 	start := time.Now()
-	if b.Type == TypeOnce {
-		once(bencher, t)
-	} else {
-		loop(bencher, t, iter, threads)
+	switch b.Type {
+	case TypeOnce:
+		if b.Parallel {
+			go once(bencher, t)
+		} else {
+			once(bencher, t)
+		}
+	case TypeLoop:
+		if b.Parallel {
+			go loop(bencher, t, iter, threads)
+		} else {
+			loop(bencher, t, iter, threads)
+		}
 	}
 
 	return time.Since(start)

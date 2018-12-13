@@ -232,6 +232,16 @@ func TestParseScript(t *testing.T) {
 		// 		{Name: "(loop) delete", Type: TypeLoop, Stmt: "DELETE ...;"},
 		// 	},
 		// },
+		{
+			description: "parallel",
+			in: `
+			\parallel
+			INSERT INTO ...;
+			`,
+			expect: []Benchmark{
+				{Name: "(loop) line 1-4", Type: TypeLoop, Parallel: true, Stmt: "INSERT INTO ...;"},
+			},
+		},
 	}
 
 	for _, tt := range testCases {
