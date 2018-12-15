@@ -34,7 +34,7 @@ func TestParseScript(t *testing.T) {
 		{
 			description: "once/statement",
 			in: `
-			\mode once
+			\benchmark once
 			INSERT INTO ...;
 			`,
 			expect: []Benchmark{
@@ -44,8 +44,8 @@ func TestParseScript(t *testing.T) {
 		{
 			description: "loop/once/statement",
 			in: `
-			\mode loop
-			\mode once
+			\benchmark loop
+			\benchmark once
 			INSERT INTO ...;
 			`,
 			expect: []Benchmark{
@@ -55,8 +55,8 @@ func TestParseScript(t *testing.T) {
 		{
 			description: "once/loop/statement",
 			in: `
-			\mode once
-			\mode loop
+			\benchmark once
+			\benchmark loop
 			INSERT INTO ...;
 			`,
 			expect: []Benchmark{
@@ -66,8 +66,8 @@ func TestParseScript(t *testing.T) {
 		{
 			description: "once/once/statement",
 			in: `
-			\mode once
-			\mode once
+			\benchmark once
+			\benchmark once
 			INSERT INTO ...;
 			`,
 			expect: []Benchmark{
@@ -77,8 +77,8 @@ func TestParseScript(t *testing.T) {
 		{
 			description: "loop/loop/statement",
 			in: `
-			\mode loop
-			\mode loop
+			\benchmark loop
+			\benchmark loop
 			INSERT INTO ...;
 			`,
 			expect: []Benchmark{
@@ -88,7 +88,7 @@ func TestParseScript(t *testing.T) {
 		{
 			description: "loop/two statements",
 			in: `
-			\mode loop
+			\benchmark loop
 			INSERT INTO ...;
 			DELETE FROM ...;
 			`,
@@ -99,9 +99,9 @@ func TestParseScript(t *testing.T) {
 		{
 			description: "two loops/two statements",
 			in: `
-			\mode loop
+			\benchmark loop
 			INSERT INTO ...;
-			\mode loop
+			\benchmark loop
 			UPDATE ...;
 			`,
 			expect: []Benchmark{
@@ -112,7 +112,7 @@ func TestParseScript(t *testing.T) {
 		{
 			description: "once/two statements",
 			in: `
-			\mode once
+			\benchmark once
 			INSERT INTO ...;
 			DELETE FROM ...;
 			`,
@@ -146,16 +146,16 @@ func TestParseScript(t *testing.T) {
 			description: "full example",
 			in: `
 			-- create table
-			\mode once
+			\benchmark once
 			CREATE TABLE ...;
 			
 			-- how long takes an insert and delete?
-			\mode loop
+			\benchmark loop
 			INSERT INTO ...;
 			DELETE FROM ...; 
 			
 			-- delete table
-			\mode once
+			\benchmark once
 			DROP TABLE ...;
 			`,
 			expect: []Benchmark{
@@ -164,25 +164,23 @@ func TestParseScript(t *testing.T) {
 				{Name: "(once) line 13", Type: TypeOnce, Stmt: "DROP TABLE ...;"},
 			},
 		},
-		{
-			description: "name command",
-			in: `
-			\name mybench
-			INSERT INTO ...;
-			`,
-			expect: []Benchmark{
-				{Name: "(loop) mybench", Type: TypeLoop, Stmt: "INSERT INTO ...;"},
-			},
-		},
+		// {
+		// 	description: "name command",
+		// 	in: `
+		// 	\name mybench
+		// 	INSERT INTO ...;
+		// 	`,
+		// 	expect: []Benchmark{
+		// 		{Name: "(loop) mybench", Type: TypeLoop, Stmt: "INSERT INTO ...;"},
+		// 	},
+		// },
 		{
 			// required the names slice/queue to work
 			description: "set new name before flush",
 			in: `
-			\name insert
-			\mode loop
+			\benchmark loop \name insert
 			INSERT INTO ...;
-			\name update
-			\mode loop
+			\benchmark loop \name update
 			UPDATE ...;
 			`,
 			expect: []Benchmark{
@@ -192,54 +190,31 @@ func TestParseScript(t *testing.T) {
 		},
 		{
 			// required the names slice/queue to work
-			description: "set 2/3 names after mode",
+			description: "set 2/3 names",
 			in: `
-			\mode loop
-			\name insert
+			\benchmark loop \name insert
 			INSERT INTO ...;
 
-			\mode loop
+			\benchmark loop
 			UPDATE ...;
 			
-			\mode loop
-			\name delete
+			\benchmark loop \name delete
 			DELETE ...;
 			`,
 			expect: []Benchmark{
 				{Name: "(loop) insert", Type: TypeLoop, Stmt: "INSERT INTO ...;"},
-				{Name: "(loop) line 7-8", Type: TypeLoop, Stmt: "UPDATE ...;"},
+				{Name: "(loop) line 6-7", Type: TypeLoop, Stmt: "UPDATE ...;"},
 				{Name: "(loop) delete", Type: TypeLoop, Stmt: "DELETE ...;"},
 			},
 		},
-		// {
-		// 	// FIXME:
-		// 	description: "set 2/3 names before mode",
-		// 	in: `
-		// 	\name insert
-		// 	\mode loop
-		// 	INSERT INTO ...;
-
-		// 	\mode loop
-		// 	UPDATE ...;
-
-		// 	\name delete
-		// 	\mode loop
-		// 	DELETE ...;
-		// 	`,
-		// 	expect: []Benchmark{
-		// 		{Name: "(loop) insert", Type: TypeLoop, Stmt: "INSERT INTO ...;"},
-		// 		{Name: "(loop) line 7-8", Type: TypeLoop, Stmt: "UPDATE ...;"},
-		// 		{Name: "(loop) delete", Type: TypeLoop, Stmt: "DELETE ...;"},
-		// 	},
-		// },
 		{
 			description: "parallel",
 			in: `
-			\parallel
+			\benchmark loop \parallel
 			INSERT INTO ...;
 			`,
 			expect: []Benchmark{
-				{Name: "(loop) line 1-4", Type: TypeLoop, Parallel: true, Stmt: "INSERT INTO ...;"},
+				{Name: "(loop) line 3-4", Type: TypeLoop, Parallel: true, Stmt: "INSERT INTO ...;"},
 			},
 		},
 	}

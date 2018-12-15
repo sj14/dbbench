@@ -95,10 +95,24 @@ There are some built-in variables and functions which can be used in the script.
 
 Usage                     | Description                                   |
 --------------------------|-----------------------------------------------|
-`\mode once`                | Execute the following statements only once (e.g. to create and delete tables).
-`\mode loop`                | Default mode. Execute the following statements in a loop. Executes them one after another and then starts a new iteration. Add another `\mode loop` to start another benchmark of statements.
+
+### Benchmark Settings
+
+A new benchmark is created with the `\benchmark` keyword, followed by either `once` or `loop`. Optional parameters can be added afterwards in the same line.
+
+The the usage description and the example subsection for more information.
+
+Usage                     | Description                                   |
+--------------------------|-----------------------------------------------|
+`\benchmark once`                | Execute the following statements (lines) only once (e.g. to create and delete tables).
+`\benchmark loop`                | Default mode. Execute the following statements (lines) in a loop. Executes them one after another and then starts a new iteration. Add another `\benchmark loop` to start another benchmark of statements.
 `\name insert`              | Set a custom name for the DB statement(s), which will be output instead the line numbers (`insert` is an examplay name).
-`{{.Iter}}`                 | The iteration counter. Will return `1` when `\mode once`.
+
+### Statement Substitutions
+
+Usage                     | Description                                   |
+--------------------------|-----------------------------------------------|
+`{{.Iter}}`                 | The iteration counter. Will return `1` when `\benchmark once`.
 `{{call .Seed 42}}`         | [godoc](https://golang.org/pkg/math/rand/#Seed) (42 is an examplary seed)
 `{{call .RandInt63}}`       | [godoc](https://golang.org/pkg/math/rand/#Int63)
 `{{call .RandInt63n 9999}}` | [godoc](https://golang.org/pkg/math/rand/#Int63n) (9999 is an examplary upper limit)
@@ -107,31 +121,29 @@ Usage                     | Description                                   |
 `{{call .RandExpFloat64}}`  | [godoc](https://golang.org/pkg/math/rand/#ExpFloat64)
 `{{call .RandNormFloat64}}` | [godoc](https://golang.org/pkg/math/rand/#NormFloat64)
 
+### Example
+
 Exemplary `sqlite_bench.sql` file:
 
 ``` sql
 -- Create table
-\mode once
-\name init
+\benchmark once \name init
 CREATE TABLE dbbench_simple (id INT PRIMARY KEY, balance DECIMAL);
 
 -- How long takes an insert and delete?
-\mode loop
-\name single
+\benchmark loop \name single
 INSERT INTO dbbench_simple (id, balance) VALUES({{.Iter}}, {{call .RandInt63}});
-DELETE FROM dbbench_simple WHERE id = {{.Iter}};
+DELETE FROM dbbench_simple WHERE id = {{.Iter}}; 
 
 -- How long takes it in a single transaction?
-\mode loop
-\name batch
+\benchmark loop \name batch
 BEGIN TRANSACTION;
 INSERT INTO dbbench_simple (id, balance) VALUES({{.Iter}}, {{call .RandInt63}});
-DELETE FROM dbbench_simple WHERE id = {{.Iter}};
+DELETE FROM dbbench_simple WHERE id = {{.Iter}}; 
 COMMIT;
 
 -- Delete table
-\mode once
-\name clean
+\benchmark once \name clean
 DROP TABLE dbbench_simple;
 ```
 
