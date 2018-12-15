@@ -93,9 +93,6 @@ The script must contain valid SQL statements for your database.
 
 There are some built-in variables and functions which can be used in the script. It's using the golang [template engine](https://golang.org/pkg/text/template/) which uses the delimiters `{{` and `}}`. Functions are executed with the `call` command and arguments are passed after the function name.
 
-Usage                     | Description                                   |
---------------------------|-----------------------------------------------|
-
 ### Benchmark Settings
 
 A new benchmark is created with the `\benchmark` keyword, followed by either `once` or `loop`. Optional parameters can be added afterwards in the same line.
