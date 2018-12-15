@@ -86,16 +86,16 @@ func ParseScript(r io.Reader) []Benchmark {
 
 			// Parse remaining tokens
 			for _, t := range tokens {
+				// reminder: can't change 'tokens' inside the range, e.g. 'cutting' with tokens[2:]
+				// so we have to iterate even the token after \name, which could be skipped otherwise.
 				switch t {
 				case "\\parallel":
 					curBench.Parallel = true
-					tokens = tokens[1:]
 				case "\\name":
 					if len(tokens) < 2 {
 						log.Fatalf("missing name after \\name token")
 					}
 					curBench.Name = tokens[1]
-					tokens = tokens[2:]
 				}
 			}
 
