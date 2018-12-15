@@ -11,7 +11,7 @@
 - [Installation](#installation)
 - [Supported Databases](#Supported-Databases-/-Driver)
 - [Usage](#usage)
-- [Custom Scripts](#custom--scripts)
+- [Custom Scripts](#custom-scripts)
 - [Known Issues](#known-issues)
 - [TODO](#TODO)
 - [Troubeshooting](#troubleshooting)
