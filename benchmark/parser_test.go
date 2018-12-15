@@ -164,19 +164,8 @@ func TestParseScript(t *testing.T) {
 				{Name: "(once) line 13", Type: TypeOnce, Stmt: "DROP TABLE ...;"},
 			},
 		},
-		// {
-		// 	description: "name command",
-		// 	in: `
-		// 	\name mybench
-		// 	INSERT INTO ...;
-		// 	`,
-		// 	expect: []Benchmark{
-		// 		{Name: "(loop) mybench", Type: TypeLoop, Stmt: "INSERT INTO ...;"},
-		// 	},
-		// },
 		{
-			// required the names slice/queue to work
-			description: "set new name before flush",
+			description: "set names",
 			in: `
 			\benchmark loop \name insert
 			INSERT INTO ...;
@@ -189,8 +178,7 @@ func TestParseScript(t *testing.T) {
 			},
 		},
 		{
-			// required the names slice/queue to work
-			description: "set 2/3 names",
+			description: "loop/set 2/3 names",
 			in: `
 			\benchmark loop \name insert
 			INSERT INTO ...;
@@ -205,6 +193,24 @@ func TestParseScript(t *testing.T) {
 				{Name: "(loop) insert", Type: TypeLoop, Stmt: "INSERT INTO ...;"},
 				{Name: "(loop) line 6-7", Type: TypeLoop, Stmt: "UPDATE ...;"},
 				{Name: "(loop) delete", Type: TypeLoop, Stmt: "DELETE ...;"},
+			},
+		},
+		{
+			description: "once/set 2/3 names",
+			in: `
+			\benchmark once \name insert
+			INSERT INTO ...;
+
+			\benchmark once
+			UPDATE ...;
+			
+			\benchmark once \name delete
+			DELETE ...;
+			`,
+			expect: []Benchmark{
+				{Name: "(once) insert", Type: TypeOnce, Stmt: "INSERT INTO ...;"},
+				{Name: "(once) line 6", Type: TypeOnce, Stmt: "UPDATE ...;"},
+				{Name: "(once) delete", Type: TypeOnce, Stmt: "DELETE ...;"},
 			},
 		},
 		{
