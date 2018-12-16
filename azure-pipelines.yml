@@ -30,15 +30,14 @@ steps:
     go version
     go get -v -t -d ./...
   workingDirectory: '$(modulePath)'
-  displayName: 'Get dependencies'
+  displayName: 'go get'
+
+- script: |
+    go vet ./...
+  workingDirectory: '$(modulePath)'
+  displayName: 'go vet'
 
 - script: |
     go test -v -race ./...
-    go vet ./...
   workingDirectory: '$(modulePath)'
-  displayName: 'Test and Vet'
-
-- script: |
-    go build -v .
-  workingDirectory: '$(modulePath)'
-  displayName: 'Build'
+  displayName: 'go test'
