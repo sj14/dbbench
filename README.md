@@ -39,7 +39,7 @@ total: 22.85141994s
 
 ### Precompiled Binaries
 
-Binaries are available for all major platforms. See the [releases](https://github.com/sj14/dbbench/releases) page. Unfortunately, CGO is disabled for these builds, which means there is *no SQLite support*.
+Binaries are available for all major platforms. See the [releases](https://github.com/sj14/dbbench/releases) page. Unfortunately, `cgo` is disabled for these builds, which means there is *no SQLite support* ([#1](https://github.com/sj14/dbbench/issues/1)).
 
 ### Homebrew
 
@@ -110,9 +110,9 @@ Usage                     | Description                                   |
 Usage                     | Description                                   |
 --------------------------|-----------------------------------------------|
 `{{.Iter}}`                 | The iteration counter. Will return `1` when `\benchmark once`.
-`{{call .Seed 42}}`         | [godoc](https://golang.org/pkg/math/rand/#Seed) (42 is an examplary seed)
+`{{call .Seed 42}}`         | [godoc](https://golang.org/pkg/math/rand/#Seed) (`42` is an examplary seed)
 `{{call .RandInt63}}`       | [godoc](https://golang.org/pkg/math/rand/#Int63)
-`{{call .RandInt63n 9999}}` | [godoc](https://golang.org/pkg/math/rand/#Int63n) (9999 is an examplary upper limit)
+`{{call .RandInt63n 9999}}` | [godoc](https://golang.org/pkg/math/rand/#Int63n) (`9999` is an examplary upper limit)
 `{{call .RandFloat32}}`     | [godoc](https://golang.org/pkg/math/rand/#Float32)  
 `{{call .RandFloat64}}`     | [godoc](https://golang.org/pkg/math/rand/#Float64)
 `{{call .RandExpFloat64}}`  | [godoc](https://golang.org/pkg/math/rand/#ExpFloat64)
@@ -159,11 +159,6 @@ output:
 (once) clean:   1.110485ms      222     ns/op
 total: 19.204362858s
 ```
-
-## Known Issues
-
-- Releases are built without CGO support (no support for sqlite) [#1](https://github.com/sj14/dbbench/issues/1)
-- Benchmark names can be mixed under certain circumstances [#5](https://github.com/sj14/dbbench/issues/5)
 
 ## TODO
 
