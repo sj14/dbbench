@@ -176,7 +176,16 @@ func main() {
 
 		// Run the particular benchmark
 		took := benchmark.Run(bencher, b, *iter, *threads)
-		fmt.Printf("%v:\t%v\t%v\tns/op\n", b.Name, took, took.Nanoseconds()/int64(*iter))
+
+		// execution in ns for mode once
+		nsPerOp := took.Nanoseconds()
+
+		// execution in ns/op for mode loop
+		if b.Type == benchmark.TypeLoop {
+			nsPerOp /= int64(*iter)
+		}
+
+		fmt.Printf("%v:\t%v\t%v\tns/op\n", b.Name, took, nsPerOp)
 
 		// Don't sleep after the last benchmark
 		if i != len(benchmarks)-1 {
