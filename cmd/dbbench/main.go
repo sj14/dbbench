@@ -149,19 +149,17 @@ func main() {
 		*threads = *iter
 	}
 
-	benchmarks := []benchmark.Benchmark{}
+	// Use built-in benchmarks.
+	benchmarks := bencher.Benchmarks()
 
+	// If a script was specified, overwrite built-in benchmarks.
 	if *scriptname != "" {
-		// Benchmark specified script.
 		dat, err := ioutil.ReadFile(*scriptname)
 		if err != nil {
 			log.Fatalf("failed to read file: %v", err)
 		}
 		buf := bytes.NewBuffer(dat)
 		benchmarks = benchmark.ParseScript(buf)
-	} else {
-		// Use built-in benchmarks.
-		benchmarks = bencher.Benchmarks()
 	}
 
 	// split benchmark names when "-run 'bench0 bench1 ...'" flag was used
