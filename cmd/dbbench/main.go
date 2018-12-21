@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"os/signal"
 	"strings"
 	"time"
 
@@ -166,30 +167,48 @@ func main() {
 	toRun := strings.Split(*runBench, " ")
 
 	startTotal := time.Now()
+
+	// notify channel for SIGINT (ctrl-c)
+	sigchan := make(chan os.Signal, 1)
+	signal.Notify(sigchan, os.Interrupt)
+
 	for i, b := range benchmarks {
-		// check if we want to run this particular benchmark
-		if !contains(toRun, "all") && !contains(toRun, b.Name) {
-			continue
-		}
+		select {
+		case <-sigchan:
+			// got SIGINT, stop benchmarking
+			printTotal(startTotal)
+			// using os.Exit(130) instead of return won't
+			// run deferred funcs (e.g. b.Cleanup())
+			return
+		default:
+			// check if we want to run this particular benchmark
+			if !contains(toRun, "all") && !contains(toRun, b.Name) {
+				continue
+			}
 
-		// Run the particular benchmark
-		took := benchmark.Run(bencher, b, *iter, *threads)
+			// run the particular benchmark
+			took := benchmark.Run(bencher, b, *iter, *threads)
 
-		// execution in ns for mode once
-		nsPerOp := took.Nanoseconds()
+			// execution in ns for mode once
+			nsPerOp := took.Nanoseconds()
 
-		// execution in ns/op for mode loop
-		if b.Type == benchmark.TypeLoop {
-			nsPerOp /= int64(*iter)
-		}
+			// execution in ns/op for mode loop
+			if b.Type == benchmark.TypeLoop {
+				nsPerOp /= int64(*iter)
+			}
 
-		fmt.Printf("%v:\t%v\t%v\tns/op\n", b.Name, took, nsPerOp)
+			fmt.Printf("%v:\t%v\t%v\tns/op\n", b.Name, took, nsPerOp)
 
-		// Don't sleep after the last benchmark
-		if i != len(benchmarks)-1 {
-			time.Sleep(*sleep)
+			// Don't sleep after the last benchmark
+			if i != len(benchmarks)-1 {
+				time.Sleep(*sleep)
+			}
 		}
 	}
+	printTotal(startTotal)
+}
+
+func printTotal(startTotal time.Time) {
 	fmt.Printf("total: %v\n", time.Since(startTotal))
 }
 

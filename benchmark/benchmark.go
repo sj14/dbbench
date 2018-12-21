@@ -3,6 +3,8 @@ package benchmark
 import (
 	"log"
 	"math/rand"
+	"os"
+	"os/signal"
 	"strings"
 	"sync"
 	"text/template"
@@ -79,10 +81,19 @@ func loop(bencher Bencher, t *template.Template, iterations, threads int) {
 
 		go func(gofrom, togo int) {
 			defer wg.Done()
+			// notify channel for SIGINT (ctrl-c)
+			sigchan := make(chan os.Signal, 1)
+			signal.Notify(sigchan, os.Interrupt)
 
 			for i := gofrom; i <= togo; i++ {
-				stmt := buildStmt(t, i)
-				bencher.Exec(stmt)
+				select {
+				case <-sigchan:
+					// got SIGINT, stop benchmarking
+					return
+				default:
+					stmt := buildStmt(t, i)
+					bencher.Exec(stmt)
+				}
 			}
 		}(from, to)
 	}
