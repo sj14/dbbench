@@ -89,7 +89,7 @@ func main() {
 	case "cassandra", "scylla":
 		cassandraFlags.AddFlagSet(defaultFlags)
 		cassandraFlags.AddFlagSet(connFlags)
-		cockroachFlags.Parse(os.Args[2:])
+		cassandraFlags.Parse(os.Args[2:])
 		bencher = databases.NewCassandra(*host, *port, *user, *pass)
 	case "mysql", "mariadb":
 		mysqlFlags.AddFlagSet(defaultFlags)
