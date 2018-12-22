@@ -70,7 +70,7 @@ func (m *SQLite) Setup() {
 	}
 	// Almost universal default mode. Thanks to D. Richard Hipp.
 	if _, err := m.db.Exec("PRAGMA journal_mode = WAL;"); err != nil {
-		log.Fatalf("failed to enabled foreign keys: %v\n", err)
+		log.Fatalf("failed to enabled write-ahead logging: %v\n", err)
 	}
 }
 
