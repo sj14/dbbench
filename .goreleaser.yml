@@ -74,7 +74,7 @@ release:
     owner: sj14
     name: dbbench
   disable: false
-  draft: true
+  draft: false
   prerelease: true
 
 changelog:
