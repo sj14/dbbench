@@ -9,7 +9,7 @@ import (
 	"github.com/sj14/dbbench/benchmark"
 )
 
-// MSSQL implements the bencher implementation.
+// MSSQL implements the bencher interface.
 type MSSQL struct {
 	db *sql.DB
 }

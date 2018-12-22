@@ -8,7 +8,7 @@ import (
 	"github.com/sj14/dbbench/benchmark"
 )
 
-// Postgres implements the bencher implementation.
+// Postgres implements the bencher interface.
 type Postgres struct {
 	db *sql.DB
 }

@@ -9,7 +9,7 @@ import (
 	"github.com/sj14/dbbench/benchmark"
 )
 
-// Cassandra implements the bencher implementation.
+// Cassandra implements the bencher interface.
 type Cassandra struct {
 	session *gocql.Session
 }

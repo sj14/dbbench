@@ -8,7 +8,7 @@ import (
 	"github.com/sj14/dbbench/benchmark"
 )
 
-// Cockroach implements the bencher implementation.
+// Cockroach implements the bencher interface.
 type Cockroach struct {
 	db *sql.DB
 }
