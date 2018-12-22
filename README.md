@@ -14,7 +14,6 @@
 - [Supported Databases](#Supported-Databases-/-Driver)
 - [Usage](#usage)
 - [Custom Scripts](#custom-scripts)
-- [Known Issues](#known-issues)
 - [TODO](#TODO)
 - [Troubeshooting](#troubleshooting)
 - [Development](#development)
@@ -41,7 +40,7 @@ total: 22.85141994s
 
 ### Precompiled Binaries
 
-Binaries are available for all major platforms. See the [releases](https://github.com/sj14/dbbench/releases) page. Unfortunately, CGO is disabled for these builds, which means there is *no SQLite support*.
+Binaries are available for all major platforms. See the [releases](https://github.com/sj14/dbbench/releases) page. Unfortunately, `cgo` is disabled for these builds, which means there is *no SQLite support* ([#1](https://github.com/sj14/dbbench/issues/1)).
 
 ### Homebrew
 
@@ -112,9 +111,9 @@ Usage                     | Description                                   |
 Usage                     | Description                                   |
 --------------------------|-----------------------------------------------|
 `{{.Iter}}`                 | The iteration counter. Will return `1` when `\benchmark once`.
-`{{call .Seed 42}}`         | [godoc](https://golang.org/pkg/math/rand/#Seed) (42 is an examplary seed)
+`{{call .Seed 42}}`         | [godoc](https://golang.org/pkg/math/rand/#Seed) (`42` is an examplary seed)
 `{{call .RandInt63}}`       | [godoc](https://golang.org/pkg/math/rand/#Int63)
-`{{call .RandInt63n 9999}}` | [godoc](https://golang.org/pkg/math/rand/#Int63n) (9999 is an examplary upper limit)
+`{{call .RandInt63n 9999}}` | [godoc](https://golang.org/pkg/math/rand/#Int63n) (`9999` is an examplary upper limit)
 `{{call .RandFloat32}}`     | [godoc](https://golang.org/pkg/math/rand/#Float32)  
 `{{call .RandFloat64}}`     | [godoc](https://golang.org/pkg/math/rand/#Float64)
 `{{call .RandExpFloat64}}`  | [godoc](https://golang.org/pkg/math/rand/#ExpFloat64)
@@ -155,17 +154,12 @@ dbbench sqlite --script scripts/sqlite_bench.sql --iter 5000 --noinit --noclean
 output:
 
 ``` text
-(once) init:    4.100387ms      820     ns/op
-(loop) single:  12.623048911s   2524609 ns/op
-(loop) batch:   6.575640186s    1315128 ns/op
-(once) clean:   1.110485ms      222     ns/op
-total: 19.204362858s
+(once) init:    3.404784ms      3404784 ns/op
+(loop) single:  10.568390874s   2113678 ns/op
+(loop) batch:   5.739021596s    1147804 ns/op
+(once) clean:   1.065703ms      1065703 ns/op
+total: 16.312319959s
 ```
-
-## Known Issues
-
-- Releases are built without CGO support (no support for sqlite) [#1](https://github.com/sj14/dbbench/issues/1)
-- Benchmark names can be mixed under certain circumstances [#5](https://github.com/sj14/dbbench/issues/5)
 
 ## TODO
 
