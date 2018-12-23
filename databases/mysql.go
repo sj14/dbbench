@@ -8,7 +8,7 @@ import (
 	"github.com/sj14/dbbench/benchmark"
 )
 
-// Mysql implements the bencher implementation.
+// Mysql implements the bencher interface.
 type Mysql struct {
 	db *sql.DB
 }

@@ -9,7 +9,7 @@ import (
 	"github.com/sj14/dbbench/benchmark"
 )
 
-// SQLite implements the bencher implementation.
+// SQLite implements the bencher interface.
 type SQLite struct {
 	db *sql.DB
 }
@@ -19,7 +19,7 @@ var (
 	dbCreated bool // DB file was created by dbbench
 )
 
-// NewSQLite retruns a new mysql bencher.
+// NewSQLite retruns a new SQLite bencher.
 func NewSQLite(path string) *SQLite {
 	dbPath = path
 
@@ -67,6 +67,10 @@ func (m *SQLite) Setup() {
 	}
 	if _, err := m.db.Exec("PRAGMA foreign_keys = ON;"); err != nil {
 		log.Fatalf("failed to enabled foreign keys: %v\n", err)
+	}
+	// Almost universal default mode. Thanks to D. Richard Hipp.
+	if _, err := m.db.Exec("PRAGMA journal_mode = WAL;"); err != nil {
+		log.Fatalf("failed to enabled write-ahead logging: %v\n", err)
 	}
 }
 
