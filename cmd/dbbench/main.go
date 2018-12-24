@@ -91,7 +91,7 @@ func main() {
 		cassandraFlags.AddFlagSet(connFlags)
 		cassandraFlags.Parse(os.Args[2:])
 		bencher = databases.NewCassandra(*host, *port, *user, *pass)
-	case "mysql", "mariadb":
+	case "mysql", "mariadb", "tidb":
 		mysqlFlags.AddFlagSet(defaultFlags)
 		mysqlFlags.AddFlagSet(connFlags)
 		mysqlFlags.AddFlagSet(maxconnsFlags)

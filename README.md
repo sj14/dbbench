@@ -64,7 +64,7 @@ Databases | Driver
 ----------|-----------
 Cassandra and compatible databases (e.g. ScyllaDB) | github.com/gocql/gocql
 MS SQL and compatible databases (no built-in benchmarks yet) | github.com/denisenkom/go-mssqldb
-MySQL and compatible databases (e.g. MariaDB) | github.com/go-sql-driver/mysql
+MySQL and compatible databases (e.g. MariaDB and TiDB) | github.com/go-sql-driver/mysql
 PostgreSQL and compatible databases (e.g. CockroachDB) | github.com/lib/pq
 SQLite3 and compatible databases | github.com/mattn/go-sqlite3
 
@@ -197,16 +197,14 @@ Currently, the released binary builds don't contain SQLite support. You have to 
 
 Below are some examples how to run different databases and the equivalent call of `dbbench` for testing/developing.
 
-### Cassandra/ScyllaDB
+### Cassandra
 
 ``` text
 docker run --name dbbench-cassandra -p 9042:9042 -d cassandra:latest
-dbbench cassandra
 ```
 
 ``` text
-docker run --name dbbench-scylla -p 9042:9042 -d scylladb/scylla
-dbbench scylla
+dbbench cassandra
 ```
 
 ### CockroachDB
@@ -214,6 +212,9 @@ dbbench scylla
 ``` text
 # port 8080 is the webinterface (optional)
 docker run --name dbbench-cockroach -d -p 26257:26257 -p 8080:8080 cockroachdb/cockroach:latest start --insecure
+```
+
+``` text
 dbbench cockroach
 ```
 
@@ -221,32 +222,74 @@ dbbench cockroach
 
 ``` text
 docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=yourStrong(!)Password' -p 1433:1433 -d microsoft/mssql-server-linux
+```
+
+``` text
 dbbench mssql -user sa -pass 'yourStrong(!)Password'
 ```
 
-### MySQL / MariaDB
+### MariaDB
 
 ``` text
-docker run --name dbbench-mysql -p 3306:3306 -d -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=dbbench mysql
-dbbench mysql
+docker run --name dbbench-mariadb -p 3306:3306 -d -e MYSQL_ROOT_PASSWORD=root mariadb
 ```
 
 ``` text
-docker run --name dbbench-mariadb -p 3306:3306 -d -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=dbbench mariadb
 dbbench mariadb
+```
+
+### MySQL
+
+``` text
+docker run --name dbbench-mysql -p 3306:3306 -d -e MYSQL_ROOT_PASSWORD=root mysql
+```
+
+``` text
+dbbench mysql
 ```
 
 ### PostgreSQL
 
 ``` text
 docker run --name dbbench-postgres -p 5432:5432 -d postgres
+```
+
+``` text
 dbbench postgres --user postgres --pass example
+```
+
+### ScyllaDB
+
+``` text
+docker run --name dbbench-scylla -p 9042:9042 -d scylladb/scylla
+```
+
+``` text
+dbbench scylla
 ```
 
 ### SQLite
 
 ``` text
 dbbench sqlite
+```
+
+### TiDB
+
+``` text
+git clone https://github.com/pingcap/tidb-docker-compose.git
+```
+
+``` text
+cd tidb-docker-compose && docker-compose pull
+```
+
+``` text
+docker-compose up -d
+```
+
+``` text
+dbbench tidb --pass '' --port 4000
 ```
 
 ## Acknowledgements

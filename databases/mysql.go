@@ -19,7 +19,7 @@ func NewMySQL(host string, port int, user, password string, maxOpenConns int) *M
 		port = 3306
 	}
 	// username:password@protocol(address)/dbname?param=value
-	dataSourceName := fmt.Sprintf("%v:%v@tcp(%v:%v)/dbbench?charset=utf8", user, password, host, port)
+	dataSourceName := fmt.Sprintf("%v:%v@tcp(%v:%v)/", user, password, host, port)
 
 	db, err := sql.Open("mysql", dataSourceName)
 	if err != nil {
@@ -54,6 +54,9 @@ func (m *Mysql) Setup() {
 	if _, err := m.db.Exec("CREATE DATABASE IF NOT EXISTS dbbench"); err != nil {
 		log.Fatalf("failed to create database: %v\n", err)
 	}
+	if _, err := m.db.Exec("USE dbbench"); err != nil {
+		log.Fatalf("failed to USE dbbench: %v\n", err)
+	}
 	if _, err := m.db.Exec("CREATE TABLE IF NOT EXISTS dbbench.simple (id INT PRIMARY KEY, balance DECIMAL);"); err != nil {
 		log.Fatalf("failed to create table: %v\n", err)
 	}
@@ -70,20 +73,8 @@ func (m *Mysql) Setup() {
 
 // Cleanup removes all remaining benchmarking data.
 func (m *Mysql) Cleanup() {
-	if _, err := m.db.Exec("DROP TABLE dbbench.simple"); err != nil {
-		log.Printf("failed to drop table: %v\n", err)
-	}
-	// When the database will be dropped here,
-	// the tool is not able recreate it during setup.
-	//
-	// if _, err := m.db.Exec("DROP DATABASE dbbench"); err != nil {
-	// 	log.Printf("failed drop schema: %v\n", err)
-	// }
-	if _, err := m.db.Exec("DROP TABLE dbbench.relational_two"); err != nil {
-		log.Printf("failed to drop table: %v\n", err)
-	}
-	if _, err := m.db.Exec("DROP TABLE dbbench.relational_one"); err != nil {
-		log.Printf("failed to drop table: %v\n", err)
+	if _, err := m.db.Exec("DROP DATABASE dbbench"); err != nil {
+		log.Printf("failed drop schema: %v\n", err)
 	}
 	if err := m.db.Close(); err != nil {
 		log.Printf("failed to close connection: %v", err)
