@@ -68,10 +68,6 @@ func (m *SQLite) Setup() {
 	if _, err := m.db.Exec("PRAGMA foreign_keys = ON;"); err != nil {
 		log.Fatalf("failed to enabled foreign keys: %v\n", err)
 	}
-	// Almost universal default mode. Thanks to D. Richard Hipp.
-	if _, err := m.db.Exec("PRAGMA journal_mode = WAL;"); err != nil {
-		log.Fatalf("failed to enabled write-ahead logging: %v\n", err)
-	}
 }
 
 // Cleanup removes all remaining benchmarking data.
