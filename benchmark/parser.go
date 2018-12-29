@@ -8,6 +8,30 @@ import (
 	"strings"
 )
 
+var (
+	// ErrNoMode is raised when tehre is no mode token after \benchmark.
+	ErrNoMode = errors.New("failed to parse \\benchmark line, missing mode")
+	// ErrNoName is raised when there is no token after \name.
+	ErrNoName = errors.New("missing name after \\name token")
+)
+
+// Helper function to determine the benchmark name.
+func getName(benchmark Benchmark, start, line int) string {
+	switch benchmark.Type {
+	case TypeLoop:
+		if benchmark.Name != "" {
+			return "(loop) " + benchmark.Name
+		}
+		return fmt.Sprintf("(loop) line %v-%v", start, line-1)
+	case TypeOnce:
+		if benchmark.Name != "" {
+			return "(once) " + benchmark.Name
+		}
+		return fmt.Sprintf("(once) line %v", line)
+	}
+	return "" // shouldn't happen
+}
+
 // ParseScript parses a benchmark script and returns the benchmarks.
 func ParseScript(r io.Reader) ([]Benchmark, error) {
 	var (
@@ -18,28 +42,11 @@ func ParseScript(r io.Reader) ([]Benchmark, error) {
 		curBench   = Benchmark{Type: TypeLoop, Parallel: false}
 	)
 
-	// Helper function to determine the benchmark name.
-	getName := func() string {
-		switch curBench.Type {
-		case TypeLoop:
-			if curBench.Name != "" {
-				return "(loop) " + curBench.Name
-			}
-			return fmt.Sprintf("(loop) line %v-%v", loopStart, lineN-1)
-		case TypeOnce:
-			if curBench.Name != "" {
-				return "(once) " + curBench.Name
-			}
-			return fmt.Sprintf("(once) line %v", lineN)
-		}
-		return "" // shouldn't happen
-	}
-
 	// Helper function to append a new loop benchmark
 	flushLoop := func() {
 		if curBench.Stmt != "" {
 			curBench.Stmt = strings.TrimSuffix(curBench.Stmt, "\n")
-			curBench.Name = getName()
+			curBench.Name = getName(curBench, loopStart, lineN)
 			benchmarks = append(benchmarks, curBench)
 
 			// Start new empty benchmark
@@ -57,7 +64,7 @@ func ParseScript(r io.Reader) ([]Benchmark, error) {
 		}
 
 		// Parse '\benchmark' command.
-		if strings.HasPrefix(line, "\\benchmark ") {
+		if strings.HasPrefix(line, "\\benchmark") {
 			tokens := strings.Split(line, " ")
 
 			// remove '\benchmark' entry from tokens
@@ -65,7 +72,7 @@ func ParseScript(r io.Reader) ([]Benchmark, error) {
 
 			if len(tokens) <= 0 {
 				// line does only consist of the token '\benchmark', we need more info
-				return []Benchmark{}, errors.New("failed to parse \\benchmark line, too few arguments")
+				return []Benchmark{}, ErrNoMode
 			}
 
 			// parse benchmark mode 'once' or 'loop'
@@ -80,7 +87,7 @@ func ParseScript(r io.Reader) ([]Benchmark, error) {
 				curBench.Type = TypeLoop
 				loopStart = lineN + 1
 			default:
-				return []Benchmark{}, fmt.Errorf("failed to parse mode, neither 'once' nor 'loop': %v", line)
+				return []Benchmark{}, fmt.Errorf("failed to parse mode, neither 'once' nor 'loop': %v", tokens[0])
 			}
 			// remove the mode token from the tokens
 			tokens = tokens[1:]
@@ -94,7 +101,7 @@ func ParseScript(r io.Reader) ([]Benchmark, error) {
 					curBench.Parallel = true
 				case "\\name":
 					if len(tokens) < 2 {
-						return []Benchmark{}, errors.New("missing name after \\name token")
+						return []Benchmark{}, ErrNoName
 					}
 					curBench.Name = tokens[1]
 				}
@@ -112,7 +119,7 @@ func ParseScript(r io.Reader) ([]Benchmark, error) {
 		case TypeOnce:
 			// Once, append benchmark immediately.
 			curBench.Type = TypeOnce
-			curBench.Name = getName()
+			curBench.Name = getName(curBench, loopStart, lineN)
 			curBench.Stmt = line
 			benchmarks = append(benchmarks, curBench)
 			// As long as there is no mode change, keep it TypeOnce, which is the non-default mode.
@@ -126,7 +133,7 @@ func ParseScript(r io.Reader) ([]Benchmark, error) {
 	// reached the end of the file, append remaining loop statements to benchmark
 	if curBench.Stmt != "" {
 		curBench.Stmt = strings.TrimSuffix(curBench.Stmt, "\n")
-		curBench.Name = getName()
+		curBench.Name = getName(curBench, loopStart, lineN)
 		benchmarks = append(benchmarks, curBench)
 	}
 
