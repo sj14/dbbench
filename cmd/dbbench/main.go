@@ -160,7 +160,10 @@ func main() {
 			log.Fatalf("failed to read file: %v", err)
 		}
 		buf := bytes.NewBuffer(dat)
-		benchmarks = benchmark.ParseScript(buf)
+		benchmarks, err = benchmark.ParseScript(buf)
+		if err != nil {
+			log.Fatalf("failed to parse script: %v\n", err)
+		}
 	}
 
 	// split benchmark names when "-run 'bench0 bench1 ...'" flag was used

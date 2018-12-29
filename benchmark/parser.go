@@ -2,20 +2,20 @@ package benchmark
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
-	"log"
 	"strings"
 )
 
 // ParseScript parses a benchmark script and returns the benchmarks.
-func ParseScript(r io.Reader) []Benchmark {
+func ParseScript(r io.Reader) ([]Benchmark, error) {
 	var (
 		scanner    = bufio.NewScanner(r)
+		loopStart  = 1             // line the current loop mode started
+		lineN      = 1             // current line number
 		benchmarks = []Benchmark{} // the result
 		curBench   = Benchmark{Type: TypeLoop, Parallel: false}
-		loopStart  = 1 // line the current loop mode started
-		lineN      = 1 // current line number
 	)
 
 	// Helper function to determine the benchmark name.
@@ -64,10 +64,11 @@ func ParseScript(r io.Reader) []Benchmark {
 			tokens = tokens[1:]
 
 			if len(tokens) <= 0 {
-				// Line does only consist of the token '\benchmark', we need more info.
-				log.Fatalf("failed to parse \\benchmark line, too few arguments")
+				// line does only consist of the token '\benchmark', we need more info
+				return []Benchmark{}, errors.New("failed to parse \\benchmark line, too few arguments")
 			}
 
+			// parse benchmark mode 'once' or 'loop'
 			switch tokens[0] {
 			case "once":
 				if curBench.Type == TypeLoop {
@@ -79,7 +80,7 @@ func ParseScript(r io.Reader) []Benchmark {
 				curBench.Type = TypeLoop
 				loopStart = lineN + 1
 			default:
-				log.Fatalf("failed to parse mode, neither 'once' nor 'loop': %v", line)
+				return []Benchmark{}, fmt.Errorf("failed to parse mode, neither 'once' nor 'loop': %v", line)
 			}
 			// remove the mode token from the tokens
 			tokens = tokens[1:]
@@ -93,7 +94,7 @@ func ParseScript(r io.Reader) []Benchmark {
 					curBench.Parallel = true
 				case "\\name":
 					if len(tokens) < 2 {
-						log.Fatalf("missing name after \\name token")
+						return []Benchmark{}, errors.New("missing name after \\name token")
 					}
 					curBench.Name = tokens[1]
 				}
@@ -104,6 +105,7 @@ func ParseScript(r io.Reader) []Benchmark {
 		}
 
 		// Neither a '\benchmark' nor '\name' command line.
+		// Should be an SQL statement line.
 		// Append the line either as benchmark type once
 		// or append line for loop benchmark.
 		switch curBench.Type {
@@ -128,5 +130,5 @@ func ParseScript(r io.Reader) []Benchmark {
 		benchmarks = append(benchmarks, curBench)
 	}
 
-	return benchmarks
+	return benchmarks, nil
 }

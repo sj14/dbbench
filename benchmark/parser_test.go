@@ -230,7 +230,8 @@ func TestParseScript(t *testing.T) {
 			r := strings.NewReader(tt.in)
 
 			// act
-			got := ParseScript(r)
+			got, err := ParseScript(r)
+			require.NoError(t, err)
 
 			// assert
 			require.Equal(t, tt.expect, got)
