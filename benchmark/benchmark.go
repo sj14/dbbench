@@ -70,15 +70,19 @@ func loop(bencher Bencher, t *template.Template, iterations, threads int) {
 	wg.Add(threads)
 	defer wg.Wait()
 
+	// start as many routines as specified
 	for routine := 0; routine < threads; routine++ {
+		// calculate the amount of iterations to execute in this routine
 		from := ((iterations / threads) * routine) + 1
 		to := (iterations / threads) * (routine + 1)
+
+		// Add the remainder of iterations to the last routine.
 		if routine == threads-1 {
-			// Add the remainder of iterations to the last thread.
 			remainder := iterations - to
 			to += remainder
 		}
 
+		// start the routine
 		go func(gofrom, togo int) {
 			defer wg.Done()
 			// notify channel for SIGINT (ctrl-c)
@@ -91,6 +95,7 @@ func loop(bencher Bencher, t *template.Template, iterations, threads int) {
 					// got SIGINT, stop benchmarking
 					return
 				default:
+					// build and execute the statement
 					stmt := buildStmt(t, i)
 					bencher.Exec(stmt)
 				}
