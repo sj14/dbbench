@@ -14,7 +14,6 @@
 - [Supported Databases](#Supported-Databases-/-Driver)
 - [Usage](#usage)
 - [Custom Scripts](#custom-scripts)
-- [TODO](#TODO)
 - [Troubeshooting](#troubleshooting)
 - [Development](#development)
 - [Acknowledgements](#Acknowledgements)
@@ -160,16 +159,6 @@ output:
 (once) clean:   1.065703ms      1065703 ns/op
 total: 16.312319959s
 ```
-
-## TODO
-
-- [ ] More benchmarks and database specific benchmarks
-  - [ ] Relational DB specific (e.g. MySQL)
-  - [ ] Non-relational DB specific (e.g. Cassandra)
-- [ ] More databases
-  - [ ] MSSQL
-  - [ ] MongoDB
-  - [ ] ...
 
 ## Troubleshooting
 
