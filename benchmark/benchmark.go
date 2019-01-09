@@ -64,6 +64,20 @@ func Run(bencher Bencher, b Benchmark, iter, threads int) time.Duration {
 	return time.Since(start)
 }
 
+func Worker(bencher Bencher, wg *sync.WaitGroup, stmts <-chan string, took chan<- int64, done <-chan bool) {
+	for {
+		select {
+		case stmt := <-stmts:
+			start := time.Now()
+			bencher.Exec(stmt)
+			took <- time.Since(start).Nanoseconds()
+		case <-done:
+			wg.Done()
+			return
+		}
+	}
+}
+
 // loop runs the benchmark concurrently several times.
 func loop(bencher Bencher, t *template.Template, iterations, threads int) {
 	wg := &sync.WaitGroup{}
@@ -96,7 +110,7 @@ func loop(bencher Bencher, t *template.Template, iterations, threads int) {
 					return
 				default:
 					// build and execute the statement
-					stmt := buildStmt(t, i)
+					stmt := BuildStmt(t, i)
 					bencher.Exec(stmt)
 				}
 			}
@@ -106,12 +120,12 @@ func loop(bencher Bencher, t *template.Template, iterations, threads int) {
 
 // once runs the benchmark a single time.
 func once(bencher Bencher, t *template.Template) {
-	stmt := buildStmt(t, 1)
+	stmt := BuildStmt(t, 1)
 	bencher.Exec(stmt)
 }
 
-// buildStmt parses the given template with variables and functions to a pure DB statement.
-func buildStmt(t *template.Template, i int) string {
+// BuildStmt parses the given template with variables and functions to a pure DB statement.
+func BuildStmt(t *template.Template, i int) string {
 	sb := &strings.Builder{}
 
 	data := struct {

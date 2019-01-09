@@ -8,6 +8,8 @@ import (
 	"os"
 	"os/signal"
 	"strings"
+	"sync"
+	"text/template"
 	"time"
 
 	_ "github.com/denisenkom/go-mssqldb"
@@ -190,7 +192,44 @@ func main() {
 			}
 
 			// run the particular benchmark
-			took := benchmark.Run(bencher, b, *iter, *threads)
+			// took := benchmark.Run(bencher, b, *iter, *threads)
+
+			var (
+				stmts = make(chan string, 100)
+				// we need a done channel and a wait group.
+				// the done channel signals the worker there are no more statemen
+				done = make(chan bool, *threads)
+				wg   = &sync.WaitGroup{}
+			)
+
+			wg.Add(*threads)
+			for i := 0; i < *threads; i++ {
+				go benchmark.Worker(bencher, wg, stmts, done)
+			}
+
+			// create template
+			t := template.New(b.Name)
+			t, err := t.Parse(b.Stmt)
+			if err != nil {
+				log.Fatalf("failed to parse template: %v", err)
+			}
+
+			// produce the SQL statements
+			start := time.Now()
+			for i := 1; i <= *iter; i++ {
+				stmts <- benchmark.BuildStmt(t, i)
+				fmt.Printf("len: %v\n", len(stmts))
+			}
+
+			for len(stmts) > 0 {
+				// just wait, workers are not finished yet.
+			}
+
+			for i := 0; i < *threads; i++ {
+				done <- true
+			}
+			wg.Wait()
+			took := time.Since(start)
 
 			// execution in ns for mode once
 			nsPerOp := took.Nanoseconds()
