@@ -78,38 +78,52 @@ func main() {
 		postgresFlags.AddFlagSet(defaultFlags)
 		postgresFlags.AddFlagSet(connFlags)
 		postgresFlags.AddFlagSet(maxconnsFlags)
-		postgresFlags.Parse(os.Args[2:])
+		if err := postgresFlags.Parse(os.Args[2:]); err != nil {
+			log.Fatalf("failed to parse postgres flags: %v", err)
+		}
 		bencher = databases.NewPostgres(*host, *port, *user, *pass, *maxconns)
 	case "cockroach":
 		cockroachFlags.AddFlagSet(defaultFlags)
 		cockroachFlags.AddFlagSet(connFlags)
 		cockroachFlags.AddFlagSet(maxconnsFlags)
-		cockroachFlags.Parse(os.Args[2:])
+		if err := cockroachFlags.Parse(os.Args[2:]); err != nil {
+			log.Fatalf("failed to parse cockroach flags: %v", err)
+		}
 		bencher = databases.NewCockroach(*host, *port, *user, *pass, *maxconns)
 	case "cassandra", "scylla":
 		cassandraFlags.AddFlagSet(defaultFlags)
 		cassandraFlags.AddFlagSet(connFlags)
-		cassandraFlags.Parse(os.Args[2:])
+		if err := cassandraFlags.Parse(os.Args[2:]); err != nil {
+			log.Fatalf("failed to parse cassandra flags: %v", err)
+		}
 		bencher = databases.NewCassandra(*host, *port, *user, *pass)
 	case "mysql", "mariadb", "tidb":
 		mysqlFlags.AddFlagSet(defaultFlags)
 		mysqlFlags.AddFlagSet(connFlags)
 		mysqlFlags.AddFlagSet(maxconnsFlags)
-		mysqlFlags.Parse(os.Args[2:])
+		if err := mysqlFlags.Parse(os.Args[2:]); err != nil {
+			log.Fatalf("failed to parse mysql flags: %v", err)
+		}
 		bencher = databases.NewMySQL(*host, *port, *user, *pass, *maxconns)
 	case "mssql":
 		mssqlFlags.AddFlagSet(defaultFlags)
 		mssqlFlags.AddFlagSet(connFlags)
 		mssqlFlags.AddFlagSet(maxconnsFlags)
-		mssqlFlags.Parse(os.Args[2:])
+		if err := mssqlFlags.Parse(os.Args[2:]); err != nil {
+			log.Fatalf("failed to parse mssql flags: %v", err)
+		}
 		bencher = databases.NewMSSQL(*host, *port, *user, *pass, *maxconns)
 	case "sqlite":
 		sqliteFlags.AddFlagSet(defaultFlags)
 		path := sqliteFlags.String("path", "dbbench.sqlite", "database file (sqlite only)")
-		sqliteFlags.Parse(os.Args[2:])
+		if err := sqliteFlags.Parse(os.Args[2:]); err != nil {
+			log.Fatalf("failed to parse sqlite flags: %v", err)
+		}
 		bencher = databases.NewSQLite(*path)
 	default:
-		defaultFlags.Parse(os.Args[1:])
+		if err := defaultFlags.Parse(os.Args[1:]); err != nil {
+			log.Fatalf("failed to parse default flags: %v", err)
+		}
 
 		// Only show version information and exit.
 		if *versionFlag {
