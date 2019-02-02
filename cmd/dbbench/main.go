@@ -196,6 +196,7 @@ func main() {
 
 			var (
 				stmts = make(chan string, 100)
+				took  = make(chan int64, 100)
 				// we need a done channel and a wait group.
 				// the done channel signals the worker there are no more statemen
 				done = make(chan bool, *threads)
@@ -204,7 +205,7 @@ func main() {
 
 			wg.Add(*threads)
 			for i := 0; i < *threads; i++ {
-				go benchmark.Worker(bencher, wg, stmts, done)
+				go benchmark.Worker(bencher, wg, stmts, took, done)
 			}
 
 			// create template

@@ -72,7 +72,7 @@ func Worker(bencher Bencher, wg *sync.WaitGroup, stmts <-chan string, took chan<
 			bencher.Exec(stmt)
 			took <- time.Since(start).Nanoseconds()
 		case <-done:
-			wg.Done()
+			// wg.Done() // TODO: can be removed?
 			return
 		}
 	}
