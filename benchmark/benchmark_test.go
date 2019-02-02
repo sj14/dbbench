@@ -18,8 +18,7 @@ func (b *mockedBencher) Exec(s string)           { _ = b.Called(s) }
 
 func TestBuildStmt(t *testing.T) {
 	// arrange
-	tmpl := template.New("test")
-	tmpl.Parse("{{.Iter}} {{call .RandInt63}}")
+	tmpl := template.Must(template.New("test").Parse("{{.Iter}} {{call .RandInt63}}"))
 
 	// act
 	stmt := buildStmt(tmpl, 1337)
@@ -52,9 +51,6 @@ func TestRun(t *testing.T) {
 			bencher := &mockedBencher{}
 			bencher.On("Exec", mock.Anything)
 
-			tmpl := template.New("test")
-			tmpl.Parse("can be ignored")
-
 			iter := 13
 			threads := 5
 			bLoop := Benchmark{Name: "test", Type: tt.givenType, Stmt: "NONE"}
@@ -76,9 +72,7 @@ func TestLoop(t *testing.T) {
 	// arrange
 	bencher := &mockedBencher{}
 	bencher.On("Exec", mock.Anything)
-
-	tmpl := template.New("test")
-	tmpl.Parse("{{.Iter}} {{call .RandInt63}}")
+	tmpl := template.Must(template.New("test").Parse("{{.Iter}} {{call .RandInt63}}"))
 
 	// act
 	loop(bencher, tmpl, 17, 5)
@@ -91,9 +85,7 @@ func TestOnce(t *testing.T) {
 	// arrange
 	bencher := &mockedBencher{}
 	bencher.On("Exec", mock.Anything)
-
-	tmpl := template.New("test")
-	tmpl.Parse("{{.Iter}} {{call .RandInt63}}")
+	tmpl := template.Must(template.New("test").Parse("{{.Iter}} {{call .RandInt63}}"))
 
 	// act
 	once(bencher, tmpl)
