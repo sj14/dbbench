@@ -59,8 +59,7 @@ func (r Result) Avg() time.Duration {
 // bencherExecutor is responsible for running the benchmark, keeping track
 // of metrics as the execution goes
 type bencherExecutor struct {
-	result  Result
-	bencher Bencher
+	result Result
 }
 
 // Run executes the benchmark.
