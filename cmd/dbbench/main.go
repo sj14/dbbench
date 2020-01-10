@@ -164,7 +164,8 @@ func main() {
 		*threads = *iter
 	}
 
-	benchmarks := []benchmark.Benchmark{}
+	// Use built-in benchmarks.
+	benchmarks := bencher.Benchmarks()
 
 	// If a script was specified, overwrite built-in benchmarks.
 	if *scriptname != "" {
@@ -177,9 +178,6 @@ func main() {
 		if err != nil {
 			log.Fatalf("failed to parse script: %v\n", err)
 		}
-	} else {
-		// Otherwise use built-in benchmarks.
-		benchmarks = bencher.Benchmarks()
 	}
 
 	// split benchmark names when "-run 'bench0 bench1 ...'" flag was used
