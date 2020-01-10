@@ -180,7 +180,7 @@ func main() {
 		*threads = *iter
 	}
 
-	benchmarks := []benchmark.Benchmark{}
+	var benchmarks []benchmark.Benchmark
 
 	// If a script was specified, overwrite built-in benchmarks.
 	if *scriptname != "" {
