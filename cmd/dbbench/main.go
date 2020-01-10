@@ -235,15 +235,15 @@ func main() {
 
 			fmt.Printf(
 				`
-%v
-	total time: %v
-	total database operations: %v
-	database operations per second: %v
-	nanoseconds per operation: %v ns/op
-	per-request: 
-		min: %v
-		max: %v
-		avg: %v
+Name: %v
+  total time: %v
+  total database operations: %v
+  database operations per second: %v
+  nanoseconds per operation: %v ns/op
+  per-request: 
+	min: %v
+	max: %v
+	avg: %v
 `,
 				b.Name,
 				took,
