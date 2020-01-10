@@ -50,13 +50,6 @@ func main() {
 		maxconnsFlags = pflag.NewFlagSet("conns", pflag.ExitOnError)
 		maxconns      = maxconnsFlags.Int("conns", 0, "max. number of open connections")
 
-		// gcp specific application flags
-		gcpFlags        = pflag.NewFlagSet("gcp", pflag.ExitOnError)
-		instanceID      = gcpFlags.String("instance-id", "", "ID of the Spanner instance")
-		projectID       = gcpFlags.String("project-id", "", "GCP project ID")
-		databaseID      = gcpFlags.String("database-id", "", "ID of the Spanner Database")
-		credentialsFile = gcpFlags.String("google-application-credentials", "", "Optional file containing GCP credentials. Defaults to GOOGLE_APPLICATION_CREDENTIALS")
-
 		// Flag sets for each database. DB specific flags are set in the switch statement below.
 		cassandraFlags = pflag.NewFlagSet("cassandra", pflag.ExitOnError)
 		cockroachFlags = pflag.NewFlagSet("cockroach", pflag.ExitOnError)
@@ -64,11 +57,10 @@ func main() {
 		mysqlFlags     = pflag.NewFlagSet("mysql", pflag.ExitOnError)
 		postgresFlags  = pflag.NewFlagSet("postgres", pflag.ExitOnError)
 		sqliteFlags    = pflag.NewFlagSet("sqlite", pflag.ExitOnError)
-		spannerFlags   = pflag.NewFlagSet("spanner", pflag.ExitOnError)
 	)
 
 	defaultFlags.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Available subcommands:\n\tcassandra|cockroach|mssql|mysql|postgres|sqlite|spanner\n")
+		fmt.Fprintf(os.Stderr, "Available subcommands:\n\tcassandra|cockroach|mssql|mysql|postgres|sqlite\n")
 		fmt.Fprintf(os.Stderr, "\tUse 'subcommand --help' for all flags of the specified command.\n")
 		fmt.Fprintf(os.Stderr, "Generic flags for all subcommands:\n")
 		defaultFlags.PrintDefaults()
@@ -128,14 +120,6 @@ func main() {
 			log.Fatalf("failed to parse sqlite flags: %v", err)
 		}
 		bencher = databases.NewSQLite(*path)
-	case "spanner":
-		spannerFlags.AddFlagSet(defaultFlags)
-		spannerFlags.AddFlagSet(gcpFlags)
-
-		if err := spannerFlags.Parse(os.Args[2:]); err != nil {
-			log.Fatalf("failed to parse spanner flags: %v", err)
-		}
-		bencher = databases.NewSpanner(*projectID, *instanceID, *databaseID, *credentialsFile)
 	default:
 		if err := defaultFlags.Parse(os.Args[1:]); err != nil {
 			log.Fatalf("failed to parse default flags: %v", err)

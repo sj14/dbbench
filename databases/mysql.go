@@ -85,6 +85,6 @@ func (m *Mysql) Cleanup() {
 func (m *Mysql) Exec(stmt string) {
 	_, err := m.db.Exec(stmt)
 	if err != nil {
-		log.Fatalf("%v failed: %v", stmt, err)
+		log.Printf("%v failed: %v", stmt, err)
 	}
 }
