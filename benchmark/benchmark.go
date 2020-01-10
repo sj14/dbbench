@@ -37,35 +37,69 @@ type Benchmark struct {
 	Stmt     string
 }
 
+// Result encapsulates the metrics of a benchmark run
+type Result struct {
+	Min                 time.Duration
+	Max                 time.Duration
+	TotalExecutionTime  time.Duration
+	Start               time.Time
+	End                 time.Time
+	Duration            time.Duration
+	TotalExecutionCount uint64
+}
+
+// Avg calculates the results average
+func (r Result) Avg() time.Duration {
+	if r.TotalExecutionCount == 0 {
+		return 0
+	}
+	return time.Duration(int64(r.TotalExecutionTime) / int64(r.TotalExecutionCount))
+}
+
+// bencherExecutor is responsible for running the benchmark, keeping track
+// of metrics as the execution goes
+type bencherExecutor struct {
+	result  Result
+	bencher Bencher
+}
+
 // Run executes the benchmark.
-func Run(bencher Bencher, b Benchmark, iter, threads int) time.Duration {
+func Run(bencher Bencher, b Benchmark, iter, threads int) Result {
 	t := template.New(b.Name)
 	t, err := t.Parse(b.Stmt)
 	if err != nil {
 		log.Fatalf("failed to parse template: %v", err)
 	}
 
-	start := time.Now()
+	executor := bencherExecutor{
+		result: Result{
+			Start: time.Now(),
+		},
+	}
+
 	switch b.Type {
 	case TypeOnce:
 		if b.Parallel {
-			go once(bencher, t)
+			go executor.once(bencher, t)
 		} else {
-			once(bencher, t)
+			executor.once(bencher, t)
 		}
 	case TypeLoop:
 		if b.Parallel {
-			go loop(bencher, t, iter, threads)
+			go executor.loop(bencher, t, iter, threads)
 		} else {
-			loop(bencher, t, iter, threads)
+			executor.loop(bencher, t, iter, threads)
 		}
 	}
 
-	return time.Since(start)
+	executor.result.End = time.Now()
+	executor.result.Duration = time.Since(executor.result.Start)
+
+	return executor.result
 }
 
 // loop runs the benchmark concurrently several times.
-func loop(bencher Bencher, t *template.Template, iterations, threads int) {
+func (b *bencherExecutor) loop(bencher Bencher, t *template.Template, iterations, threads int) {
 	wg := &sync.WaitGroup{}
 	wg.Add(threads)
 	defer wg.Wait()
@@ -97,16 +131,35 @@ func loop(bencher Bencher, t *template.Template, iterations, threads int) {
 				default:
 					// build and execute the statement
 					stmt := buildStmt(t, i)
+					now := time.Now()
 					bencher.Exec(stmt)
+					b.collectStats(now)
 				}
 			}
 		}(from, to)
 	}
 }
 
+func (b *bencherExecutor) collectStats(start time.Time) {
+	b.result.TotalExecutionCount++
+
+	durTime := time.Since(start)
+
+	b.result.TotalExecutionTime += durTime
+
+	if durTime > b.result.Max {
+		b.result.Max = durTime
+	}
+
+	if durTime < b.result.Min || b.result.Min == 0 {
+		b.result.Min = durTime
+	}
+}
+
 // once runs the benchmark a single time.
-func once(bencher Bencher, t *template.Template) {
+func (b *bencherExecutor) once(bencher Bencher, t *template.Template) {
 	stmt := buildStmt(t, 1)
+	defer b.collectStats(time.Now())
 	bencher.Exec(stmt)
 }
 

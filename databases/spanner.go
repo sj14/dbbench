@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 
+	"google.golang.org/api/iterator"
+
 	"cloud.google.com/go/spanner"
 	"github.com/sj14/dbbench/benchmark"
 	"google.golang.org/api/option"
@@ -44,6 +46,7 @@ func NewSpanner(projectID, instanceID, databaseID, gcpCredentialsFile string) *S
 
 	database := fmt.Sprintf("projects/%s/instances/%s/databases/%s", projectID, instanceID, databaseID)
 	client, err := spanner.NewClient(ctx, database, gcpOpts...)
+
 	if err != nil {
 		log.Fatalf("failed to open connection to spanner: %v", err)
 	}
@@ -66,7 +69,13 @@ func (s *Spanner) Benchmarks() (bb []benchmark.Benchmark) {
 // Exec executes the given statement on the database.
 func (s *Spanner) Exec(stmt string) {
 	_, err := s.client.ReadWriteTransaction(s.ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
-		txn.Query(ctx, spanner.NewStatement(stmt))
+		result := txn.Query(ctx, spanner.NewStatement(stmt))
+		_, res := result.Next()
+		if res == iterator.Done {
+			return nil
+		} else if res != nil {
+			return res
+		}
 		return nil
 	})
 	if err != nil {
