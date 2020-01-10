@@ -60,6 +60,7 @@ func (r Result) Avg() time.Duration {
 // of metrics as the execution goes
 type bencherExecutor struct {
 	result Result
+	mux    sync.Mutex
 }
 
 // Run executes the benchmark.
@@ -140,6 +141,9 @@ func (b *bencherExecutor) loop(bencher Bencher, t *template.Template, iterations
 }
 
 func (b *bencherExecutor) collectStats(start time.Time) {
+	b.mux.Lock()
+	defer b.mux.Unlock()
+
 	b.result.TotalExecutionCount++
 
 	durTime := time.Since(start)
