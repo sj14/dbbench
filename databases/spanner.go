@@ -12,9 +12,8 @@ import (
 
 // Spanner implements the bencher interface.
 type Spanner struct {
-	client     *spanner.Client
-	ctx        context.Context
-	instanceID string
+	client *spanner.Client
+	ctx    context.Context
 }
 
 /*
@@ -48,7 +47,7 @@ func NewSpanner(projectID, instanceID, databaseID, gcpCredentialsFile string) *S
 		log.Fatalf("failed to open connection to spanner: %v", err)
 	}
 
-	return &Spanner{client, ctx, instanceID}
+	return &Spanner{client, ctx}
 }
 
 // Setup initializes the database for the benchmark.
