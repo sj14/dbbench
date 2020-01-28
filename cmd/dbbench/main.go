@@ -204,8 +204,9 @@ func main() {
 			}
 
 			// run the particular benchmark
-			took := benchmark.Run(bencher, b, *iter, *threads)
+			results := benchmark.Run(bencher, b, *iter, *threads)
 
+			took := results.Duration
 			// execution in ns for mode once
 			nsPerOp := took.Nanoseconds()
 
@@ -214,7 +215,26 @@ func main() {
 				nsPerOp /= int64(*iter)
 			}
 
-			fmt.Printf("%v:\t%v\t%v\tns/op\n", b.Name, took, nsPerOp)
+			fmt.Printf(
+				`
+Name: %v
+  total time: %v
+  total database operations: %v
+  database operations per second: %v
+  nanoseconds per operation: %v ns/op
+  per-request: 
+	min: %v
+	max: %v
+	avg: %v
+`,
+				b.Name,
+				took,
+				results.TotalExecutionCount,
+				float64(results.TotalExecutionCount)/results.Duration.Seconds(),
+				nsPerOp,
+				results.Min,
+				results.Max,
+				results.Avg())
 
 			// Don't sleep after the last benchmark
 			if i != len(benchmarks)-1 {
