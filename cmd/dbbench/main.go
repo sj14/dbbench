@@ -233,26 +233,20 @@ func main() {
 				nsPerOp /= int64(*iter)
 			}
 
-			fmt.Printf(
-				`
-Name: %v
-  total time: %v
-  total database operations: %v
-  database operations per second: %v
-  nanoseconds per operation: %v ns/op
-  per-request: 
-	min: %v
-	max: %v
-	avg: %v
+			fmt.Printf(`%v (%v) took: %v 
+avg: %v, min: %v, max: %v
+%v ops/s
+%v ns/op
+
 `,
 				b.Name,
-				took,
 				results.TotalExecutionCount,
-				float64(results.TotalExecutionCount)/results.Duration.Seconds(),
-				nsPerOp,
+				took,
+				results.Avg(),
 				results.Min,
 				results.Max,
-				results.Avg())
+				float64(results.TotalExecutionCount)/results.Duration.Seconds(),
+				nsPerOp)
 
 			// Don't sleep after the last benchmark
 			if i != len(benchmarks)-1 {
