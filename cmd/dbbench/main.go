@@ -233,7 +233,7 @@ func main() {
 				nsPerOp /= int64(*iter)
 			}
 
-			fmt.Printf(`%v (%v) took: %v 
+			fmt.Printf(`%v (%vx) took: %v 
 avg: %v, min: %v, max: %v
 %v ops/s
 %v ns/op
