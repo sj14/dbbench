@@ -1,5 +1,7 @@
 module github.com/sj14/dbbench
 
+go 1.14
+
 require (
 	cloud.google.com/go v0.34.0 // indirect
 	github.com/bitly/go-hostpool v0.0.0-20171023180738-a3a6125de932 // indirect
