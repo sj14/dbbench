@@ -50,6 +50,13 @@ func main() {
 		maxconnsFlags = pflag.NewFlagSet("conns", pflag.ExitOnError)
 		maxconns      = maxconnsFlags.Int("conns", 0, "max. number of open connections")
 
+		// GCP specific application flags (for Spanner)
+		gcpFlags        = pflag.NewFlagSet("gcp", pflag.ExitOnError)
+		instanceID      = gcpFlags.String("instance", "", "ID of the Spanner instance")
+		projectID       = gcpFlags.String("project", "", "GCP project ID")
+		databaseID      = gcpFlags.String("database", "", "ID of the Spanner Database")
+		credentialsFile = gcpFlags.String("credentials", "GOOGLE_APPLICATION_CREDENTIALS", "optional file containing GCP credentials. Defaults to GOOGLE_APPLICATION_CREDENTIALS")
+
 		// Flag sets for each database. DB specific flags are set in the switch statement below.
 		cassandraFlags = pflag.NewFlagSet("cassandra", pflag.ExitOnError)
 		cockroachFlags = pflag.NewFlagSet("cockroach", pflag.ExitOnError)
@@ -57,10 +64,11 @@ func main() {
 		mysqlFlags     = pflag.NewFlagSet("mysql", pflag.ExitOnError)
 		postgresFlags  = pflag.NewFlagSet("postgres", pflag.ExitOnError)
 		sqliteFlags    = pflag.NewFlagSet("sqlite", pflag.ExitOnError)
+		spannerFlags   = pflag.NewFlagSet("spanner", pflag.ExitOnError)
 	)
 
 	defaultFlags.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Available subcommands:\n\tcassandra|cockroach|mssql|mysql|postgres|sqlite\n")
+		fmt.Fprintf(os.Stderr, "Available subcommands:\n\tcassandra|cockroach|mssql|mysql|postgres|sqlite|spanner\n")
 		fmt.Fprintf(os.Stderr, "\tUse 'subcommand --help' for all flags of the specified command.\n")
 		fmt.Fprintf(os.Stderr, "Generic flags for all subcommands:\n")
 		defaultFlags.PrintDefaults()
@@ -120,6 +128,14 @@ func main() {
 			log.Fatalf("failed to parse sqlite flags: %v", err)
 		}
 		bencher = databases.NewSQLite(*path)
+	case "spanner":
+		spannerFlags.AddFlagSet(defaultFlags)
+		spannerFlags.AddFlagSet(gcpFlags)
+
+		if err := spannerFlags.Parse(os.Args[2:]); err != nil {
+			log.Fatalf("failed to parse spanner flags: %v", err)
+		}
+		bencher = databases.NewSpanner(*projectID, *instanceID, *databaseID, *credentialsFile)
 	default:
 		if err := defaultFlags.Parse(os.Args[1:]); err != nil {
 			log.Fatalf("failed to parse default flags: %v", err)
@@ -164,8 +180,7 @@ func main() {
 		*threads = *iter
 	}
 
-	// Use built-in benchmarks.
-	benchmarks := bencher.Benchmarks()
+	benchmarks := []benchmark.Benchmark{}
 
 	// If a script was specified, overwrite built-in benchmarks.
 	if *scriptname != "" {
@@ -178,6 +193,9 @@ func main() {
 		if err != nil {
 			log.Fatalf("failed to parse script: %v\n", err)
 		}
+	} else {
+		// Otherwise use built-in benchmarks.
+		benchmarks = bencher.Benchmarks()
 	}
 
 	// split benchmark names when "-run 'bench0 bench1 ...'" flag was used
@@ -204,8 +222,9 @@ func main() {
 			}
 
 			// run the particular benchmark
-			took := benchmark.Run(bencher, b, *iter, *threads)
+			results := benchmark.Run(bencher, b, *iter, *threads)
 
+			took := results.Duration
 			// execution in ns for mode once
 			nsPerOp := took.Nanoseconds()
 
@@ -214,7 +233,20 @@ func main() {
 				nsPerOp /= int64(*iter)
 			}
 
-			fmt.Printf("%v:\t%v\t%v\tns/op\n", b.Name, took, nsPerOp)
+			fmt.Printf(`%v (%vx) took: %v 
+avg: %v, min: %v, max: %v
+%v ops/s
+%v ns/op
+
+`,
+				b.Name,
+				results.TotalExecutionCount,
+				took,
+				results.Avg(),
+				results.Min,
+				results.Max,
+				float64(results.TotalExecutionCount)/results.Duration.Seconds(),
+				nsPerOp)
 
 			// Don't sleep after the last benchmark
 			if i != len(benchmarks)-1 {

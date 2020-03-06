@@ -3,6 +3,9 @@ package benchmark
 import (
 	"testing"
 	"text/template"
+	"time"
+
+	"github.com/stretchr/testify/assert"
 
 	"github.com/stretchr/testify/mock"
 )
@@ -74,8 +77,14 @@ func TestLoop(t *testing.T) {
 	bencher.On("Exec", mock.Anything)
 	tmpl := template.Must(template.New("test").Parse("{{.Iter}} {{call .RandInt63}}"))
 
+	executor := bencherExecutor{
+		result: Result{
+			Start: time.Now(),
+		},
+	}
+
 	// act
-	loop(bencher, tmpl, 17, 5)
+	executor.loop(bencher, tmpl, 17, 5)
 
 	// assert
 	bencher.AssertNumberOfCalls(t, "Exec", 17)
@@ -87,9 +96,35 @@ func TestOnce(t *testing.T) {
 	bencher.On("Exec", mock.Anything)
 	tmpl := template.Must(template.New("test").Parse("{{.Iter}} {{call .RandInt63}}"))
 
+	executor := bencherExecutor{
+		result: Result{
+			Start: time.Now(),
+		},
+	}
+
 	// act
-	once(bencher, tmpl)
+	executor.once(bencher, tmpl)
 
 	// assert
 	bencher.AssertNumberOfCalls(t, "Exec", 1)
+}
+
+func TestResults(t *testing.T) {
+	// arrange
+	bencher := &mockedBencher{}
+	bencher.On("Exec", mock.Anything)
+	tmpl := template.Must(template.New("test").Parse("{{.Iter}} {{call .RandInt63}}"))
+
+	executor := bencherExecutor{
+		result: Result{
+			Start: time.Now(),
+		},
+	}
+
+	// act
+	executor.once(bencher, tmpl)
+
+	assert.Equal(t, uint64(1), executor.result.TotalExecutionCount)
+
+	assert.Equal(t, executor.result.TotalExecutionTime, executor.result.Avg())
 }
