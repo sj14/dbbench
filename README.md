@@ -1,7 +1,6 @@
 # dbbench
 
 ![Action](https://github.com/sj14/dbbench/workflows/Go/badge.svg)
-[![Build Status](https://travis-ci.org/sj14/dbbench.svg?branch=master)](https://travis-ci.org/sj14/dbbench)
 [![Go Report Card](https://goreportcard.com/badge/github.com/sj14/dbbench)](https://goreportcard.com/report/github.com/sj14/dbbench)
 [![Coverage Status](https://coveralls.io/repos/github/sj14/dbbench/badge.svg?branch=master)](https://coveralls.io/github/sj14/dbbench?branch=master)
 
