@@ -5,7 +5,7 @@ go 1.14
 require (
 	cloud.google.com/go/spanner v1.16.0
 	github.com/denisenkom/go-mssqldb v0.0.0-20200910202707-1e08a3fab204
-	github.com/go-sql-driver/mysql v1.5.0
+	github.com/go-sql-driver/mysql v1.6.0
 	github.com/gocql/gocql v0.0.0-20200926162733-393f0c961220
 	github.com/golang/snappy v0.0.2 // indirect
 	github.com/lib/pq v1.10.0
