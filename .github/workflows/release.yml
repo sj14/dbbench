@@ -10,13 +10,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@v1
-
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - name: Validates GO releaser config
         uses: docker://goreleaser/goreleaser:latest
         with:
           args: check
-
       - name: Create release on GitHub
         uses: docker://goreleaser/goreleaser:latest
         with:
