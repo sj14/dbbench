@@ -13,6 +13,6 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/objx v0.3.0 // indirect
 	github.com/stretchr/testify v1.7.2
-	google.golang.org/api v0.81.0
+	google.golang.org/api v0.82.0
 	gopkg.in/check.v1 v1.0.0-20200902074654-038fdea0a05b // indirect
 )
