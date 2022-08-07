@@ -12,69 +12,36 @@ builds:
     goos:
       - linux
       - darwin
-      - freebsd
-      - openbsd
-      - netbsd
-      - solaris
-      # -plan9
-      - dragonfly
       - windows
-    goarch:
-      - 386
-      - amd64
-      - arm
-      - arm64
-    # - ppc64
-    # - ppc64le
-    # - mips
-    # - mipsle
-    # - mips64
-    # - mips64le
-    goarm:
-      - 6
-      - 7
-
 archives:
-  - wrap_in_directory: true
-    format_overrides:
-      - goos: windows
-        format: zip
-    files:
-      - LICENSE
-      - README.md
-      - scripts/**/*
-
+    format: binary
 checksum:
   name_template: "checksums.txt"
-
 snapshot:
   name_template: "{{ .Tag }}-next-{{.Commit}}"
-
-nfpms:
-  - maintainer: Simon Jürgensmeyyer <simon.juergensmeyer@gmail.com>
-    homepage: https://github.com/sj14/dbbench/
-    description: dbbench is a simple database benchmarking tool which supports several databases
-    license: MIT
-    formats:
-      - deb
-      - rpm
-
+# nfpms:
+#   - maintainer: Simon Jürgensmeyyer <simon.juergensmeyer@gmail.com>
+#     homepage: https://github.com/sj14/dbbench/
+#     description: dbbench is a simple database benchmarking tool which supports several databases
+#     license: MIT
+#     formats:
+#       - deb
+#       - rpm
+#       - apk # not tested
 brews:
-  - # name: dbbench
-    # folder: homebrew-tap
+  - name: dbbench
+    skip_upload: auto
     tap:
       owner: sj14
       name: homebrew-tap
     description: "dbbench is a simple database benchmarking tool which supports several databases"
-
 release:
   github:
     owner: sj14
     name: dbbench
   disable: false
   draft: false
-  prerelease: true
-
+  prerelease: auto
 changelog:
   filters:
     exclude:
