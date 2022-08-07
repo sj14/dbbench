@@ -14,7 +14,7 @@ builds:
       - darwin
       - windows
 archives:
-    format: binary
+  - format: binary
 checksum:
   name_template: "checksums.txt"
 snapshot:
