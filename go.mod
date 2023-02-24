@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go/spanner v1.44.0
 	github.com/denisenkom/go-mssqldb v0.12.3
 	github.com/go-sql-driver/mysql v1.7.0
-	github.com/gocql/gocql v0.0.0-20200926162733-393f0c961220
+	github.com/gocql/gocql v1.3.1
 	github.com/lib/pq v1.10.7
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
