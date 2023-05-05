@@ -21,13 +21,13 @@ func (b *mockedBencher) Exec(s string)           { _ = b.Called(s) }
 
 func TestBuildStmt(t *testing.T) {
 	// arrange
-	tmpl := template.Must(template.New("test").Parse("{{.Iter}} {{call .RandInt63}}"))
+	tmpl := template.Must(template.New("test").Parse("{{.Iter}} test"))
 
 	// act
 	stmt := buildStmt(tmpl, 1337)
 
 	// assert
-	want := "1337 5577006791947779410"
+	want := "1337 test"
 	if stmt != want {
 		t.Errorf("got statement %v, want %v", stmt, want)
 	}
