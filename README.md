@@ -6,15 +6,15 @@
 
 ## Table of Contents
 
-- [Description](#Description)
+- [Description](#description)
 - [Example](#example)
 - [Installation](#installation)
-- [Supported Databases](#Supported-Databases-/-Driver)
+- [Supported Databases](#supported-Databases-/-Driver)
 - [Usage](#usage)
 - [Custom Scripts](#custom-scripts)
 - [Troubeshooting](#troubleshooting)
 - [Development](#development)
-- [Acknowledgements](#Acknowledgements)
+- [Acknowledgements](#acknowledgements)
 
 ## Description
 
@@ -43,7 +43,7 @@ Binaries are available for all major platforms. See the [releases](https://githu
 
 Using the [Homebrew](https://brew.sh/) package manager for macOS:
 
-``` text
+```console
 brew install sj14/tap/dbbench
 ```
 
@@ -51,9 +51,17 @@ brew install sj14/tap/dbbench
 
 It's also possible to install the current development snapshot with `go get` (not recommended):
 
-``` text
+```console
 go get -u github.com/sj14/dbbench/cmd/dbbench
 ```
+
+### Docker
+
+```console
+docker run ghcr.io/sj14/dbbench:latest
+```
+
+Check [here](https://github.com/sj14/dbbench/pkgs/container/dbbench) for available images.
 
 ## Supported Databases / Driver
 

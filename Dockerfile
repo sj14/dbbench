@@ -1,15 +1,14 @@
-FROM golang:1.20-alpine3.17 AS build
+FROM golang:1-alpine AS build
 
 WORKDIR /app
 
 COPY . .
-RUN go mod download
 
-RUN go get -v -t -d ./...
+RUN go mod download
 RUN go build -v ./cmd/dbbench/...
 
 ## Deploy
-FROM alpine:3.17
+FROM gcr.io/distroless/static-debian11
 
 WORKDIR /app
 
