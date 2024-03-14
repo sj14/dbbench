@@ -3,7 +3,7 @@ module github.com/sj14/dbbench
 go 1.14
 
 require (
-	cloud.google.com/go/spanner v1.58.0
+	cloud.google.com/go/spanner v1.59.0
 	github.com/denisenkom/go-mssqldb v0.12.3
 	github.com/go-sql-driver/mysql v1.8.0
 	github.com/gocql/gocql v1.6.0
