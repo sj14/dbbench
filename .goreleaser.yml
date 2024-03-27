@@ -31,7 +31,7 @@ snapshot:
 brews:
   - name: dbbench
     skip_upload: auto
-    tap:
+    repository:
       owner: sj14
       name: homebrew-tap
     description: "dbbench is a simple database benchmarking tool which supports several databases"
