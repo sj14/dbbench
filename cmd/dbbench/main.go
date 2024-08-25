@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/signal"
@@ -184,7 +183,7 @@ func main() {
 
 	// If a script was specified, overwrite built-in benchmarks.
 	if *scriptname != "" {
-		dat, err := ioutil.ReadFile(*scriptname)
+		dat, err := os.ReadFile(*scriptname)
 		if err != nil {
 			log.Fatalf("failed to read file: %v", err)
 		}
