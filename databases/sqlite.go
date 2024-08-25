@@ -42,12 +42,12 @@ func NewSQLite(path string) *SQLite {
 // Benchmarks returns the individual benchmark statements for sqlite.
 func (m *SQLite) Benchmarks() []benchmark.Benchmark {
 	return []benchmark.Benchmark{
-		{Name: "inserts", Type: benchmark.TypeLoop, Stmt: "INSERT INTO dbbench_simple (id, balance) VALUES( {{.Iter}}, {{call .RandInt63}});"},
+		{Name: "inserts", Type: benchmark.TypeLoop, Stmt: "INSERT INTO dbbench_simple (id, balance) VALUES( {{.Iter}}, {{call .RandInt64}});"},
 		{Name: "selects", Type: benchmark.TypeLoop, Stmt: "SELECT * FROM dbbench_simple WHERE id = {{.Iter}};"},
-		{Name: "updates", Type: benchmark.TypeLoop, Stmt: "UPDATE dbbench_simple SET balance = {{call .RandInt63}} WHERE id = {{.Iter}};"},
+		{Name: "updates", Type: benchmark.TypeLoop, Stmt: "UPDATE dbbench_simple SET balance = {{call .RandInt64}} WHERE id = {{.Iter}};"},
 		{Name: "deletes", Type: benchmark.TypeLoop, Stmt: "DELETE FROM dbbench_simple WHERE id = {{.Iter}};"},
-		// {"relation_insert0", benchmark.TypeLoop, "INSERT INTO dbbench_relational_one (oid, balance_one) VALUES( {{.Iter}}, {{call .RandInt63}});"},
-		// {"relation_insert1", benchmark.TypeLoop, "INSERT INTO dbbench_relational_two (relation, balance_two) VALUES( {{.Iter}}, {{call .RandInt63}});"},
+		// {"relation_insert0", benchmark.TypeLoop, "INSERT INTO dbbench_relational_one (oid, balance_one) VALUES( {{.Iter}}, {{call .RandInt64}});"},
+		// {"relation_insert1", benchmark.TypeLoop, "INSERT INTO dbbench_relational_two (relation, balance_two) VALUES( {{.Iter}}, {{call .RandInt64}});"},
 		// {"relation_select", benchmark.TypeLoop, "SELECT * FROM dbbench_relational_two INNER JOIN dbbench_relational_one ON dbbench_relational_one.oid = relation WHERE relation = {{.Iter}};"},
 		// {"relation_delete1", benchmark.TypeLoop, "DELETE FROM dbbench_relational_two WHERE relation = {{.Iter}};"},
 		// {"relation_delete0", benchmark.TypeLoop, "DELETE FROM dbbench_relational_one WHERE oid = {{.Iter}};"},

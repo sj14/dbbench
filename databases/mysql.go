@@ -37,12 +37,12 @@ func NewMySQL(host string, port int, user, password string, maxOpenConns int) *M
 // Benchmarks returns the individual benchmark functions for the mysql db.
 func (m *Mysql) Benchmarks() []benchmark.Benchmark {
 	return []benchmark.Benchmark{
-		{Name: "inserts", Type: benchmark.TypeLoop, Stmt: "INSERT INTO dbbench.simple (id, balance) VALUES( {{.Iter}}, {{call .RandInt63n 9999999999}});"},
+		{Name: "inserts", Type: benchmark.TypeLoop, Stmt: "INSERT INTO dbbench.simple (id, balance) VALUES( {{.Iter}}, {{call .RandInt64N 9999999999}});"},
 		{Name: "selects", Type: benchmark.TypeLoop, Stmt: "SELECT * FROM dbbench.simple WHERE id = {{.Iter}};"},
-		{Name: "updates", Type: benchmark.TypeLoop, Stmt: "UPDATE dbbench.simple SET balance = {{call .RandInt63n 9999999999}} WHERE id = {{.Iter}};"},
+		{Name: "updates", Type: benchmark.TypeLoop, Stmt: "UPDATE dbbench.simple SET balance = {{call .RandInt64N 9999999999}} WHERE id = {{.Iter}};"},
 		{Name: "deletes", Type: benchmark.TypeLoop, Stmt: "DELETE FROM dbbench.simple WHERE id = {{.Iter}};"},
-		// {"relation_insert0", benchmark.TypeLoop, "INSERT INTO dbbench.relational_one (oid, balance_one) VALUES( {{.Iter}}, {{call .RandInt63n 9999999999}});"},
-		// {"relation_insert1", benchmark.TypeLoop, "INSERT INTO dbbench.relational_two (relation, balance_two) VALUES( {{.Iter}}, {{call .RandInt63n 9999999999}});"},
+		// {"relation_insert0", benchmark.TypeLoop, "INSERT INTO dbbench.relational_one (oid, balance_one) VALUES( {{.Iter}}, {{call .RandInt64N 9999999999}});"},
+		// {"relation_insert1", benchmark.TypeLoop, "INSERT INTO dbbench.relational_two (relation, balance_two) VALUES( {{.Iter}}, {{call .RandInt64N 9999999999}});"},
 		// {"relation_select", benchmark.TypeLoop, "SELECT * FROM dbbench.relational_two INNER JOIN dbbench.relational_one ON relational_one.oid = relational_two.relation WHERE relation = {{.Iter}};"},
 		// {"relation_delete1", benchmark.TypeLoop, "DELETE FROM dbbench.relational_two WHERE relation = {{.Iter}};"},
 		// {"relation_delete0", benchmark.TypeLoop, "DELETE FROM dbbench.relational_one WHERE oid = {{.Iter}};"},

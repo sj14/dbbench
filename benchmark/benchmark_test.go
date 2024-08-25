@@ -75,7 +75,7 @@ func TestLoop(t *testing.T) {
 	// arrange
 	bencher := &mockedBencher{}
 	bencher.On("Exec", mock.Anything)
-	tmpl := template.Must(template.New("test").Parse("{{.Iter}} {{call .RandInt63}}"))
+	tmpl := template.Must(template.New("test").Parse("{{.Iter}} {{call .RandInt64}}"))
 
 	executor := bencherExecutor{
 		result: Result{
@@ -94,7 +94,7 @@ func TestOnce(t *testing.T) {
 	// arrange
 	bencher := &mockedBencher{}
 	bencher.On("Exec", mock.Anything)
-	tmpl := template.Must(template.New("test").Parse("{{.Iter}} {{call .RandInt63}}"))
+	tmpl := template.Must(template.New("test").Parse("{{.Iter}} {{call .RandInt64}}"))
 
 	executor := bencherExecutor{
 		result: Result{
@@ -113,7 +113,7 @@ func TestResults(t *testing.T) {
 	// arrange
 	bencher := &mockedBencher{}
 	bencher.On("Exec", mock.Anything)
-	tmpl := template.Must(template.New("test").Parse("{{.Iter}} {{call .RandInt63}}"))
+	tmpl := template.Must(template.New("test").Parse("{{.Iter}} {{call .RandInt64}}"))
 
 	executor := bencherExecutor{
 		result: Result{

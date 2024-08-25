@@ -2,7 +2,7 @@ package benchmark
 
 import (
 	"log"
-	"math/rand"
+	"math/rand/v2"
 	"os"
 	"os/signal"
 	"strings"
@@ -172,18 +172,20 @@ func buildStmt(t *template.Template, i int) string {
 
 	data := struct {
 		Iter            int
-		Seed            func(int64)
-		RandInt63       func() int64
-		RandInt63n      func(int64) int64
+		RandInt64       func() int64
+		RandInt64N      func(int64) int64
+		RandUint64      func() uint64
+		RandUint64N     func(uint64) uint64
 		RandFloat32     func() float32
 		RandFloat64     func() float64
 		RandExpFloat64  func() float64
 		RandNormFloat64 func() float64
 	}{
 		Iter:            i,
-		Seed:            rand.Seed,
-		RandInt63:       rand.Int63,
-		RandInt63n:      rand.Int63n,
+		RandInt64:       rand.Int64,
+		RandInt64N:      rand.Int64N,
+		RandUint64:      rand.Uint64,
+		RandUint64N:     rand.Uint64N,
 		RandFloat32:     rand.Float32,
 		RandFloat64:     rand.Float64,
 		RandExpFloat64:  rand.ExpFloat64,

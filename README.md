@@ -116,13 +116,14 @@ Usage                     | Description                                   |
 Usage                     | Description                                   |
 --------------------------|-----------------------------------------------|
 `{{.Iter}}`                 | The iteration counter. Will return `1` when `\benchmark once`.
-`{{call .Seed 42}}`         | [godoc](https://golang.org/pkg/math/rand/#Seed) (`42` is an examplary seed)
-`{{call .RandInt63}}`       | [godoc](https://golang.org/pkg/math/rand/#Int63)
-`{{call .RandInt63n 9999}}` | [godoc](https://golang.org/pkg/math/rand/#Int63n) (`9999` is an examplary upper limit)
-`{{call .RandFloat32}}`     | [godoc](https://golang.org/pkg/math/rand/#Float32)  
-`{{call .RandFloat64}}`     | [godoc](https://golang.org/pkg/math/rand/#Float64)
-`{{call .RandExpFloat64}}`  | [godoc](https://golang.org/pkg/math/rand/#ExpFloat64)
-`{{call .RandNormFloat64}}` | [godoc](https://golang.org/pkg/math/rand/#NormFloat64)
+`{{call .RandInt64}}`       | [godoc](https://pkg.go.dev/math/rand/v2#Int64)
+`{{call .RandInt64N 9999}}` | [godoc](https://pkg.go.dev/math/rand/v2#Int64N) (`9999` is an examplary upper limit)
+`{{call .RandUint64}}`       | [godoc](https://pkg.go.dev/math/rand/v2#Uint64)
+`{{call .RandUint64N 9999}}` | [godoc](https://pkg.go.dev/math/rand/v2#Uint64N) (`9999` is an examplary upper limit)
+`{{call .RandFloat32}}`     | [godoc](https://pkg.go.dev/math/rand/v2#Float32)  
+`{{call .RandFloat64}}`     | [godoc](https://pkg.go.dev/math/rand/v2#Float64)
+`{{call .RandExpFloat64}}`  | [godoc](https://pkg.go.dev/math/rand/v2#ExpFloat64)
+`{{call .RandNormFloat64}}` | [godoc](https://pkg.go.dev/math/rand/v2#NormFloat64)
 
 ### Example
 
@@ -135,13 +136,13 @@ CREATE TABLE dbbench_simple (id INT PRIMARY KEY, balance DECIMAL);
 
 -- How long takes an insert and delete?
 \benchmark loop \name single
-INSERT INTO dbbench_simple (id, balance) VALUES({{.Iter}}, {{call .RandInt63}});
+INSERT INTO dbbench_simple (id, balance) VALUES({{.Iter}}, {{call .RandInt64}});
 DELETE FROM dbbench_simple WHERE id = {{.Iter}}; 
 
 -- How long takes it in a single transaction?
 \benchmark loop \name batch
 BEGIN TRANSACTION;
-INSERT INTO dbbench_simple (id, balance) VALUES({{.Iter}}, {{call .RandInt63}});
+INSERT INTO dbbench_simple (id, balance) VALUES({{.Iter}}, {{call .RandInt64}});
 DELETE FROM dbbench_simple WHERE id = {{.Iter}}; 
 COMMIT;
 
