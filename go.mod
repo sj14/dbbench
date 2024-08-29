@@ -11,7 +11,7 @@ require (
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.9.0
-	google.golang.org/api v0.194.0
+	google.golang.org/api v0.195.0
 )
 
 require (
@@ -20,6 +20,8 @@ require (
 	cloud.google.com/go/auth v0.9.1 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.4 // indirect
 	cloud.google.com/go/compute/metadata v0.5.0 // indirect
+	cloud.google.com/go/iam v1.1.13 // indirect
+	cloud.google.com/go/longrunning v0.5.12 // indirect
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/GoogleCloudPlatform/grpc-gcp-go/grpcgcp v1.5.0 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.4.1 // indirect
