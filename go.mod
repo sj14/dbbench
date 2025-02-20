@@ -5,7 +5,7 @@ go 1.23.0
 require (
 	cloud.google.com/go/spanner v1.75.0
 	github.com/denisenkom/go-mssqldb v0.12.3
-	github.com/go-sql-driver/mysql v1.8.1
+	github.com/go-sql-driver/mysql v1.9.0
 	github.com/gocql/gocql v1.7.0
 	github.com/lib/pq v1.10.9
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
