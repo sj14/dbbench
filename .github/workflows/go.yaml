@@ -27,7 +27,7 @@ jobs:
           go fmt ./...
           git diff --exit-code
       - name: staticcheck
-        uses: dominikh/staticcheck-action@v1.3.1
+        uses: dominikh/staticcheck-action@v1.4.0
         with:
           install-go: false
       - name: Test
