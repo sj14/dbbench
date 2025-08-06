@@ -11,7 +11,7 @@ require (
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
 	github.com/spf13/pflag v1.0.7
 	github.com/stretchr/testify v1.10.0
-	google.golang.org/api v0.244.0
+	google.golang.org/api v0.245.0
 )
 
 require (
