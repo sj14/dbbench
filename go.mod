@@ -9,7 +9,7 @@ require (
 	github.com/gocql/gocql v1.7.0
 	github.com/lib/pq v1.10.9
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
-	github.com/spf13/pflag v1.0.9
+	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.11.1
 	google.golang.org/api v0.248.0
 )
