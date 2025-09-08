@@ -49,10 +49,10 @@ brew install sj14/tap/dbbench
 
 ### Manually
 
-It's also possible to install the current development snapshot with `go get` (not recommended):
+It's also possible to install the current development snapshot with `go install` (not recommended):
 
 ```console
-go get -u github.com/sj14/dbbench/cmd/dbbench
+go install github.com/sj14/dbbench/cmd/dbbench
 ```
 
 ### Docker
@@ -263,13 +263,7 @@ dbbench sqlite
 
 ``` text
 git clone https://github.com/pingcap/tidb-docker-compose.git
-```
-
-``` text
 cd tidb-docker-compose && docker-compose pull
-```
-
-``` text
 docker-compose up -d
 ```
 
