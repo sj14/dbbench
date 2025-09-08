@@ -29,7 +29,7 @@ func NewSQLite(path string) *SQLite {
 	}
 
 	// Automatically creates the DB file if it doesn't exist yet.
-	db, err := sql.Open("sqlite3", fmt.Sprintf("%s?cache=shared", path))
+	db, err := sql.Open("sqlite", fmt.Sprintf("%s?cache=shared", path))
 	if err != nil {
 		log.Fatalf("failed to open connection: %v\n", err)
 	}
