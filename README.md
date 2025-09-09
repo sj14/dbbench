@@ -37,7 +37,7 @@ total: 22.85141994s
 
 ### Precompiled Binaries
 
-Binaries are available for all major platforms. See the [releases](https://github.com/sj14/dbbench/releases) page. Unfortunately, `cgo` is disabled for these builds, which means there is *no SQLite support* ([#1](https://github.com/sj14/dbbench/issues/1)).
+Binaries are available for all major platforms. See the [releases](https://github.com/sj14/dbbench/releases) page.
 
 ### Homebrew
 
@@ -71,7 +71,7 @@ Cassandra and compatible databases (e.g. ScyllaDB) | github.com/gocql/gocql
 MS SQL and compatible databases (no built-in benchmarks yet) | github.com/denisenkom/go-mssqldb
 MySQL and compatible databases (e.g. MariaDB and TiDB) | github.com/go-sql-driver/mysql
 PostgreSQL and compatible databases (e.g. CockroachDB) | github.com/lib/pq
-SQLite3 and compatible databases | github.com/mattn/go-sqlite3
+SQLite3 and compatible databases | github.com/glebarez/go-sqlite
 
 ## Usage
 
