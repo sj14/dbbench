@@ -5,13 +5,13 @@ go 1.24.0
 require (
 	cloud.google.com/go/spanner v1.85.0
 	github.com/denisenkom/go-mssqldb v0.12.3
-	github.com/glebarez/go-sqlite v1.22.0
 	github.com/go-sql-driver/mysql v1.9.3
 	github.com/gocql/gocql v1.7.0
 	github.com/lib/pq v1.10.9
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.11.1
 	google.golang.org/api v0.249.0
+	modernc.org/sqlite v1.38.2
 )
 
 require (
@@ -78,5 +78,4 @@ require (
 	modernc.org/libc v1.66.8 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect
-	modernc.org/sqlite v1.38.2 // indirect
 )
