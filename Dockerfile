@@ -8,7 +8,7 @@ RUN go mod download
 RUN go build -v ./cmd/dbbench/...
 
 ## Deploy
-FROM gcr.io/distroless/static-debian12
+FROM gcr.io/distroless/static-debian13
 
 WORKDIR /app
 
