@@ -38,7 +38,7 @@ func NewSpanner(projectID, instanceID, databaseID, gcpCredentialsFile string) *S
 	gcpOpts := []option.ClientOption{}
 
 	if gcpCredentialsFile != "" {
-		gcpOpts = append(gcpOpts, option.WithCredentialsFile(gcpCredentialsFile))
+		gcpOpts = append(gcpOpts, option.WithAuthCredentialsFile(option.ServiceAccount, gcpCredentialsFile))
 	}
 
 	database := fmt.Sprintf("projects/%s/instances/%s/databases/%s", projectID, instanceID, databaseID)
