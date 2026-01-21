@@ -11,7 +11,7 @@ require (
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.11.1
 	google.golang.org/api v0.260.0
-	modernc.org/sqlite v1.44.2
+	modernc.org/sqlite v1.44.3
 )
 
 require (
