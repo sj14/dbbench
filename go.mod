@@ -1,6 +1,6 @@
 module github.com/sj14/dbbench
 
-go 1.24.0
+go 1.25.0
 
 require (
 	cloud.google.com/go/spanner v1.88.0
@@ -10,7 +10,7 @@ require (
 	github.com/lib/pq v1.11.2
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.11.1
-	google.golang.org/api v0.267.0
+	google.golang.org/api v0.268.0
 	modernc.org/sqlite v1.46.1
 )
 
