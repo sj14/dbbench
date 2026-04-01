@@ -10,7 +10,7 @@ require (
 	github.com/lib/pq v1.12.1
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.11.1
-	google.golang.org/api v0.273.0
+	google.golang.org/api v0.273.1
 	modernc.org/sqlite v1.48.0
 )
 
