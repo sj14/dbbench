@@ -15,8 +15,8 @@ cloud.google.com/go/longrunning v0.9.0 h1:0EzbDEGsAvOZNbqXopgniY0w0a1phvu5IdUFq8
 cloud.google.com/go/longrunning v0.9.0/go.mod h1:pkTz846W7bF4o2SzdWJ40Hu0Re+UoNT6Q5t+igIcb8E=
 cloud.google.com/go/monitoring v1.25.0 h1:HnsTIOxTN6BCSkt1P/Im23r1m7MHTTpmSYCzPkW7NK4=
 cloud.google.com/go/monitoring v1.25.0/go.mod h1:wlj6rX+JGyusw/8+2duW4cJ6kmDHGmde3zMTJuG3Jpc=
-cloud.google.com/go/spanner v1.90.0 h1:tVUzYI9IZJY1SDvCmCzyuLoaAyotZgiyQq6go+lNH5A=
-cloud.google.com/go/spanner v1.90.0/go.mod h1:8NB5a7qgwIhGD19Ly+vkpKffPL78vIG9RcrgsuREha0=
+cloud.google.com/go/spanner v1.91.0 h1:XwXfcZ0kc1NT9Uu2IsThFiWtYptB+WgLn/KZEZcyzRg=
+cloud.google.com/go/spanner v1.91.0/go.mod h1:8NB5a7qgwIhGD19Ly+vkpKffPL78vIG9RcrgsuREha0=
 filippo.io/edwards25519 v1.1.1 h1:YpjwWWlNmGIDyXOn8zLzqiD+9TyIlPhGFG96P39uBpw=
 filippo.io/edwards25519 v1.1.1/go.mod h1:BxyFTGdWcka3PhytdK4V28tE5sGfRvvvRV7EaN4VDT4=
 github.com/Azure/azure-sdk-for-go/sdk/azcore v0.19.0/go.mod h1:h6H6c8enJmmocHUbLiiGY6sx7f9i+X3m1CHdd5c6Rdw=
