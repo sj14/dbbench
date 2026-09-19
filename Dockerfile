@@ -8,7 +8,9 @@ RUN go mod download
 RUN go build -v ./cmd/dbbench/...
 
 ## Deploy
-FROM gcr.io/distroless/static-debian13
+
+# cc image is necessary for turso
+FROM gcr.io/distroless/cc-debian13
 
 WORKDIR /app
 

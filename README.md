@@ -72,12 +72,13 @@ MS SQL and compatible databases (no built-in benchmarks yet) | github.com/denise
 MySQL and compatible databases (e.g. MariaDB and TiDB) | github.com/go-sql-driver/mysql
 PostgreSQL and compatible databases (e.g. CockroachDB) | github.com/lib/pq
 SQLite3 and compatible databases | modernc.org/sqlite
+Turso | turso.tech/database/tursogo
 
 ## Usage
 
 ``` text
 Available subcommands:
-        cassandra|cockroach|mssql|mysql|postgres|sqlite
+        cassandra|cockroach|mssql|mysql|postgres|sqlite|spanner|turso
         Use 'subcommand --help' for all flags of the specified command.
 Generic flags for all subcommands:
       --clean            only cleanup benchmark data, e.g. after a crash
@@ -270,6 +271,14 @@ docker-compose up -d
 ``` text
 dbbench tidb --pass '' --port 4000
 ```
+
+### Turso
+
+``` text
+dbbench turso
+```
+
+`PRAGMA foreign_keys` is connection-scoped. dbbench currently enables it during setup only, so it is not guaranteed to be enabled on every pooled Turso connection; the same limitation applies when setting it in a custom script.
 
 ## Acknowledgements
 

@@ -16,6 +16,7 @@ import (
 	"github.com/sj14/dbbench/databases"
 	"github.com/spf13/pflag"
 	_ "modernc.org/sqlite"
+	_ "turso.tech/database/tursogo"
 )
 
 var (
@@ -64,10 +65,11 @@ func main() {
 		postgresFlags  = pflag.NewFlagSet("postgres", pflag.ExitOnError)
 		sqliteFlags    = pflag.NewFlagSet("sqlite", pflag.ExitOnError)
 		spannerFlags   = pflag.NewFlagSet("spanner", pflag.ExitOnError)
+		tursoFlags     = pflag.NewFlagSet("turso", pflag.ExitOnError)
 	)
 
 	defaultFlags.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Available subcommands:\n\tcassandra|cockroach|mssql|mysql|postgres|sqlite|spanner\n")
+		fmt.Fprintf(os.Stderr, "Available subcommands:\n\tcassandra|cockroach|mssql|mysql|postgres|sqlite|spanner|turso\n")
 		fmt.Fprintf(os.Stderr, "\tUse 'subcommand --help' for all flags of the specified command.\n")
 		fmt.Fprintf(os.Stderr, "Generic flags for all subcommands:\n")
 		defaultFlags.PrintDefaults()
@@ -135,6 +137,14 @@ func main() {
 			log.Fatalf("failed to parse spanner flags: %v", err)
 		}
 		bencher = databases.NewSpanner(*projectID, *instanceID, *databaseID, *credentialsFile)
+	case "turso":
+		tursoFlags.AddFlagSet(defaultFlags)
+		tursoFlags.AddFlagSet(maxconnsFlags)
+		path := tursoFlags.String("path", "dbbench.turso", "database file (Turso only)")
+		if err := tursoFlags.Parse(os.Args[2:]); err != nil {
+			log.Fatalf("failed to parse Turso flags: %v", err)
+		}
+		bencher = databases.NewTurso(*path, *maxconns)
 	default:
 		if err := defaultFlags.Parse(os.Args[1:]); err != nil {
 			log.Fatalf("failed to parse default flags: %v", err)
