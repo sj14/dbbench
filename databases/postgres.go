@@ -2,7 +2,6 @@ package databases
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 
 	"github.com/sj14/dbbench/benchmark"
@@ -19,7 +18,7 @@ func NewPostgres(host string, port int, user, password string, maxOpenConns int)
 		port = 5432
 	}
 
-	dataSourceName := fmt.Sprintf("host=%v port=%v user='%v' password='%v' sslmode=disable", host, port, user, password)
+	dataSourceName := connectionURL(host, port, user, password)
 
 	db, err := sql.Open("postgres", dataSourceName)
 	if err != nil {

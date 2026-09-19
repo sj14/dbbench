@@ -19,9 +19,15 @@ func NewCassandra(host string, port int, user, password string) *Cassandra {
 	if port == 0 {
 		port = 9042
 	}
-	dataSourceName := fmt.Sprintf("%v:%v", host, port) // TODO: check how to do with port, user and password
+	dataSourceName := fmt.Sprintf("%v:%v", host, port)
 
 	cluster := gocql.NewCluster(dataSourceName)
+	if user != "" || password != "" {
+		cluster.Authenticator = gocql.PasswordAuthenticator{
+			Username: user,
+			Password: password,
+		}
+	}
 	cluster.Keyspace = ""
 	cluster.Timeout = 5 * time.Minute
 	cluster.Consistency = gocql.Quorum
