@@ -52,8 +52,8 @@ func (p *Postgres) Benchmarks() []benchmark.Benchmark {
 
 // Setup initializes the database for the benchmark.
 func (p *Postgres) Setup() {
-	if _, err := p.db.Exec("CREATE SCHEMA IF NOT EXISTS dbbench"); err != nil {
-		log.Fatalf("failed to create schema: %v\n", err)
+	if _, err := p.db.Exec("CREATE SCHEMA dbbench"); err != nil {
+		log.Fatalf("failed to create schema (use --clean to remove stale benchmark data): %v\n", err)
 	}
 	if _, err := p.db.Exec("CREATE TABLE IF NOT EXISTS dbbench.simple (id INT PRIMARY KEY, balance DECIMAL);"); err != nil {
 		log.Fatalf("failed to create table: %v\n", err)
@@ -87,9 +87,7 @@ func (p *Postgres) Cleanup() {
 }
 
 // Exec executes the given statement on the database.
-func (p *Postgres) Exec(stmt string) {
+func (p *Postgres) Exec(stmt string) error {
 	_, err := p.db.Exec(stmt)
-	if err != nil {
-		log.Printf("%v failed: %v", stmt, err)
-	}
+	return err
 }

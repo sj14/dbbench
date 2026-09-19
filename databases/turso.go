@@ -41,13 +41,21 @@ func (t *Turso) Benchmarks() []benchmark.Benchmark {
 
 // Setup initializes the database for the benchmark.
 func (t *Turso) Setup() {
-	if _, err := t.db.Exec("CREATE TABLE IF NOT EXISTS dbbench_simple (id INT PRIMARY KEY, balance DECIMAL);"); err != nil {
-		log.Fatalf("failed to create table dbbench_simple: %v\n", err)
+	var existing int
+	if err := t.db.QueryRow("SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name IN ('dbbench_simple', 'dbbench_relational_one', 'dbbench_relational_two')").Scan(&existing); err != nil {
+		log.Fatalf("failed to inspect existing tables: %v\n", err)
 	}
-	if _, err := t.db.Exec("CREATE TABLE IF NOT EXISTS dbbench_relational_one (oid INT PRIMARY KEY, balance_one DECIMAL);"); err != nil {
+	if existing != 0 {
+		log.Fatalf("benchmark tables already exist; use --clean to remove stale benchmark data")
+	}
+
+	if _, err := t.db.Exec("CREATE TABLE dbbench_simple (id INT PRIMARY KEY, balance DECIMAL);"); err != nil {
+		log.Fatalf("failed to create table dbbench_simple (use --clean to remove stale benchmark data): %v\n", err)
+	}
+	if _, err := t.db.Exec("CREATE TABLE dbbench_relational_one (oid INT PRIMARY KEY, balance_one DECIMAL);"); err != nil {
 		log.Fatalf("failed to create table dbbench_relational_one: %v\n", err)
 	}
-	if _, err := t.db.Exec("CREATE TABLE IF NOT EXISTS dbbench_relational_two (balance_two DECIMAL, relation INT PRIMARY KEY, FOREIGN KEY(relation) REFERENCES dbbench_relational_one(oid));"); err != nil {
+	if _, err := t.db.Exec("CREATE TABLE dbbench_relational_two (balance_two DECIMAL, relation INT PRIMARY KEY, FOREIGN KEY(relation) REFERENCES dbbench_relational_one(oid));"); err != nil {
 		log.Fatalf("failed to create table dbbench_relational_two: %v\n", err)
 	}
 	if _, err := t.db.Exec("PRAGMA foreign_keys = ON;"); err != nil {
@@ -81,8 +89,7 @@ func (t *Turso) Cleanup() {
 }
 
 // Exec executes the given statement on the database.
-func (t *Turso) Exec(stmt string) {
-	if _, err := t.db.Exec(stmt); err != nil {
-		log.Printf("%v failed: %v", stmt, err)
-	}
+func (t *Turso) Exec(stmt string) error {
+	_, err := t.db.Exec(stmt)
+	return err
 }

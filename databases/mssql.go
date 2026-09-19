@@ -42,7 +42,6 @@ func NewMSSQL(host string, port int, user, password string, maxOpenConns int) *M
 
 // Benchmarks returns the individual benchmark functions for the mysql db.
 func (m *MSSQL) Benchmarks() []benchmark.Benchmark {
-	log.Fatal("no built-in benchmarks for MS SQL available yet, use your own script")
 	return []benchmark.Benchmark{}
 }
 
@@ -52,12 +51,13 @@ func (m *MSSQL) Setup() {
 
 // Cleanup removes all remaining benchmarking data.
 func (m *MSSQL) Cleanup() {
+	if err := m.db.Close(); err != nil {
+		log.Printf("failed to close connection: %v", err)
+	}
 }
 
 // Exec executes the given statement on the database.
-func (m *MSSQL) Exec(stmt string) {
+func (m *MSSQL) Exec(stmt string) error {
 	_, err := m.db.Exec(stmt)
-	if err != nil {
-		log.Printf("%v failed: %v", stmt, err)
-	}
+	return err
 }

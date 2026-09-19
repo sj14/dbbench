@@ -51,8 +51,8 @@ func (m *Mysql) Benchmarks() []benchmark.Benchmark {
 
 // Setup initializes the database for the benchmark.
 func (m *Mysql) Setup() {
-	if _, err := m.db.Exec("CREATE DATABASE IF NOT EXISTS dbbench"); err != nil {
-		log.Fatalf("failed to create database: %v\n", err)
+	if _, err := m.db.Exec("CREATE DATABASE dbbench"); err != nil {
+		log.Fatalf("failed to create database (use --clean to remove stale benchmark data): %v\n", err)
 	}
 	if _, err := m.db.Exec("USE dbbench"); err != nil {
 		log.Fatalf("failed to USE dbbench: %v\n", err)
@@ -82,9 +82,7 @@ func (m *Mysql) Cleanup() {
 }
 
 // Exec executes the given statement on the database.
-func (m *Mysql) Exec(stmt string) {
+func (m *Mysql) Exec(stmt string) error {
 	_, err := m.db.Exec(stmt)
-	if err != nil {
-		log.Printf("%v failed: %v", stmt, err)
-	}
+	return err
 }

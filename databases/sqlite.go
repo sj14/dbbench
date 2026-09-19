@@ -56,13 +56,21 @@ func (m *SQLite) Benchmarks() []benchmark.Benchmark {
 
 // Setup initializes the database for the benchmark.
 func (m *SQLite) Setup() {
-	if _, err := m.db.Exec("CREATE TABLE IF NOT EXISTS dbbench_simple (id INT PRIMARY KEY, balance DECIMAL);"); err != nil {
-		log.Fatalf("failed to create table dbbench_simple: %v\n", err)
+	var existing int
+	if err := m.db.QueryRow("SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name IN ('dbbench_simple', 'dbbench_relational_one', 'dbbench_relational_two')").Scan(&existing); err != nil {
+		log.Fatalf("failed to inspect existing tables: %v\n", err)
 	}
-	if _, err := m.db.Exec("CREATE TABLE IF NOT EXISTS dbbench_relational_one (oid INT PRIMARY KEY, balance_one DECIMAL);"); err != nil {
+	if existing != 0 {
+		log.Fatalf("benchmark tables already exist; use --clean to remove stale benchmark data")
+	}
+
+	if _, err := m.db.Exec("CREATE TABLE dbbench_simple (id INT PRIMARY KEY, balance DECIMAL);"); err != nil {
+		log.Fatalf("failed to create table dbbench_simple (use --clean to remove stale benchmark data): %v\n", err)
+	}
+	if _, err := m.db.Exec("CREATE TABLE dbbench_relational_one (oid INT PRIMARY KEY, balance_one DECIMAL);"); err != nil {
 		log.Fatalf("failed to create table dbbench_relational_one: %v\n", err)
 	}
-	if _, err := m.db.Exec("CREATE TABLE IF NOT EXISTS dbbench_relational_two (balance_two DECIMAL, relation INT PRIMARY KEY, FOREIGN KEY(relation) REFERENCES dbbench_relational_one(oid));"); err != nil {
+	if _, err := m.db.Exec("CREATE TABLE dbbench_relational_two (balance_two DECIMAL, relation INT PRIMARY KEY, FOREIGN KEY(relation) REFERENCES dbbench_relational_one(oid));"); err != nil {
 		log.Fatalf("failed to create table dbbench_relational_two: %v\n", err)
 	}
 	if _, err := m.db.Exec("PRAGMA foreign_keys = ON;"); err != nil {
@@ -96,10 +104,8 @@ func (m *SQLite) Cleanup() {
 }
 
 // Exec executes the given statement on the database.
-func (m *SQLite) Exec(stmt string) {
+func (m *SQLite) Exec(stmt string) error {
 	//  driver has no support for results
 	_, err := m.db.Exec(stmt)
-	if err != nil {
-		log.Printf("%v failed: %v", stmt, err)
-	}
+	return err
 }

@@ -57,14 +57,11 @@ func (c *Cassandra) Benchmarks() []benchmark.Benchmark {
 // Setup initializes the database for the benchmark.
 func (c *Cassandra) Setup() {
 	// TODO: flags for class and replication factor
-	if err := c.session.Query("CREATE KEYSPACE IF NOT EXISTS dbbench WITH replication = { 'class':'SimpleStrategy', 'replication_factor' : 1 }").Exec(); err != nil {
-		log.Fatalf("failed to create keyspace: %v\n", err)
+	if err := c.session.Query("CREATE KEYSPACE dbbench WITH replication = { 'class':'SimpleStrategy', 'replication_factor' : 1 }").Exec(); err != nil {
+		log.Fatalf("failed to create keyspace (use --clean to remove stale benchmark data): %v\n", err)
 	}
 	if err := c.session.Query("CREATE TABLE IF NOT EXISTS dbbench.dbbench_simple (id INT PRIMARY KEY, balance DECIMAL);").Exec(); err != nil {
 		log.Fatalf("failed to create table: %v\n", err)
-	}
-	if err := c.session.Query("TRUNCATE dbbench.dbbench_simple;").Exec(); err != nil {
-		log.Fatalf("failed to truncate table: %v\n", err)
 	}
 }
 
@@ -80,8 +77,6 @@ func (c *Cassandra) Cleanup() {
 }
 
 // Exec executes the given statement on the database.
-func (c *Cassandra) Exec(stmt string) {
-	if err := c.session.Query(stmt).Exec(); err != nil {
-		log.Fatalf("%v: failed: %v\n", stmt, err)
-	}
+func (c *Cassandra) Exec(stmt string) error {
+	return c.session.Query(stmt).Exec()
 }

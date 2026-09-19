@@ -26,6 +26,10 @@ var (
 )
 
 func main() {
+	os.Exit(run())
+}
+
+func run() int {
 	var (
 		// Default set of flags, available for all subcommands (benchmark options).
 		defaultFlags = pflag.NewFlagSet("defaults", pflag.ExitOnError)
@@ -55,7 +59,7 @@ func main() {
 		instanceID      = gcpFlags.String("instance", "", "ID of the Spanner instance")
 		projectID       = gcpFlags.String("project", "", "GCP project ID")
 		databaseID      = gcpFlags.String("database", "", "ID of the Spanner Database")
-		credentialsFile = gcpFlags.String("credentials", "GOOGLE_APPLICATION_CREDENTIALS", "optional file containing GCP credentials. Defaults to GOOGLE_APPLICATION_CREDENTIALS")
+		credentialsFile = gcpFlags.String("credentials", "", "optional file containing GCP credentials; defaults to application default credentials")
 
 		// Flag sets for each database. DB specific flags are set in the switch statement below.
 		cassandraFlags = pflag.NewFlagSet("cassandra", pflag.ExitOnError)
@@ -78,7 +82,7 @@ func main() {
 	// No comamnd given. Print usage help and exit.
 	if len(os.Args) < 2 {
 		defaultFlags.Usage()
-		os.Exit(1)
+		return 1
 	}
 
 	var bencher benchmark.Bencher
@@ -153,19 +157,19 @@ func main() {
 		// Only show version information and exit.
 		if *versionFlag {
 			fmt.Printf("dbbench %v, commit %v, built at %v\n", version, commit, date)
-			os.Exit(0)
+			return 0
 		}
 
 		// Command not recognized. Print usage help and exit.
 		defaultFlags.Usage()
-		os.Exit(1)
+		return 1
 	}
 
 	// only clean old data when clean flag is set
 	if *clean {
 		bencher.Cleanup()
 		fmt.Println("cleaned data")
-		os.Exit(0)
+		return 0
 	}
 
 	// setup database
@@ -174,7 +178,7 @@ func main() {
 	}
 
 	// only cleanup benchmark data when noclean flag is not set
-	if !*noclean {
+	if !*noclean && !*nosetup {
 		defer bencher.Cleanup()
 	}
 
@@ -189,9 +193,7 @@ func main() {
 		*threads = *iter
 	}
 
-	benchmarks := bencher.Benchmarks()
-
-	// If a script was specified, overwrite built-in benchmarks.
+	var benchmarks []benchmark.Benchmark
 	if *scriptname != "" {
 		dat, err := os.ReadFile(*scriptname)
 		if err != nil {
@@ -201,6 +203,12 @@ func main() {
 		benchmarks, err = benchmark.ParseScript(buf)
 		if err != nil {
 			log.Fatalf("failed to parse script: %v\n", err)
+		}
+	} else {
+		benchmarks = bencher.Benchmarks()
+		if len(benchmarks) == 0 {
+			log.Printf("no built-in benchmarks available; use --script")
+			return 1
 		}
 	}
 
@@ -218,9 +226,7 @@ func main() {
 		case <-sigchan:
 			// got SIGINT, stop benchmarking
 			printTotal(startTotal)
-			// using os.Exit(130) instead of return won't
-			// run deferred funcs (e.g. b.Cleanup())
-			return
+			return 130
 		default:
 			// check if we want to run this particular benchmark
 			if !contains(toRun, "all") && !contains(toRun, b.Name) {
@@ -228,7 +234,11 @@ func main() {
 			}
 
 			// run the particular benchmark
-			results := benchmark.Run(bencher, b, *iter, *threads)
+			results, err := benchmark.Run(bencher, b, *iter, *threads)
+			if err != nil {
+				log.Printf("benchmark %q failed: %v", b.Name, err)
+				return 1
+			}
 
 			took := results.Duration
 			// execution in ns for mode once
@@ -261,6 +271,7 @@ avg: %v, min: %v, max: %v
 		}
 	}
 	printTotal(startTotal)
+	return 0
 }
 
 func printTotal(startTotal time.Time) {

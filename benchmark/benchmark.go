@@ -16,7 +16,7 @@ type Bencher interface {
 	Setup()
 	Cleanup()
 	Benchmarks() []Benchmark
-	Exec(string)
+	Exec(string) error
 }
 
 // BenchType determines if the particular benchmark should be run several times or only once.
@@ -60,11 +60,12 @@ func (r Result) Avg() time.Duration {
 // of metrics as the execution goes
 type bencherExecutor struct {
 	result Result
+	err    error
 	mux    sync.Mutex
 }
 
 // Run executes the benchmark.
-func Run(bencher Bencher, b Benchmark, iter, threads int) Result {
+func Run(bencher Bencher, b Benchmark, iter, threads int) (Result, error) {
 	t := template.New(b.Name)
 	t, err := t.Parse(b.Stmt)
 	if err != nil {
@@ -79,23 +80,15 @@ func Run(bencher Bencher, b Benchmark, iter, threads int) Result {
 
 	switch b.Type {
 	case TypeOnce:
-		if b.Parallel {
-			go executor.once(bencher, t)
-		} else {
-			executor.once(bencher, t)
-		}
+		executor.once(bencher, t)
 	case TypeLoop:
-		if b.Parallel {
-			go executor.loop(bencher, t, iter, threads)
-		} else {
-			executor.loop(bencher, t, iter, threads)
-		}
+		executor.loop(bencher, t, iter, threads)
 	}
 
 	executor.result.End = time.Now()
 	executor.result.Duration = time.Since(executor.result.Start)
 
-	return executor.result
+	return executor.result, executor.err
 }
 
 // loop runs the benchmark concurrently several times.
@@ -124,6 +117,9 @@ func (b *bencherExecutor) loop(bencher Bencher, t *template.Template, iterations
 			signal.Notify(sigchan, os.Interrupt)
 
 			for i := gofrom; i <= togo; i++ {
+				if b.failed() {
+					return
+				}
 				select {
 				case <-sigchan:
 					// got SIGINT, stop benchmarking
@@ -132,12 +128,29 @@ func (b *bencherExecutor) loop(bencher Bencher, t *template.Template, iterations
 					// build and execute the statement
 					stmt := buildStmt(t, i)
 					now := time.Now()
-					bencher.Exec(stmt)
+					if err := bencher.Exec(stmt); err != nil {
+						b.fail(err)
+						return
+					}
 					b.collectStats(now)
 				}
 			}
 		}(from, to)
 	}
+}
+
+func (b *bencherExecutor) fail(err error) {
+	b.mux.Lock()
+	defer b.mux.Unlock()
+	if b.err == nil {
+		b.err = err
+	}
+}
+
+func (b *bencherExecutor) failed() bool {
+	b.mux.Lock()
+	defer b.mux.Unlock()
+	return b.err != nil
 }
 
 func (b *bencherExecutor) collectStats(start time.Time) {
@@ -162,8 +175,12 @@ func (b *bencherExecutor) collectStats(start time.Time) {
 // once runs the benchmark a single time.
 func (b *bencherExecutor) once(bencher Bencher, t *template.Template) {
 	stmt := buildStmt(t, 1)
-	defer b.collectStats(time.Now())
-	bencher.Exec(stmt)
+	start := time.Now()
+	if err := bencher.Exec(stmt); err != nil {
+		b.fail(err)
+		return
+	}
+	b.collectStats(start)
 }
 
 // buildStmt parses the given template with variables and functions to a pure DB statement.

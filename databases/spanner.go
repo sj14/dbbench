@@ -4,9 +4,11 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 
 	"cloud.google.com/go/spanner"
 	"github.com/sj14/dbbench/benchmark"
+	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 )
 
@@ -54,21 +56,35 @@ func NewSpanner(projectID, instanceID, databaseID, gcpCredentialsFile string) *S
 func (s *Spanner) Setup() {}
 
 // Cleanup removes all remaining benchmarking data.
-func (s *Spanner) Cleanup() {}
+func (s *Spanner) Cleanup() {
+	s.client.Close()
+}
 
 // Benchmarks returns the individual benchmark functions for tspanner (not implemented).
 func (s *Spanner) Benchmarks() (bb []benchmark.Benchmark) {
-	log.Fatal("no built-in benchmarks for Spanner available yet, use your own script")
 	return
 }
 
 // Exec executes the given statement on the database.
-func (s *Spanner) Exec(stmt string) {
-	_, err := s.client.ReadWriteTransaction(s.ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
-		txn.Query(ctx, spanner.NewStatement(stmt))
-		return nil
-	})
-	if err != nil {
-		log.Fatalf("%v: failed: %v\n", stmt, err)
+func (s *Spanner) Exec(stmt string) error {
+	statement := spanner.NewStatement(stmt)
+	upper := strings.ToUpper(strings.TrimSpace(stmt))
+	if strings.HasPrefix(upper, "SELECT") || strings.HasPrefix(upper, "WITH") {
+		iter := s.client.Single().Query(s.ctx, statement)
+		defer iter.Stop()
+		for {
+			if _, err := iter.Next(); err != nil {
+				if err == iterator.Done {
+					return nil
+				}
+				return err
+			}
+		}
 	}
+
+	_, err := s.client.ReadWriteTransaction(s.ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
+		_, err := txn.Update(ctx, statement)
+		return err
+	})
+	return err
 }

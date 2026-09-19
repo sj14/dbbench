@@ -50,8 +50,8 @@ func (p *Cockroach) Benchmarks() []benchmark.Benchmark {
 
 // Setup initializes the database for the benchmark.
 func (p *Cockroach) Setup() {
-	if _, err := p.db.Exec("CREATE DATABASE IF NOT EXISTS dbbench"); err != nil {
-		log.Fatalf("failed to create database: %v\n", err)
+	if _, err := p.db.Exec("CREATE DATABASE dbbench"); err != nil {
+		log.Fatalf("failed to create database (use --clean to remove stale benchmark data): %v\n", err)
 	}
 	if _, err := p.db.Exec("CREATE TABLE IF NOT EXISTS dbbench.simple (id INT PRIMARY KEY, balance DECIMAL);"); err != nil {
 		log.Fatalf("failed to create table: %v\n", err)
@@ -85,9 +85,7 @@ func (p *Cockroach) Cleanup() {
 }
 
 // Exec executes the given statement on the database.
-func (p *Cockroach) Exec(stmt string) {
+func (p *Cockroach) Exec(stmt string) error {
 	_, err := p.db.Exec(stmt)
-	if err != nil {
-		log.Printf("%v failed: %v", stmt, err)
-	}
+	return err
 }
