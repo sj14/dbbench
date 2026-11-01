@@ -12,7 +12,7 @@ require (
 	github.com/stretchr/testify v1.12.1
 	google.golang.org/api v0.299.0
 	modernc.org/sqlite v1.59.0
-	turso.tech/database/tursogo v0.7.2
+	turso.tech/database/tursogo v0.8.3
 )
 
 require (
@@ -50,7 +50,7 @@ require (
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/spiffe/go-spiffe/v2 v2.8.1 // indirect
 	github.com/stretchr/objx v0.5.3 // indirect
-	github.com/tursodatabase/turso-go-platform-libs v0.7.2 // indirect
+	github.com/tursodatabase/turso-go-platform-libs v0.8.3 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/contrib/detectors/gcp v1.44.0 // indirect
