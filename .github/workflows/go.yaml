@@ -1,12 +1,16 @@
 name: Go
 
 on:
-  pull_request:
-    paths:
+  push:
+    branches:
+      - "renovate/**"
+    paths: &go-paths
       - go.sum
       - go.mod
       - "**.go"
-      - .github/workflows/go.yaml
+      - ".github/workflows/**"
+  pull_request:
+    paths: *go-paths
 
 jobs:
   build:
